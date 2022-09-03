@@ -1,6 +1,7 @@
 A Little Chat|Petite discussion|Éphémère|Victime 1 (Au moment où vous lancez ce sort, vous pouvez sacrifier une créature de force supérieure ou égale à 1. Quand vous faites ainsi, copiez ce sort.)\nRegardez les deux cartes du dessus de votre bibliothèque. Mettez l'une d'elles dans votre main et l'autre au-dessous de votre bibliothèque.
 Aarakocra Sneak|Mouchard aarakocra|Créature : oiseau et gredin|Vol\nQuand le Mouchard aarakocra arrive sur le champ de bataille, vous prenez l'initiative.
-Abandon Hope|Abandon de l'espoir||
+Abaddon the Despoiler|Abaddon Le Fléau|Créature légendaire : astartes et guerrier|Piétinement\nMarque du Chaos ascendant — Pendant votre tour, les sorts que vous lancez depuis votre main avec une valeur de mana inférieure ou égale à X ont la cascade, X étant la quantité totale de points de vie que vos adversaires ont perdus ce tour-ci.
+Abandon Hope|Abandon de l'espoir|Rituel|En tant que coût supplémentaire pour jouer l'Abandon de l'espoir, défaussez-vous de X cartes. Regardez la main de l'adversaire ciblé et choisissez-y X cartes. Ce joueur se défausse de ces cartes.
 Abandon Reason|Abandonner toute raison|Éphémère|Jusqu'à deux créatures ciblées gagnent chacune +1/+0 et acquièrent l'initiative jusqu'à la fin du tour.\nFolie {1}{R} (Si vous vous défaussez de cette carte, défaussez-vous en vers l'exil. Quand vous le faites, lancez-la pour son coût de folie ou mettez-la dans votre cimetière.)
 Abandon the Post|Abandon de poste|Rituel|Jusqu'à deux créatures ciblées ne peuvent pas bloquer ce tour-ci.\nFlashback {3}{R} (Vous pouvez lancer cette carte depuis votre cimetière pour son coût de flashback. Exilez-la ensuite.)
 Abandoned Outpost|Avant-poste abandonné|Terrain|L'Avant-poste abandonné arrive en jeu engagé.\n{T} : Ajoutez {W} à votre réserve.\n{T}, sacrifiez l'Avant-poste abandonné: Ajoutez un mana de la couleur de votre choix à votre réserve.
@@ -285,7 +286,7 @@ Ainok Guide|Guide aïnok|Créature : chien de chasse et éclaireur|Quand le Guid
 Ainok Survivalist|Survivaliste aïnok|Créature : chien de chasse et shamane|Mégamue {1}{G} (Vous pouvez lancer cette carte face cachée comme une créature 2/2 pour {3}. Retournez-la face visible à tout moment pour son coût de mégamue et mettez un marqueur +1/+1 sur elle.)\nQuand le Survivaliste aïnok est retourné face visible, détruisez l'artefact ciblé ou l'enchantement ciblé qu'un adversaire contrôle.
 Ainok Tracker|Traqueur aïnok|Créature : chien de chasse et éclaireur|InitiativeMue {4}{R} (Vous pouvez lancer cette carte face cachée comme une créature 2/2 pour {3}. Retournez-la à tout moment pour son coût de mue.)
 Air Bladder|Ballonnement||
-Air Elemental|Elémental d'air||
+Air Elemental|Élémental d'air||
 Air Servant|Servant d'air|Créature : élémental|Vol (Cette créature ne peut pas être bloquée excepté par des créatures avec le vol ou la portée).\n{2}{U} : Engagez la créature avec le vol ciblée.
 Air-Cult Elemental|Élémental du culte de l'Air|Créature : élémental|Vol\nTourbillon — Quand l'Élémental du culte de l'Air arrive sur le champ de bataille, renvoyez jusqu'à une autre créature ciblée dans la main de son propriétaire.
 Airborne Aid|Aide aérienne|Rituel|Piochez une carte pour chaque oiseau en jeu.
@@ -3170,7 +3171,7 @@ Chilling Trap|Piège glaçant|Éphémère|Une créature ciblée gagne -4/-0 jusq
 Chill|Refroidissement||
 Chime of Night|Carillon de la Nuit||
 Chimeric Coils|Annelures chimériques|Artefact|{X}{1} : Les Annelures chimériques deviennent une créature-artefact X/X. Sacrifiez-les à la fin du tour.
-Chimeric Egg|Œuf chimérique|Artefact|À chaque fois qu'un adversaire joue un sort non-artefact, mettez un marqueur « charge » sur l'Œuf chimérique.\nRetirez trois marqueurs « charge » de l'Œuf chimérique : L'Œuf chimérique devient une créature artefact 6/6 avec le piétinement jusqu'à la fin du tour.
+Chimeric Egg|Œuf chimérique|Artefact|À chaque fois qu'un adversaire joue un sort non-artefact, mettez un marqueur « charge » sur l'Œuf chimérique.\nRetirez trois marqueurs « charge » de l'Œuf chimérique : L'Œuf chimérique devient une créature-artefact 6/6 avec le piétinement jusqu'à la fin du tour.
 Chimeric Idol|Idole chimérique||
 Chimeric Mass|Masse chimérique|Artefact|La Masse chimérique arrive sur le champ de bataille avec X marqueurs « charge » sur elle.\n{1} : Jusqu'à la fin du tour, la Masse chimérique devient une créature-artefact Construction avec « La force et l'endurance de cette créature sont chacune égales au nombre de marqueurs « charge » sur elle. »
 Chimeric Sphere|Sphère-chimère||
@@ -3235,7 +3236,7 @@ Churning Eddy|Remous tournoyants|Rituel|Renvoyez la créature ciblée et le terr
 Cinder Barrens|Landes de cendres|Terrain|Les Landes de cendres arrivent sur le champ de bataille engagées.\n{T} : Ajoutez {B} ou {R} à votre réserve.
 Cinder Cloud|Nuage de cendres||
 Cinder Crawler|Reptile des cendres||
-Cinder Elemental|Elémental de cendres||
+Cinder Elemental|Élémental de cendres||
 Cinder Giant|Géant des cendres||
 Cinder Glade|Clairière de scories|Terrain : montagne et forêt|({T} : Ajoutez {R} ou {G} à votre réserve.)La Clairière de scories arrive sur le champ de bataille engagée à moins que vous ne contrôliez au moins deux terrains de base.
 Cinder Hellion|Monstruosité scoriacée|Créature : monstruosité|Piétinement\nQuand la Monstruosité scoriacée arrive sur le champ de bataille, elle inflige 2 blessures à un adversaire ciblé.
@@ -3394,7 +3395,7 @@ Cloud Cover|Couverture nuageuse|Enchantement|À chaque fois qu'un autre permanen
 Cloud Crusader|Croisé des nuées|Créature : humain et chevalier|Vol\nInitiative (Cette créature inflige des blessures de combat avant les créatures sans l'initiative.)
 Cloud Djinn|Djinn des nuages||
 Cloud Dragon|Dragon des nuages||
-Cloud Elemental|Elémental de nuage||
+Cloud Elemental|Élémental de nuage||
 Cloud Key|Clef de nuage|Artefact|Au moment où la Clef de nuage arrive en jeu, choisissez artefact, créature, enchantement, éphémère ou rituel.\nLes sorts que vous jouez du type choisi coûtent {1} de moins à jouer.
 Cloud Manta|Raie manta des nuées|Créature : poisson|Vol
 Cloud Pirates|Pirate des nuages||
@@ -6783,7 +6784,7 @@ Flailing Soldier|Soldat flagellant||
 Flame Blitz|Éclair flamboyant|Enchantement|Au début de votre étape de fin, l'Éclair flamboyant inflige 5 blessures à chaque planeswalker.\nRecyclage {2} ({2}, défaussez-vous de cette carte : Piochez une carte.)
 Flame Burst|Explosion flambante|Éphémère|L'Explosion flambante inflige X blessures à une cible, créature ou joueur, où X est égal à 2 plus le nombre de cartes d'Explosion flambante dans tous les cimetières.
 Flame Discharge|Excrétion de flamme|Éphémère|L'Excrétion de flamme inflige X blessures à une cible, créature ou planeswalker. Si vous contrôliez une créature modifiée au moment où vous avez lancé ce sort, elle inflige X plus 2 blessures à la place. (Les équipements, les auras que vous contrôlez et les marqueurs sont des modifications.)
-Flame Elemental|Elémental de flammes||
+Flame Elemental|Élémental de flammes||
 Flame Fusillade|Fusillade de flammes|Rituel|Jusqu'à la fin du tour, les permanents que vous contrôlez acquièrent « {T} : Ce permanent inflige 1 blessure à une cible, créature ou joueur. »
 Flame Jab|Urtication de flammes|Rituel|L'Urtication de flammes inflige 1 blessure à une cible, créature ou joueur.\nPistage (Vous pouvez jouer cette carte depuis votre cimetière en vous défaussant d'une carte de terrain en plus de payer ses autres coûts.)
 Flame Javelin|Javelot de flammes|Éphémère|({2/R} peut être payé au choix avec n'importe quelle combinaison de deux manas ou avec {R}. Le coût converti de mana de cette carte est 6.)\nLe Javelot de flammes inflige 4 blessures à une cible, créature ou joueur.
@@ -6971,7 +6972,7 @@ Fodder Launch|Lance-chair|Rituel tribal : gobelin|En tant que coût supplémenta
 Fodder Tosser|Catapulte à chair|Artefact|{T}, défaussez-vous d'une carte : La Catapulte à chair inflige 2 blessures à une cible, joueur ou planeswalker.
 Foe-Razer Regent|Régente rase-rival|Créature : dragon|Vol\nQuand la Régente rase-rival arrive sur le champ de bataille, vous pouvez faire qu'elle se batte contre une créature ciblée que vous ne contrôlez pas.\nÀ chaque fois qu'une créature que vous contrôlez se bat, mettez deux marqueurs +1/+1 sur elle au début de la prochaine étape de fin.
 Fog Bank|Banc de brouillard|Créature : mur|Défenseur (Cette créature ne peut pas attaquer.)\nVol\nPrévenez toutes les blessures de combat qui devraient être infligées à et par le Banc de brouillard.
-Fog Elemental|Elémental de brouillard||
+Fog Elemental|Élémental de brouillard||
 Fog Patch|Nappe de brouillard||
 Fog of Gnats|Nuée de moucherons||
 Fogwalker|Marcheur des brumes|Créature : esprit|Furtivité (Cette créature ne peut pas être bloquée par des créatures de force supérieure.)\nQuand le Marcheur des brumes arrive sur le champ de bataille, une créature ciblée qu'un adversaire contrôle ne se dégage pas pendant la prochaine étape de dégagement de son contrôleur.
@@ -7253,7 +7254,7 @@ Fungal Reaches|Étendues fongoïdes|Terrain|{T} : Ajoutez {1} à votre réserve.
 Fungal Rebirth|Renaissance fongoïde|Éphémère|Renvoyez une carte de permanent ciblée depuis votre cimetière dans votre main. Si une créature est morte ce tour-ci, créez deux jetons de créature 1/1 verte Saprobionte.
 Fungal Shambler|Escogriffe fongoïde|Créature : bête|Piétinement\nÀ chaque fois que l'Escogriffe fongoïde inflige des blessures à un adversaire, vous piochez une carte et cet adversaire se défausse d'une carte de sa main.
 Fungal Sprouting|Bourgeonnement fongoïde|Rituel|Mettez sur le champ de bataille X jetons de créature 1/1 verte Saprobionte, X étant étant la force la plus élevée parmi les créatures que vous contrôlez.
-Fungus Elemental|Elémental de fongus||
+Fungus Elemental|Élémental de fongus||
 Fungus Sliver|Slivoïde fongoïde|Créature : fongus et slivoïde|Tous les slivoïdes ont « À chaque fois que cette créature subit des blessures, mettez un marqueur +1/+1 sur elle. » (Les blessures sont infligées avant le placement du marqueur.)
 Fungusaur|Fongosaure|Créature : Fongosaure|À chaque fois que le Fongosaure reçoit des blessures, placez sur lui un marqueur +1/+1. (Les blessures sont infligées avant le placement du marqueur.)
 Funnel-Web Recluse|Recluse à toile en entonnoir|Créature : araignée|Portée\nMorbidité — Quand la Recluse à toile en entonnoir arrive sur le champ de bataille, si une créature est morte ce tour-ci, enquêtez. (Créez un jeton d'artefact incolore Indice avec « {2}, sacrifiez cet artefact : Piochez une carte. »)
@@ -8747,7 +8748,7 @@ Healer's Headdress|Coiffe de guérisseur|Artefact : équipement|La créature éq
 Healing Grace|Grâce curative|Éphémère|Prévenez les 3 prochaines blessures qui devraient être infligées à une cible ce tour-ci par une source de votre choix. Vous gagnez 3 points de vie.
 Healing Hands|Mains curatives|Rituel|Le joueur ciblé gagne 4 points de vie.Piochez une carte.
 Healing Leaves|Feuillage de soins|Éphémère|Choisissez l'un — Le joueur ciblé gagne 3 points de vie ; ou prévenez, ce tour-ci, les prochaines 3 blessures qui devraient être infligées à une cible, créature ou joueur.
-Healing Salve|Onguent de soins||
+Healing Salve|Onguent de soins|Éphémère|Choisissez l'un — Le joueur ciblé gagne 3 points de vie ; ou prévenez, ce tour-ci, les prochaines 3 blessures qui devraient être infligées à une cible, créature ou joueur.
 Healing Technique|Technique de guérison|Rituel|Démonstration (Quand vous lancez ce sort, vous pouvez le copier. Si vous faites ainsi, choisissez un adversaire pour qu'il le copie aussi. Les joueurs peuvent choisir de nouvelles cibles pour leurs copies.)\nRenvoyez une carte ciblée depuis votre cimetière dans votre main. Vous gagnez un nombre de points de vie égal à la valeur de mana de cette carte. Exilez la Technique de guérison.
 Heal|Guérison||
 Heap Doll|Poupée de ferraille|Créature-artefact : épouvantail|Sacrifiez la Poupée de ferraille : Retirez de la partie la carte ciblée d'un cimetière.
@@ -9812,9 +9813,9 @@ Isareth the Awakener|Isareth l'éveilleuse|Créature légendaire : humain et sor
 Ishai, Ojutai Dragonspeaker|Ishaï, languedragon d'Ojutaï|Créature légendaire : oiseau et moine|Vol\nÀ chaque fois qu'un adversaire lance un sort, mettez un marqueur +1/+1 sur Ishaï, languedragon d'Ojutaï.\nPartenariat (Vous pouvez avoir deux commandants si les deux ont le partenariat.)
 Ishi-Ishi, Akki Crackshot|Ishi-Ishi, tireur d'élite akki|Créature légendaire : gobelin et guerrier|À chaque fois qu'un adversaire joue un sort d'esprit ou d'arcane, Ishi-Ishi, tireur d'élite akki inflige 2 blessures à ce joueur.
 Ishkanah, Grafwidow|Ishkhana, veuve de graf|Créature légendaire : araignée|Portée\nDélire — Quand Ishkhana, veuve de graf arrive sur le champ de bataille, s'il y a au moins quatre types de carte parmi les cartes de votre cimetière, mettez sur le champ de bataille trois jetons de créature 1/2 verte Araignée avec la portée.\n{6}{B} : L'adversaire ciblé perd 1 point de vie pour chaque araignée que vous contrôlez.
-Island Fish Jasconius|Ile-poisson Seyidna yûnûs||
-Island Sanctuary|Ile sanctuaire||
-Island|Ile||
+Island Fish Jasconius|Île-poisson Seyidna yûnûs||
+Island Sanctuary|Île sanctuaire||
+Island|Île||
 Isle of Vesuva|Île de Vésuva|Plan : Dominaria|À chaque fois qu'une créature non-jeton arrive sur le champ de bataille, son contrôleur met sur le champ de bataille un jeton qui est une copie de cette créature.\nÀ chaque fois que vous obtenez chaos, détruisez la créature ciblée et toutes les autres créatures ayant le même nom que cette créature.
 Isleback Spawn|Engeance havréchine|Créature : kraken|Linceul\nL'Engeance havréchine gagne +4/+8 tant qu'une bibliothèque contient vingt cartes ou moins.
 Isochron Scepter|Sceptre isochronique|Artefact|Empreinte Quand le Sceptre isochronique arrive en jeu, vous pouvez retirer de la partie une carte d'éphémère de votre main ayant un coût converti de mana inférieur ou égal à 2. (Cet artefact a l'empreinte de la carte retirée.){2}, {T} : Vous pouvez copier la carte d'éphémère dont le Sceptre isochronique a l'empreinte et jouer la copie sans payer son coût de mana\n.
@@ -10673,7 +10674,7 @@ Krosan Vorine|Serval krosian|Créature : chat et bête|Provocation (Quand cette 
 Krosan Warchief|Chef de guerre krosian|Créature : bête|Les sorts de bête que vous jouez coûtent {1} de moins à jouer.\n{1}{G} : Régénérez la bête ciblée.
 Krosan Wayfarer|Voyageur krosian|Créature : druide|Sacrifiez le Voyageur krosian : Mettez en jeu une carte de terrain de votre main.
 Krosa|Krosia|Plan : Dominaria|Toutes les créatures gagnent +2/+2.\nÀ chaque fois que vous obtenez chaos, vous pouvez ajouter {W}{U}{B}{R}{G} à votre réserve.
-Krovikan Elementalist|Elémentaliste krovois||
+Krovikan Elementalist|Élémentaliste krovois||
 Krovikan Fetish|Fétiche krovois||
 Krovikan Horror|Horreur krovoise||
 Krovikan Mist|Brume krovoise|Créature : illusion|Vol\nLa force et l'endurance de la Brume krovoise sont chacune égale au nombre d'illusions en jeu.
@@ -11068,7 +11069,7 @@ Lightning Crafter|Façonneur d'éclairs|Créature : gobelin et shamane|Appui de 
 Lightning Dart|Dard foudroyant|Éphémère|Le Dard foudroyant inflige 1 blessure à la créature ciblée. Si cette créature est blanche ou bleue, le Dard foudroyant lui inflige 4 blessures à la place.
 Lightning Diadem|Diadème d'éclair|Enchantement : aura|Enchanter : créature\nQuand le Diadème d'éclair arrive sur le champ de bataille, il inflige 2 blessures à une cible, créature ou joueur.\nLa créature enchantée gagne +2/+2.
 Lightning Dragon|Dragon fulgurant||
-Lightning Elemental|Elémental d'éclair||
+Lightning Elemental|Élémental d'éclair||
 Lightning Greaves|Jambières d'éclair|Artefact : équipement|La créature équipée a la célérité et le linceul. (Elle ne peut pas être la cible de sorts ou de capacités.)\nÉquipement {0}
 Lightning Helix|Hélice d'éclairs|Éphémère|L'Hélice d'éclairs inflige 3 blessures à n'importe quelle cible et vous gagnez 3 points de vie.
 Lightning Hounds|Chiens de chasse fulgurants||
@@ -11082,7 +11083,7 @@ Lightning Rift|Ride d'éclairs|Enchantement|À chaque fois qu'un joueur recycle 
 Lightning Runner|Coureuse d'éclairs|Créature : humain et guerrier|Double initiative, célérité\nÀ chaque fois que la Coureuse d'éclairs attaque, vous gagnez {E}{E} (deux marqueurs « énergie »), puis vous pouvez payer {E}{E}{E}{E}{E}{E}{E}{E}. Si vous payez, dégagez toutes les créatures que vous contrôlez et cette phase est suivie d'une phase de combat supplémentaire.
 Lightning Serpent|Serpent d'éclairs|Créature : élémental et serpent|Piétinement, célérité\nLe Serpent d'éclairs arrive en jeu avec, sur lui, X marqueurs +1/+0.\nÀ la fin du tour, sacrifiez le Serpent d'éclairs.
 Lightning Shrieker|Hurleur d'éclairs|Créature : dragon|Vol, piétinement, célérité\nAu début de l'étape de fin, le propriétaire du Hurleur d'éclairs le mélange dans sa bibliothèque.
-Lightning Skelemental|Squelémental d'éclair|Créature : élémental et squelette|Piétinement, célérité\nÀ chaque fois que le Squelémental d'éclair inflige des blessures de combat à un joueur, ce joueur se défausse de deux cartes.\nAu début de l'étape de fin, sacrifiez le Squelémental d'éclair.
+Lightning Skelemental|SquÉlémental d'éclair|Créature : élémental et squelette|Piétinement, célérité\nÀ chaque fois que le SquÉlémental d'éclair inflige des blessures de combat à un joueur, ce joueur se défausse de deux cartes.\nAu début de l'étape de fin, sacrifiez le SquÉlémental d'éclair.
 Lightning Spear|Lance d'éclairs|Artefact : équipement|La créature équipée gagne +1/+0 et a le piétinement.\n{2}{R}, sacrifiez la Lance d'éclairs : Elle inflige 3 blessures à n'importe quelle cible.\nÉquipement {1}
 Lightning Stormkin|Sangboré d'éclair|Créature : élémental et sorcier|Vol\nCélérité (Cette créature peut attaquer et {T} dès le tour où elle arrive sous votre contrôle.)
 Lightning Storm|Orage d'éclairs|Éphémère|L'Orage d'éclairs inflige X blessures à une cible, créature ou joueur, X étant 3 plus le nombre de marqueurs « charge » sur lui.\nDéfaussez-vous d'une carte de terrain : Mettez deux marqueurs « charge » sur l'Orage d'éclairs. Vous pouvez lui choisir une nouvelle cible. N'importe quel joueur peut jouer cette capacité, mais uniquement si l'Orage d'éclairs est sur la pile.
@@ -12476,7 +12477,7 @@ Moonlit Strider|Enjambeur au clair de lune|Créature : esprit|Sacrifiez l'Enjamb
 Moonlit Wake|Veillée au clair de lune||
 Moonmist|Brumelune|Éphémère|Transformez tous les humains. Prévenez toutes les blessures de combat qui devraient être infligées ce tour-ci par des créatures autres que les loups-garous et les loups. (Seules les cartes recto-verso peuvent être transformées.)
 Moonrager's Slash|Balafre du furielune|Éphémère|Ce sort coûte {2} de moins à lancer si c'est la nuit.\nLa Balafre du furielune inflige 3 blessures à n'importe quelle cible.
-Moonring Island|Île de l'Anneau-lune|Terrain : île|({T} : Ajoutez {U} à votre réserve.)\nL'Île de l'Anneau-lune arrive en jeu engagée.\n{U}, {T} : Regardez la carte du dessus de la bibliothèque du joueur ciblé. Ne jouez cette capacité que si vous contrôlez au moins deux permanents bleus.
+Moonring Island|Île de l'Anneau-lune|Terrain : île|({T} : Ajoutez {U} à votre réserve.)\nL'île de l'Anneau-lune arrive en jeu engagée.\n{U}, {T} : Regardez la carte du dessus de la bibliothèque du joueur ciblé. Ne jouez cette capacité que si vous contrôlez au moins deux permanents bleus.
 Moonring Mirror|Miroir anneau de lune|Artefact|À chaque fois que vous piochez une carte, retirez de la partie la carte du dessus de votre bibliothèque, face cachée.\nAu début de votre entretien, vous pouvez retirer de la partie votre main, face cachée. Si vous faites ainsi, mettez toutes les autres cartes retirées de la partie avec le Miroir anneau de lune dans votre main.
 Moonrise Intruder|Intruse du lever de lune|Créature : - loup-garou|Menace (Cette créature ne peut pas être bloquée excepté par deux créatures ou plus.)\nAu début de chaque entretien, si un joueur a lancé au moins deux sorts au tour précédent, transformez l'Intruse du lever de lune.
 Moonscarred Werewolf|Loup-garou marqué par la lune|Créature : - loup-garou|Vigilance\n{T} : Ajoutez {G}{G} à votre réserve.\nAu début de chaque entretien, si un joueur a lancé au moins deux sorts au tour précédent, transformez le Loup-garou marqué par la lune.
@@ -12757,7 +12758,7 @@ Mythos of Nethroi|Mythe de Nethroï|Éphémère|Détruisez le permanent non-terr
 Mythos of Snapdax|Mythe de Snapdax|Rituel|Chaque joueur choisit un artefact, une créature, un enchantement et un planeswalker parmi les permanents non-terrains qu'il contrôle, puis il sacrifie le reste. Si {B}{R} ont été dépensés pour lancer ce sort, vous choisissez les permanents pour chaque joueur à la place.
 Mythos of Vadrok|Mythe de Vadrok|Rituel|Le Mythe de Vadrok inflige 5 blessures réparties comme vous le désirez entre n'importe quel nombre de cibles, créatures et/ou planeswalkers. Si {W}{U} ont été dépensés pour lancer ce sort, jusqu'à votre prochain tour, ces permanents ne peuvent ni attaquer ni bloquer et leurs capacités activées ne peuvent pas être activées.
 Márton Stromgald|Màrton Stromgald||
-Naar Isle|Île de Naâr|Plan : Grégefeu|Au début de votre entretien, mettez un marqueur « flamme » sur l'Île de Naâr. L'Île de Naâr vous inflige ensuite un nombre de blessures égal au nombre de marqueurs « flamme » sur elle.\nÀ chaque fois que vous obtenez chaos, l'Île de Naâr inflige 3 blessures au joueur ciblé.
+Naar Isle|Île de Naâr|Plan : Grégefeu|Au début de votre entretien, mettez un marqueur « flamme » sur l'île de Naâr. L'île de Naâr vous inflige ensuite un nombre de blessures égal au nombre de marqueurs « flamme » sur elle.\nÀ chaque fois que vous obtenez chaos, l'île de Naâr inflige 3 blessures au joueur ciblé.
 Naban, Dean of Iteration|Naban, doyen de l'itération|Créature légendaire : humain et sorcier|Si l'arrivée sur le champ de bataille d'un sorcier sous votre contrôle provoque le déclenchement d'une capacité déclenchée d'un permanent que vous contrôlez, cette capacité se déclenche une fois de plus.
 Nacatl Hunt-Pride|Bande chasseresse nacatl|Créature : chat et guerrier|Vigilance\n{R}, {T} : La créature ciblée ne peut pas bloquer ce tour-ci.\n{G}, {T} : La créature ciblée bloque ce tour-ci si possible.
 Nacatl Outlander|Pérégrin nacatl|Créature : chat et éclaireur|Protection contre le bleu
@@ -15425,7 +15426,7 @@ Reminisce|Réminiscence|Rituel|Le joueur ciblé mélange son cimetière à sa bi
 Remorseful Cleric|Clerc pénitent|Créature : esprit et clerc|Vol\nSacrifiez le Clerc pénitent : Exilez toutes les cartes du cimetière d'un joueur ciblé.
 Remorseless Punishment|Supplice implacable|Rituel|L'adversaire ciblé perd 5 points de vie à moins que ce joueur ne se défausse de deux cartes ou ne sacrifie une créature ou un planeswalker. Répétez ce processus une fois.
 Remote Farm|Ferme isolée||
-Remote Isle|Ile lointaine||
+Remote Isle|Île lointaine||
 Remove Soul|Retrait d'âme||
 Remove|Anéantissement||
 Renari, Merchant of Marvels|Renari, marchande de merveilles|Créature légendaire : dragon et artificier|Vous pouvez lancer des sorts de dragon et d'artefact comme s'ils avaient le flash.\nChoisissez un passé
@@ -16109,7 +16110,7 @@ Rushed Rebirth|Renaissance précipitée|Éphémère|Choisissez une créature cib
 Rushing River|Rivière impétueuse|Éphémère|Kick - Sacrifiez un terrain. (Vous pouvez sacrifier un terrain en supplément de tous autres coûts quand vous jouez ce sort.)\nRenvoyez le permanent non-terrain ciblé dans la main de son propriétaire. Si vous avez payé le coût de kick, renvoyez un autre permanent non-terrain ciblé dans la main de son propriétaire.
 Rushing-Tide Zubera|Zubera aux marées impétueuses|Créature : zubera et esprit|Quand le Zubera aux marées impétueuses est mis dans un cimetière depuis le jeu, s'il a subi au moins 4 blessures ce tour-ci, piochez trois cartes.
 Rushwood Dryad|Dryade de Paillebois|Créature : dryade|Traversée des forêts (Cette créature est imblocable tant que le joueur défenseur contrôle au moins une forêt.)
-Rushwood Elemental|Elémental de Paillebois||
+Rushwood Elemental|Élémental de Paillebois||
 Rushwood Grove|Bosquet de Paillebois||
 Rushwood Herbalist|Herboriste de Paillebois||
 Rushwood Legate|Légat de Paillebois||
@@ -17016,7 +17017,7 @@ Shadowspear|Ombrelance|Artefact légendaire : équipement|La créature équipée
 Shadowstorm Vizier|Vizir de la tempête de distorsion|Créature : humain et clerc|Vol\nÀ chaque fois que vous recyclez ou vous défaussez d'une carte, le Vizir de la tempête de distorsion gagne +1/+1 jusqu'à la fin du tour.
 Shadowstorm|Tempête de distorsion||
 Shadrix Silverquill|Shadrix Plumargent|Créature légendaire : ancêtre et dragon|Vol, double initiative\nAu début du combat pendant votre tour, vous pouvez choisir deux. Chaque mode doit cibler un joueur différent.\n• Un joueur ciblé crée un jeton de créature 2/1 blanche et noire Encrelin avec le vol.\n• Un joueur ciblé pioche une carte et perd 1 point de vie.\n• Un joueur ciblé met un marqueur +1/+1 sur chaque créature qu'il contrôle.
-Shah of Naar Isle|Schah de l'Île de Naâr|Créature : éfrit|Piétinement\nÉcho {0} (Au début de votre entretien, si ce permanent est passé sous votre contrôle depuis le début de votre dernier entretien, sacrifiez-le à moins que vous ne payiez son coût d'écho.)\nQuand le coût d'écho du Schah de l'Île de Naâr est payé, chaque adversaire peut piocher jusqu'à trois cartes.
+Shah of Naar Isle|Schah de l'île de Naâr|Créature : éfrit|Piétinement\nÉcho {0} (Au début de votre entretien, si ce permanent est passé sous votre contrôle depuis le début de votre dernier entretien, sacrifiez-le à moins que vous ne payiez son coût d'écho.)\nQuand le coût d'écho du Schah de l'île de Naâr est payé, chaque adversaire peut piocher jusqu'à trois cartes.
 Shake the Foundations|Ébranler les fondations|Éphémère|Ébranler les fondations inflige 1 blessure à chaque créature sans le vol.\nPiochez une carte.
 Shakedown Heavy|Lourdaud extorqueur|Créature : ogre et guerrier|Menace\nÀ chaque fois que le Lourdaud extorqueur attaque, le joueur défenseur peut vous faire piocher une carte. S'il fait ainsi, dégagez le Lourdaud extorqueur et retirez-le du combat.
 Shalai, Voice of Plenty|Shalaï, Voix de l'abondance|Créature légendaire : ange|Vol\nVous, les planeswalkers que vous contrôlez et les autres créatures que vous contrôlez avez la défense talismanique.\n{4}{G}{G} : Mettez un marqueur +1/+1 sur chaque créature que vous contrôlez.
@@ -17391,7 +17392,7 @@ Silumgar Spell-Eater|Mangesort de Silumgar|Créature : naga et sorcier|Mégamue 
 Silumgar's Command|Commandement de Silumgar|Éphémère|Choisissez deux —\n• Contrecarrez le sort non-créature ciblé.\n• Renvoyez le permanent ciblé dans la main de son propriétaire.\n• La créature ciblée gagne -3/-3 jusqu'à la fin du tour.\n• Détruisez le planeswalker ciblé.
 Silumgar's Scorn|Mépris selon Silumgar|Éphémère|En tant que coût supplémentaire pour lancer le Mépris selon Silumgar, vous pouvez révéler une carte de dragon de votre main.\nContrecarrez le sort ciblé à moins que son contrôleur ne paie {1}. Si vous avez révélé une carte de dragon ou si vous contrôliez un dragon au moment où vous avez lancé le Mépris selon Silumgar, contrecarrez ce sort à la place.
 Silumgar, the Drifting Death|Silumgar, la mort drossante|Créature légendaire : dragon|Vol, défense talismanique\nÀ chaque fois qu'un dragon que vous contrôlez attaque, les créatures que le joueur défenseur contrôle gagnent -1/-1 jusqu'à la fin du tour.
-Silundi Isle|Île de Silundi|Terrain|L'Île de Silundi arrive sur le champ de bataille engagée.\n{T} : Ajoutez {U}.\nÉphémère\n{2}{U}
+Silundi Isle|Île de Silundi|Terrain|L'île de Silundi arrive sur le champ de bataille engagée.\n{T} : Ajoutez {U}.\nÉphémère\n{2}{U}
 Silundi Vision|Vision de Silundi|Éphémère|Regardez les six cartes du dessus de votre bibliothèque. Vous pouvez révéler une carte d'éphémère ou de rituel parmi elles et la mettre dans votre main. Mettez le reste au-dessous de votre bibliothèque dans un ordre aléatoire.\nTerrain\n{T} : Ajoutez {U}.
 Silvanus's Invoker|Invocateur de Silvanus|Créature : dragon et druide|Invocation d'élémentaire — {8} : Dégagez un terrain ciblé que vous contrôlez. Il devient une créature 8/8 Élémental avec le piétinement et la célérité jusqu'à la fin du tour. C'est toujours un terrain.
 Silvar, Devourer of the Free|Silvar, dévoreur des hommes libres|Créature légendaire : chat et cauchemar|Partenariat avec Trynn, championne de la liberté (Quand cette créature arrive sur le champ de bataille, le joueur ciblé peut mettre Trynn dans sa main depuis sa bibliothèque, puis mélanger.)\nMenace\nSacrifiez un humain : Mettez un marqueur +1/+1 sur Silvar, dévoreur des hommes libres. Il acquiert l'indestructible jusqu'à la fin du tour.
@@ -17418,7 +17419,7 @@ Silverflame Squire|Écuyer de la Flamme d'argent|Créature : humain et soldat|
 Silverfur Partisan|Partisane poilargent|Créature : loup et guerrier|Piétinement\nÀ chaque fois qu'un loup ou un loup-garou que vous contrôlez devient la cible d'un sort d'éphémère ou de rituel, mettez sur le champ de bataille un jeton de créature 2/2 verte Loup.
 Silvergill Adept|Expert d'Ouidargent|Créature : ondin et sorcier|En tant que coût supplémentaire pour jouer l'Expert d'Ouidargent, révélez une carte d'ondin de votre main ou payez {3}.\nQuand l'Expert d'Ouidargent arrive en jeu, piochez une carte.
 Silvergill Douser|Trempeuse d'Ouidargent|Créature : ondin et sorcier|{T} : La créature ciblée gagne -X/-0 jusqu'à la fin du tour, X étant le nombre d'ondins et/ou de peuple fée que vous contrôlez.
-Silverglade Elemental|Elémental de la Clairière d'argent||
+Silverglade Elemental|Élémental de la Clairière d'argent||
 Silverglade Pathfinder|Pionnière de la Clairière d'argent||
 Silverpelt Werewolf|Loup-garou à fourrure d'argent|Créature : - loup-garou|À chaque fois que le Loup-garou à fourrure d'argent inflige des blessures de combat à un joueur, piochez une carte.\nAu début de chaque entretien, si un joueur a lancé au moins deux sorts au tour précédent, transformez le Loup-garou à fourrure d'argent.
 Silverquill Apprentice|Apprentie de Plumargent|Créature : humain et psychagogue|Sorcellerie — À chaque fois que vous lancez ou copiez un sort d'éphémère ou de rituel, une créature ciblée gagne +1/+0 jusqu'à la fin du tour.
@@ -17868,7 +17869,7 @@ Snow Devil|Diable des neiges||
 Snow Fortress|Forteresse des neiges||
 Snow Hound|Chien de chasse des neiges||
 Snow-Covered Forest|Forêt enneigée|Terrain neigeux de base : forêt|
-Snow-Covered Island|Ile enneigée||
+Snow-Covered Island|Île enneigée||
 Snow-Covered Mountain|Montagne enneigée|Terrain neigeux de base : montagne|
 Snow-Covered Plains|Plaine enneigée|Terrain neigeux de base : plaine|
 Snow-Covered Swamp|Marais enneigé|Terrain neigeux de base : marais|
@@ -18683,6 +18684,7 @@ Stomper Cub|Jeune piétineur|Créature : bête|Piétinement
 Stomping Ground|Terrain de prédilection|Terrain : montagne et forêt|({T} : Ajoutez {R} ou {G} à votre réserve.)\nAu moment où le Terrain de prédilection arrive en jeu, vous pouvez payer 2 points de vie. Si vous ne le faites pas, le Terrain de prédilection arrive en jeu engagé à la place.
 Stomping Slabs|Dalles pilonnantes|Rituel|Révélez les sept cartes du dessus de votre bibliothèque, et mettez ensuite ces cartes au-dessous de votre bibliothèque dans l'ordre de votre choix. Si une carte appelée Dalles pilonnantes a été révélée de cette manière, les Dalles pilonnantes infligent 7 blessures à une cible, créature ou joueur.
 Stomp|Piétineur|Éphémère : aventure|Les blessures ne peuvent être prévenues ce tour-ci. Piétineur inflige 2 blessures à n'importe quelle cible.
+Stone Calendar|Calendrier des pierres|Artefact|Les sorts que vous lancez coûtent {1} de moins à lancer.
 Stone Giant|Géant de pierre|Créature : géant|{T} : La créature ciblée que vous contrôlez d'endurance inférieure à la force du Géant de pierre acquiert le vol jusqu'à la fin du tour. Détruisez cette créature au début de l'étape de fin.
 Stone Golem|Golem de pierre|Créature-artefact : golem|
 Stone Haven Medic|Carabin du Refuge de pierre|Créature : kor et clerc|{W}, {T} : Vous gagnez 1 point de vie.
@@ -18730,7 +18732,7 @@ Storage Matrix|Matrice de Stockage||
 Storm Caller|Meneur d'orage|Créature : ogre et shamane|Quand le Meneur d'orage arrive sur le champ de bataille, il inflige 2 blessures à chaque adversaire.
 Storm Cauldron|Chaudron de l'orage|Artefact|Chaque joueur peut jouer un terrain supplémentaire pendant chacun de ses tours.\nÀ chaque fois qu'un terrain est engagé pour du mana, renvoyez-le dans la main de son propriétaire.
 Storm Crow|Corbeau de l'orage|Créature : oiseau|Vol
-Storm Elemental|Elémental de l'orage||
+Storm Elemental|Élémental de l'orage||
 Storm Entity|Entité d'orage|Créature : élémental|Célérité\nL'Entité d'orage arrive en jeu avec un marqueur +1/+1 sur elle pour chaque autre sort joué ce tour-ci.
 Storm Fleet Aerialist|Voltigeuse de la Flotte de la tempête|Créature : humain et pirate|Vol\nSaccage — La Voltigeuse de la Flotte de la tempête arrive sur le champ de bataille avec un marqueur +1/+1 sur elle si vous avez attaqué avec une créature ce tour-ci.
 Storm Fleet Arsonist|Incendiaire de la Flotte de la tempête|Créature : orque et pirate|Saccage — Quand l'Incendiaire de la Flotte de la tempête arrive sur le champ de bataille, si vous avez attaqué avec une créature ce tour-ci, l'adversaire ciblé sacrifie un permanent.
@@ -19447,7 +19449,7 @@ Teferi's Curse|Malédiction selon Téfeiri||
 Teferi's Drake|Drâkon de Téfeiri||
 Teferi's Honor Guard|Garde d'honneur de Téfeiri||
 Teferi's Imp|Diablotin de Téfeiri||
-Teferi's Isle|Ile de Téfeiri||
+Teferi's Isle|Île de Téfeiri||
 Teferi's Moat|Douve de Téfeiri|Enchantement|Au moment où la Douve de Téfeiri arrive en jeu, choisissez une couleur.\nLes créatures de la couleur choisie sans le vol ne peuvent pas vous attaquer.
 Teferi's Protection|Protection de Téfeiri|Éphémère|Jusqu'à votre prochain tour, votre total de points de vie ne peut pas changer et vous acquérez la protection contre tout. Tous les permanents que vous contrôlez passent hors phase. (Tant qu'ils sont hors phase, ils sont traités comme s'ils n'existaient pas. Ils passent en phase avant le dégagement pendant votre étape de dégagement.)\nExilez la Protection de Téfeiri.
 Teferi's Protege|Protégée de Téfeiri|Créature : humain et sorcier|{1}{U}, {T} : Piochez une carte, puis défaussez-vous d'une carte.
@@ -19784,7 +19786,7 @@ Thirst for Meaning|Soif de sens|Éphémère|Piochez trois cartes. Défaussez-vou
 Thirsting Axe|Hache assoiffée|Artefact : équipement|La créature équipée gagne +4/+0.\nAu début de votre étape de fin, si la créature équipée n'a pas infligé de blessures de combat à une créature ce tour-ci, sacrifiez-la.\nÉquipement {2}
 Thirsting Bloodlord|Seigneur de sang assoiffé|Créature : vampire|Les autres vampires que vous contrôlez gagnent +1/+1.
 Thirsting Shade|Ombre assoiffée|Créature : ombre|Lien de vie\n{2}{B} : L'Ombre assoiffée gagne +1/+1 jusqu'à la fin du tour.
-Thirst|Soif||
+Thirst|Soif|Enchantement : aura|Enchanter : créature\nQuand la Soif arrive en jeu, engagez la créature enchantée.\nLa créature enchantée ne se dégage pas pendant l'étape de dégagement de son contrôleur.\nAu début de votre entretien sacrifiez la Soif à moins que vous ne payiez {U}.
 Thistledown Duo|Duo de Buttechardon|Créature : sangami et soldat et sorcier|À chaque fois que vous jouez un sort blanc, le Duo de Buttechardon gagne +1/+1 jusqu'à la fin du tour.\nÀ chaque fois que vous jouez un sort bleu, le Duo de Buttechardon acquiert le vol jusqu'à la fin du tour.
 Thistledown Liege|Noble féal de Buttechardon|Créature : sangami et chevalier|Flash\nLes autres créatures blanches que vous contrôlez gagnent +1/+1.\nLes autres créatures bleues que vous contrôlez gagnent +1/+1.
 Thopter Arrest|Arrestation par mécanoptère|Enchantement|Quand l'Arrestation par mécanoptère arrive sur le champ de bataille, exilez un artefact ciblé ou une créature ciblée qu'un adversaire contrôle jusqu'à ce que l'Arrestation par mécanoptère quitte le champ de bataille.
@@ -19792,8 +19794,8 @@ Thopter Assembly|Assembleur de mécanoptères|Créature-artefact : mécanoptère
 Thopter Engineer|Ingénieur en mécanoptère|Créature : humain et artificier|Quand l'Ingénieur en mécanoptère arrive sur le champ de bataille, créez un jeton de créature-artefact 1/1 incolore Mécanoptère avec le vol.\nLes créatures-artefacts que vous contrôlez ont la célérité.
 Thopter Foundry|Fonderie mécanoptère|Artefact|{1}, sacrifiez un artefact non-jeton : Créez un jeton de créature 1/1 bleue Mécanoptère avec le vol. Vous gagnez 1 point de vie.
 Thopter Spy Network|Réseau de mécanoptères espions|Enchantement|Au début de votre entretien, si vous contrôlez un artefact, créez un jeton de créature-artefact 1/1 incolore Mécanoptère avec le vol.\nÀ chaque fois qu'au moins une créature-artefact que vous contrôlez inflige des blessures de combat à un joueur, piochez une carte.
-Thopter Squadron|Escadron de mécanoptères||
-Thorn Elemental|Elémental d'Epines||
+Thopter Squadron|Escadron de mécanoptères|Créature-artefact|Vol\nL'Escadron de mécanoptères arrive en jeu avec trois marqueurs +1/+1 sur lui.\n{1}, Retirez un marqueur +1/+1 de l'Escadron de mécanoptères: Mettez en jeu un jeton de créature-artefact 1/1 Mécanoptère. Ne jouez cette capacité que lorsque vous pourriez jouer un rituel.\n{1}, Sacrifiez un mécanoptère: Mettez un marqueur +1/+1 sur l'Escadron de mécanoptères. Ne jouez cette capacité que lorsque vous pourriez jouer un rituel.
+Thorn Elemental|Élémental d'épines|Créature : élémental|Vous pouvez faire que l'Élémental d'épines attribue ses blessures de combat comme s'il n'était pas bloqué.
 Thorn Lieutenant|Lieutenant d'épines|Créature : elfe et guerrier|À chaque fois que le Lieutenant d'épines devient la cible d'un sort ou d'une capacité qu'un adversaire contrôle, créez un jeton de créature 1/1 verte Elfe et Guerrier.\n{5}{G} : Le Lieutenant d'épines gagne +4/+4 jusqu'à la fin du tour.
 Thorn of Amethyst|Éclat d'améthyste|Artefact|Les sorts non-créature coûtent {1} de plus à jouer.
 Thorn of the Black Rose|Épine de la Rose Noire|Créature : humain et assassin|Contact mortel\nQuand l'Épine de la Rose Noire arrive sur le champ de bataille, vous devenez le monarque.
@@ -19874,10 +19876,10 @@ Thran Dynamo|Dynamo Thran|Artefact|{T}: Ajoutez trois manas incolores à votre r
 Thran Forge|Forge de Thran||
 Thran Foundry|Fonderie Thran||
 Thran Golem|Golem Thran||
-Thran Lens|Lentille thran||
-Thran Quarry|Carrière de Thran||
+Thran Lens|Lentille thran|Artefact|
+Thran Quarry|Carrière de Thran|Terrain|
 Thran Temporal Gateway|Portail temporel thran|Artefact légendaire|{4}, {T} : Vous pouvez mettre sur le champ de bataille une carte de permanent historique de votre main. (Les artefacts, les légendaires et les sagas sont historiques.)
-Thran Tome|Grimoire de Thran||
+Thran Tome|Grimoire de Thran|Artefact|{5}, {T} :  Révélez les trois cartes du dessus de votre bibliothèque. L'adversaire ciblé choisit l'une de ces cartes. Mettez cette carte dans votre cimetière, et piochez les deux cartes.
 Thran Turbine|Turbine Thran||
 Thran War Machine|Machine de guerre thran||
 Thran Weaponry|Armement thran||
@@ -19912,7 +19914,7 @@ Thriving Grove|Bosquet prospère|Terrain|Le Bosquet prospère arrive sur le cham
 Thriving Grubs|Larves prospères|Créature : gremlin|Quand les Larves prospères arrivent sur le champ de bataille, vous gagnez {E}{E} (deux marqueurs « énergie »).\nÀ chaque fois que les Larves prospères attaquent, vous pouvez payer {E}{E}. Si vous faites ainsi, mettez un marqueur +1/+1 sur elles.
 Thriving Heath|Prairie prospère|Terrain|La Prairie prospère arrive sur le champ de bataille engagée.\nAu moment où la Prairie prospère arrive sur le champ de bataille, choisissez une couleur autre que le blanc.\n{T} : Ajoutez {W} ou un mana de la couleur choisie.
 Thriving Ibex|Bouquetin prospère|Créature : chèvre|Quand le Bouquetin prospère arrive sur le champ de bataille, vous gagnez {E}{E} (deux marqueurs « énergie »).\nÀ chaque fois que le Bouquetin prospère attaque, vous pouvez payer {E}{E}. Si vous faites ainsi, mettez un marqueur +1/+1 sur lui.
-Thriving Isle|Île prospère|Terrain|L'Île prospère arrive sur le champ de bataille engagée.\nAu moment où l'Île prospère arrive sur le champ de bataille, choisissez une couleur autre que le bleu.\n{T} : Ajoutez {U} ou un mana de la couleur choisie.
+Thriving Isle|Île prospère|Terrain|L'île prospère arrive sur le champ de bataille engagée.\nAu moment où l'île prospère arrive sur le champ de bataille, choisissez une couleur autre que le bleu.\n{T} : Ajoutez {U} ou un mana de la couleur choisie.
 Thriving Moor|Lande prospère|Terrain|La Lande prospère arrive sur le champ de bataille engagée.\nAu moment où la Lande prospère arrive sur le champ de bataille, choisissez une couleur autre que le noir.\n{T} : Ajoutez {B} ou un mana de la couleur choisie.
 Thriving Rats|Rats prospères|Créature : rat|Quand les Rats prospères arrivent sur le champ de bataille, vous gagnez {E}{E} (deux marqueurs « énergie »).\nÀ chaque fois que les Rats prospères attaquent, vous pouvez payer {E}{E}. Si vous faites ainsi, mettez un marqueur +1/+1 sur eux.
 Thriving Rhino|Rhinocéros prospère|Créature : rhinocéros|Quand le Rhinocéros prospère arrive sur le champ de bataille, vous gagnez {E}{E} (deux marqueurs « énergie »).\nÀ chaque fois que le Rhinocéros prospère attaque, vous pouvez payer {E}{E}. Si vous faites ainsi, mettez un marqueur +1/+1 sur lui.
@@ -20043,7 +20045,7 @@ Timberwatch Elf|Elfe gardebois|Créature : elfe|{T} : La créature ciblée gagne
 Time Bomb|Bombe temporelle||
 Time Distortion|Déformation temporelle|Phénomène|Quand vous rencontrez la Déformation temporelle, inversez l'ordre du tour de la partie. (Par exemple, si la partie s'est déroulée dans le sens des aiguilles d'une montre autour de la table, elle se déroule maintenant dans le sens inverse des aiguilles d'une montre. Puis transplanez-vous depuis ce phénomène.)
 Time Ebb|Temps du jusant|Rituel|Mettez la créature ciblée au-dessus de la bibliothèque de son propriétaire.
-Time Elemental|Elémental du temps||
+Time Elemental|Élémental du temps||
 Time Reversal|Inversion temporelle|Rituel|Chaque joueur mélange sa main et son cimetière avec sa bibliothèque et pioche ensuite sept cartes. Exilez l'Inversion temporelle.
 Time Sieve|Crible temporel|Artefact|{T}, sacrifiez cinq artefacts : Jouez un autre tour après celui-ci.
 Time Spiral|Spirale temporelle||
@@ -20444,7 +20446,7 @@ Tromokratis|Tromokratis|Créature légendaire : kraken|Tromokratis a la défense
 Tromp the Domains|Fouler les domaines|Rituel|Domaine — Jusqu'à la fin du tour, les créatures que vous contrôlez acquièrent le piétinement et gagnent +1/+1 pour chaque type de terrain de base parmi les terrains que vous contrôlez.
 Trophy Hunter|Chasseuse de trophées|Créature : humain et archer|{1}{G} : La Chasseuse de trophées inflige 1 blessure à la créature avec le vol ciblée.\nÀ chaque fois qu'une créature avec le vol blessée par la Chasseuse de trophées ce tour-ci est mise dans un cimetière, mettez un marqueur +1/+1 sur la Chasseuse de trophées.
 Trophy Mage|Mage des trophées|Créature : humain et sorcier|Quand la Mage des trophées arrive sur le champ de bataille, vous pouvez chercher dans votre bibliothèque une carte d'artefact avec un coût converti de mana de 3, la révéler, la mettre dans votre main et mélanger votre bibliothèque.
-Tropical Island|Ile tropicale||
+Tropical Island|Île tropicale||
 Tropical Storm|Orage tropical||
 Trostani Discordant|Trostani la discordante|Créature légendaire : dryade|Les autres créatures que vous contrôlez gagnent +1/+1.\nQuand Trostani la discordante arrive sur le champ de bataille, créez deux jetons de créature 1/1 blanche Soldat avec le lien de vie.\nAu début de votre étape de fin, chaque joueur acquiert le contrôle de toutes les créatures qu'il possède.
 Trostani's Judgment|Jugement selon Trostani|Éphémère|Exilez la créature ciblée, puis peuplez. (Créez un jeton qui est une copie d'un jeton de créature que vous contrôlez.)
@@ -21399,7 +21401,7 @@ Volcanic Eruption|Eruption volcanique||
 Volcanic Fallout|Retombées volcaniques|Éphémère|Ce sort ne peut pas être contrecarré.\nLes Retombées volcaniques infligent 2 blessures à chaque créature et à chaque joueur.
 Volcanic Geyser|Geyser volcanique||
 Volcanic Hammer|Marteau volcanique|Rituel|Le Marteau volcanique inflige 3 blessures à une cible, créature ou joueur.
-Volcanic Island|Ile volcanique||
+Volcanic Island|Île volcanique||
 Volcanic Offering|Offrande volcanique|Éphémère|Détruisez un terrain non-base ciblé que vous ne contrôlez pas et un terrain non-base ciblé choisi par un adversaire que vous ne contrôlez pas.\nL'Offrande volcanique inflige 7 blessures à une créature ciblée que vous ne contrôlez pas et 7 blessures à une créature ciblée choisie par un adversaire que vous ne contrôlez pas.
 Volcanic Rambler|Randonneur volcanique|Créature : élémental|{2}{R} : Le Randonneur volcanique inflige 1 blessure au joueur ciblé.
 Volcanic Rush|Ruée volcanique|Éphémère|Les créatures attaquantes gagnent +2/+0 et acquièrent le piétinement jusqu'à la fin du tour.
@@ -21731,7 +21733,7 @@ Watchful Giant|Géant alerte|Créature : géant et soldat|Quand le Géant alerte
 Watchful Naga|Naga alerte|Créature : naga et sorcier|Vous pouvez surmener le Naga alerte au moment où il attaque. Quand vous faites ainsi, piochez une carte. (Une créature surmenée ne se dégage pas pendant votre prochaine étape de dégagement.)
 Watchwing Scarecrow|Épouvantail ailegarde|Créature-artefact : épouvantail|L'Épouvantail ailegarde a la vigilance tant que vous contrôlez une créature blanche.\nL'Épouvantail ailegarde a le vol tant que vous contrôlez une créature bleue.
 Watchwolf|Loup de garde|Créature : loup|
-Water Elemental|Elémental d'eau||
+Water Elemental|Élémental d'eau||
 Water Servant|Servant d'eau|Créature : élémental|{U} : Le Servant d'eau gagne +1/-1 jusqu'à la fin du tour.\n{U} : Le Servant d'eau gagne -1/+1 jusqu'à la fin du tour.
 Watercourser|Coursier des eaux|Créature : élémental|{U} : Le Coursier des eaux gagne +1/-1 jusqu'à la fin du tour.
 Waterfall Aerialist|Voltigeur des cascades|Créature : djinn et sorcier|Vol\nParade {2} (À chaque fois que cette créature devient la cible d'un sort ou d'une capacité qu'un adversaire contrôle, contrecarrez ce sort ou cette capacité à moins que ce joueur ne paie {2}.)
