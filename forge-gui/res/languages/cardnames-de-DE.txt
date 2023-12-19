@@ -4535,7 +4535,7 @@ Dance with Calamity|Frevelhafter Tanz|Hexerei|Mische deine Bibliothek. Du kannst
 Dance with Devils|Tanz der Teufel|Spontanzauber|Bringe zwei 1/1 rote Teufel-Kreaturenspielsteine ins Spiel. Sie haben „Wenn diese Kreatur stirbt, fügt sie einer Kreatur oder einem Spieler deiner Wahl 1 Schadenspunkt zu."
 Dancing Scimitar|Tanzender Krummsäbel|Artefaktkreatur — Geist|Fliegend (Diese Kreatur kann nur von fliegenden Kreaturen geblockt werden.)
 Dancing Sword|Tanzendes Schwert|Artefakt — Ausrüstung|Die ausgerüstete Kreatur erhält +2/+1.\nWenn die ausgerüstete Kreatur stirbt, kannst du das Tanzende Schwert zu einer 2/1 Konstrukt-Artefaktkreatur mit Flugfähigkeit und Abwehr {1} werden lassen. Falls du dies tust, ist es keine Ausrüstung.\nAusrüsten {1}
-Dandân|Dandân|Beschwörung eines Dandan|Heimat: Inseln
+Dandân|Dandân|Beschwörung eines Dandân|Heimat: Inseln
 Dangerous Wager|Gefährliche Herausforderung|Spontanzauber|Wirf die Karten auf deiner Hand ab und ziehe dann zwei Karten.
 Danitha Capashen, Paragon|Danitha Capashen, die Vorbildliche|Legendäre Kreatur — Mensch, Ritter|Erstschlag, Wachsamkeit, Lebensverknüpfung\nAura- und Ausrüstung-Zaubersprüche, die du wirkst, kosten beim Wirken {1} weniger.
 Danitha, Benalia's Hope|Danitha, Benalias Hoffnung|Legendäre Kreatur — Mensch, Ritter|Erstschlag, Wachsamkeit, Lebensverknüpfung\nWenn Danitha, Benalias Hoffnung, ins Spiel kommt, kannst du eine Aura- oder Ausrüstung-Karte aus deiner Hand oder deinem Friedhof an Danitha angelegt ins Spiel bringen.
@@ -6007,7 +6007,7 @@ Eiganjo, Seat of the Empire|Eiganjo, Sitz des Kaiserreichs|Legendäres Land|{T}:
 Eight-and-a-Half-Tails|Acht-Schwänze-und-ein-halber|Legendäre Kreatur - Fuchs, Kleriker|{1}{W}: Eine bleibende Karte deiner Wahl, die du kontrollierst, erhält bis zum Ende des Zuges Schutz vor Weiß.\n{1}: Die Farbe eines Zauberspruchs oder einer bleibenden Karte deiner Wahl wird bis zum Ende des Zuges zu Weiß.
 Ekundu Cyclops|Ekunduzyklop|Beschwörung eines Zyklopen|Wenn irgendeine Kreatur, die Du kontrollierst, angreift, dann greift auch der Ekunduzyklop an, wenn möglich.
 Ekundu Griffin|Ekundugreif|Beschwörung eines Greifen|Fliegend, Erstschlag
-El-Hajjâj|El-Hajjâj|Beschwörung von El — Hajjaj|Du gewinnst 1 Lebenspunkt für jeden Schadenspunkt, den El-Hajjaj beliebigen Gegnern zufügt. Du kannst allerdings nicht mehr Lebenspunkte gewinnen als die angegriffene Kreatur Widerstandskraft bzw. der Spieler Lebenspunkte besitzt.
+El-Hajjâj|El-Hajjâj|Beschwörung von El — Hajjaj|Du gewinnst 1 Lebenspunkt für jeden Schadenspunkt, den El-Hajjâj beliebigen Gegnern zufügt. Du kannst allerdings nicht mehr Lebenspunkte gewinnen als die angegriffene Kreatur Widerstandskraft bzw. der Spieler Lebenspunkte besitzt.
 Elaborate Firecannon|Ausgetüftelte Feuerkanone|Artefakt|Die Ausgetüftelte Feuerkanone enttappt nicht während deines Enttappsegments.\n{4}, {T}: Die Ausgetüftelte Feuerkanone fügt einer Kreatur oder einem Spieler deiner Wahl 2 Schadenspunkte zu.\nZu Beginn deines Versorgungssegments kannst du eine Karte abwerfen. Falls du dies tust, enttappe die Ausgetüftelte Feuerkanone.
 Eladamri's Call|Eladamris Ruf|Spontanzauber|Durchsuche Deine Bibliothek nach einer Kreaturenkarte, zeige diese offen vor und nimm sie auf Deine Hand. Mische danach deine Bibliothek.
 Eladamri's Vineyard|Eladamris Weinberg|Verzauberung|Erhöhe zu Beginn der Hauptphase eines Spielers dessen Manavorrat um GG.
