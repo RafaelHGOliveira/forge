@@ -16,7 +16,6 @@ public class Main {
     public static void main(String[] args) {
         GuiBase.setInterface(new GuiMobile(Files.exists(Paths.get("./res"))?"./":"../forge-gui/"));
         GuiBase.setDeviceInfo("", "", 0, 0);
-        Config.instance();
-        new EditorMainWindow();
+        new EditorMainWindow(Config.instance());
     }
 }

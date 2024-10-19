@@ -7,41 +7,21 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>forge-adventure</artifactId>
+    <artifactId>adventure-editor</artifactId>
     <packaging>jar</packaging>
-    <name>Forge Adventure</name>
-    <repositories>
-        <repository>
-            <id>4thline-repo</id>
-            <url>http://4thline.org/m2</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
+    <name>Map Editor</name>
+
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
         <resources>
             <resource>
                 <directory>${project.basedir}</directory>
                 <includes>
-                    <include>**/*.vert</include>
-                    <include>**/*.frag</include>
-                    <include>**/title_bg_lq.png</include>
-                    <include>**/title_bg_lq_portrait.png</include>
-                    <include>**/transition.png</include>
-                    <include>**/adv_bg_texture.jpg</include>
-                    <include>**/adv_bg_splash.png</include>
-                    <include>**/bg_splash.png</include>
-                    <include>**/bg_texture.jpg</include>
-                    <include>**/font1.ttf</include>
+                    <include>**/gear.gif</include>
                 </includes>
             </resource>
         </resources>
+        <finalName>adventure-editor</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -64,7 +44,7 @@
                 </executions>
                 <configuration>
                     <basedir>${basedir}/${configSourceDirectory}</basedir>
-                    <filesToInclude>forge-adventure-editor.sh, forge-adventure-editor-mac.sh, forge-adventure-editor.command, forge-adventure-editor.cmd</filesToInclude>
+                    <filesToInclude>adventure-editor.sh, adventure-editor.command, adventure-editor.cmd</filesToInclude>
                     <outputBasedir>${project.build.directory}</outputBasedir>
                     <outputDir>.</outputDir>
                     <regex>false</regex>
@@ -89,6 +69,9 @@
                             <mainClass>forge.adventure.Main</mainClass>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
+                        <manifestEntries>
+                            <SplashScreen-Image>splash/gear.gif</SplashScreen-Image>
+                        </manifestEntries>
                     </archive>
                 </configuration>
                 <executions>
@@ -107,77 +90,28 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>com.badlogicgames.gdx</groupId>
-            <artifactId>gdx</artifactId>
-            <version>1.13.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.badlogicgames.gdx</groupId>
-            <artifactId>gdx-platform</artifactId>
-            <version>1.13.0</version>
-            <classifier>natives-desktop</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.badlogicgames.gdx</groupId>
-            <artifactId>gdx-freetype</artifactId>
-            <version>1.13.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.badlogicgames.gdx</groupId>
-            <artifactId>gdx-backend-lwjgl</artifactId>
-            <version>1.13.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.badlogicgames.gdx</groupId>
-            <artifactId>gdx-tools</artifactId>
-            <version>1.13.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.badlogicgames.gdx</groupId>
-            <artifactId>gdx-freetype-platform</artifactId>
-            <version>1.13.0</version>
-            <classifier>natives-desktop</classifier>
-        </dependency>
-        <dependency>
-            <groupId>forge</groupId>
-            <artifactId>forge-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>forge</groupId>
-            <artifactId>forge-gui</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>forge</groupId>
-            <artifactId>forge-gui-mobile</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>25.0.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.badlogicgames.gdx-controllers</groupId>
-            <artifactId>gdx-controllers-desktop</artifactId>
-            <version>2.2.3</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.badlogicgames.gdx</groupId>
-                    <artifactId>gdx</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>forge</groupId>
+            <artifactId>forge-gui</artifactId>
+            <version>2.0.00-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>forge</groupId>
+            <artifactId>forge-gui-mobile</artifactId>
+            <version>2.0.00-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
 </project>
