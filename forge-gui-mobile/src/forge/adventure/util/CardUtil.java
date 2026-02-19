@@ -770,6 +770,16 @@ public class CardUtil {
     }
 
     public static PaperCard getCardByName(String cardName) {
+        // Parse edition suffix if present (e.g., "Card Name|SET" -> name "Card Name", edition "SET")
+        // getAllCards() expects just the card name, unlike getCard() which parses the full format.
+        String lookupName = cardName;
+        String requestedEdition = null;
+        int separatorIndex = cardName.indexOf(CardDb.NameSetSeparator);
+        if (separatorIndex >= 0) {
+            lookupName = cardName.substring(0, separatorIndex);
+            requestedEdition = cardName.substring(separatorIndex + 1);
+        }
+
         List<PaperCard> validCards;
         // Faster to ask the CardDB for a card name than it is to search the pool.
         if (Config.instance().getSettingData().useAllCardVariants) {
@@ -785,18 +795,36 @@ public class CardUtil {
             if (Config.instance().getSettingData().excludeAlchemyVariants) {
                 combined_predicate = editionFilter.and(PaperCardPredicates.IS_REBALANCED.negate());
             }
-            validCards = FModel.getMagicDb().getCommonCards().getAllCards(cardName, combined_predicate);
+            validCards = FModel.getMagicDb().getCommonCards().getAllCards(lookupName, combined_predicate);
         } else {
-            validCards = FModel.getMagicDb().getCommonCards().getUniqueCardsNoAlt(cardName);
+            validCards = FModel.getMagicDb().getCommonCards().getUniqueCardsNoAlt(lookupName);
         }
         if (validCards.isEmpty()) {
             return getReplacement(cardName, "Wastes");
+        }
+
+        // If a specific edition was requested, prefer cards from that edition.
+        if (requestedEdition != null) {
+            String editionToMatch = requestedEdition;
+            List<PaperCard> editionCards = validCards.stream()
+                    .filter(card -> card.getEdition().equals(editionToMatch))
+                    .collect(Collectors.toList());
+            if (!editionCards.isEmpty()) {
+                return editionCards.get(Current.world().getRandom().nextInt(editionCards.size()));
+            }
         }
 
         return validCards.get(Current.world().getRandom().nextInt(validCards.size()));
     }
 
     public static PaperCard getCardByNameAndEdition(String cardName, String edition) {
+        // Parse card name for DB lookup (getAllCards expects name without "|SET" suffix).
+        String lookupName = cardName;
+        int separatorIndex = cardName.indexOf(CardDb.NameSetSeparator);
+        if (separatorIndex >= 0) {
+            lookupName = cardName.substring(0, separatorIndex);
+        }
+
         ConfigData configData = Config.instance().getConfigData();
         if (configData.allowedEditions != null && configData.allowedEditions.length > 0) {
             if (!Arrays.asList(configData.allowedEditions).contains(edition)) {
@@ -808,8 +836,8 @@ public class CardUtil {
             }
         }
         List<PaperCard> cardPool = Config.instance().getSettingData().useAllCardVariants
-                ? FModel.getMagicDb().getCommonCards().getAllCards(cardName)
-                : FModel.getMagicDb().getCommonCards().getUniqueCardsNoAlt(cardName);
+                ? FModel.getMagicDb().getCommonCards().getAllCards(lookupName)
+                : FModel.getMagicDb().getCommonCards().getUniqueCardsNoAlt(lookupName);
         List<PaperCard> validCards = cardPool.stream()
                 .filter(input -> input.getEdition().equals(edition)).collect(Collectors.toList());
 
