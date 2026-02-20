@@ -103,9 +103,7 @@ public class LibGDXImageFetcher extends ImageFetcher {
             for (String urlToDownload : downloadUrls) {
                 boolean isPlanechaseBG = urlToDownload.startsWith("PLANECHASEBG:");
                 try {
-
                     success = doFetch(urlToDownload.replace("PLANECHASEBG:", ""));
-
                     if (success) {
                         break;
                     }
@@ -135,6 +133,7 @@ public class LibGDXImageFetcher extends ImageFetcher {
                             }
                         }
                     }
+                } finally {
                     try {
                         TimeUnit.MILLISECONDS.sleep(100);
                     } catch (InterruptedException ex) {
