@@ -4,6 +4,7 @@ import com.badlogic.gdx.files.FileHandle;
 import forge.Forge;
 import forge.gui.GuiBase;
 import forge.localinstance.properties.ForgeConstants;
+import io.sentry.Sentry;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +37,11 @@ public class LibGDXImageFetcher extends ImageFetcher {
                 return false;
             }
 
+            if (disableScryfallDownload && urlToDownload.startsWith(ForgeConstants.URL_PIC_SCRYFALL_DOWNLOAD)) {
+                // Don't try to download card images from scryfall if we've been rate limited
+                return false;
+            }
+
             String newdespath = urlToDownload.contains(".fullborder.") || urlToDownload.startsWith(ForgeConstants.URL_PIC_SCRYFALL_DOWNLOAD) ?
                     TextUtil.fastReplace(destPath, ".full.", ".fullborder.") : destPath;
             if (!newdespath.contains(".full") && urlToDownload.startsWith(ForgeConstants.URL_PIC_SCRYFALL_DOWNLOAD) &&
@@ -43,8 +49,26 @@ public class LibGDXImageFetcher extends ImageFetcher {
                 newdespath = newdespath.replace(".jpg", ".fullborder.jpg"); //fix planes/phenomenon for round border options
             URL url = new URL(urlToDownload);
             System.out.println("Attempting to fetch: " + url);
-            java.net.URLConnection c = url.openConnection();
+            HttpURLConnection c = (HttpURLConnection) url.openConnection();
+            c.setRequestProperty("Accept", "*/*");
             c.setRequestProperty("User-Agent", BuildInfo.getUserAgent());
+
+            int responseCode = c.getResponseCode();
+            String responseMessage = c.getResponseMessage();
+            System.out.println("HTTP Response: " + responseCode + " " + responseMessage + " for URL: " + urlToDownload);
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                System.err.println("Failed to fetch image. HTTP code: " + responseCode + " (" + responseMessage + ") for URL: " + urlToDownload);
+                c.disconnect();
+
+                if (responseCode == 429) {
+                    System.err.println("Device has been rate limited. Adding reduction of download attempts for this device.");
+                    Sentry.captureMessage("Device has been rate limited. Adding reduction of download attempts for this device. " + urlToDownload);
+                    disableScryfallDownload = true;
+                }
+
+                // TODO SHould we be returning the status codes and doing something different based off 200 or whatever?
+                return false;
+            }
 
             InputStream is = c.getInputStream();
             // First, save to a temporary file so that nothing tries to read
@@ -58,6 +82,7 @@ public class LibGDXImageFetcher extends ImageFetcher {
                 is.close();
             }
             destFile.moveTo(new FileHandle(newdespath));
+            c.disconnect();
 
             System.out.println("Saved image to " + newdespath);
             GuiBase.getInterface().invokeInEdtLater(notifyObservers);
@@ -87,9 +112,7 @@ public class LibGDXImageFetcher extends ImageFetcher {
             for (String urlToDownload : downloadUrls) {
                 boolean isPlanechaseBG = urlToDownload.startsWith("PLANECHASEBG:");
                 try {
-
                     success = doFetch(urlToDownload.replace("PLANECHASEBG:", ""));
-
                     if (success) {
                         break;
                     }
@@ -119,6 +142,7 @@ public class LibGDXImageFetcher extends ImageFetcher {
                             }
                         }
                     }
+                } finally {
                     try {
                         TimeUnit.MILLISECONDS.sleep(100);
                     } catch (InterruptedException ex) {

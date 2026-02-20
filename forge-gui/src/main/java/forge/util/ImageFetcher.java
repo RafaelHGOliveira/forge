@@ -19,6 +19,7 @@ public abstract class ImageFetcher {
     // https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
     private static final HashMap<String, String> langCodeMap = new HashMap<>();
     protected static final boolean disableHostedDownload = true;
+    protected static boolean disableScryfallDownload = false;
     private static final HashSet<String> fetching = new HashSet<>();
 
     static {
