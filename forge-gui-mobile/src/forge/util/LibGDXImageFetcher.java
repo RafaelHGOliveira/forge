@@ -44,6 +44,7 @@ public class LibGDXImageFetcher extends ImageFetcher {
             URL url = new URL(urlToDownload);
             System.out.println("Attempting to fetch: " + url);
             HttpURLConnection c = (HttpURLConnection) url.openConnection();
+            c.setRequestProperty("Accept", "*/*");
             c.setRequestProperty("User-Agent", BuildInfo.getUserAgent());
 
             int responseCode = c.getResponseCode();
