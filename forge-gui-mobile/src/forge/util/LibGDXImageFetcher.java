@@ -4,6 +4,7 @@ import com.badlogic.gdx.files.FileHandle;
 import forge.Forge;
 import forge.gui.GuiBase;
 import forge.localinstance.properties.ForgeConstants;
+import io.sentry.Sentry;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +37,11 @@ public class LibGDXImageFetcher extends ImageFetcher {
                 return false;
             }
 
+            if (disableScryfallDownload && urlToDownload.startsWith(ForgeConstants.URL_PIC_SCRYFALL_DOWNLOAD)) {
+                // Don't try to download card images from scryfall if we've been rate limited
+                return false;
+            }
+
             String newdespath = urlToDownload.contains(".fullborder.") || urlToDownload.startsWith(ForgeConstants.URL_PIC_SCRYFALL_DOWNLOAD) ?
                     TextUtil.fastReplace(destPath, ".full.", ".fullborder.") : destPath;
             if (!newdespath.contains(".full") && urlToDownload.startsWith(ForgeConstants.URL_PIC_SCRYFALL_DOWNLOAD) &&
@@ -56,6 +62,8 @@ public class LibGDXImageFetcher extends ImageFetcher {
 
                 if (responseCode == 429) {
                     System.err.println("Device has been rate limited. Adding reduction of download attempts for this device.");
+                    Sentry.captureMessage("Device has been rate limited. Adding reduction of download attempts for this device. " + urlToDownload);
+                    disableScryfallDownload = true;
                 }
 
                 // TODO SHould we be returning the status codes and doing something different based off 200 or whatever?
