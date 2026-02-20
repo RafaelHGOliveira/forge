@@ -3681,7 +3681,7 @@ public class AbilityUtils {
                 landTypes.addAll(card.getType().getLandTypes());
             }
 
-            return doXMath(landTypes.size(), CardFactoryUtil.extractOperators(string), source, ctb);
+            return doXMath(landTypes.size(), CardFactoryUtil.extractOperators(def), source, ctb);
         }
 
         Function<IntStream, Integer> func;
