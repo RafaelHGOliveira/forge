@@ -3,6 +3,76 @@ Code=TMT
 Date=2026-03-06
 Name=Teenage Mutant Ninja Turtles
 Type=Expansion
+DoublePick=WhenPodSizeIs4
+RecommendedPodSize=4
+BoosterSlots=Common,Common-SourceMaterial,Uncommon,Turtle,RareMythic,Land,Wildcard,WildcardFoil
+Booster=6 Common, 1 Common-SourceMaterial, 2 Uncommon, 1 Turtle, 1 RareMythic, 1 Wildcard, 1 WildcardFoil+, 1 Land
+Prerelease=6 Boosters, 1 RareMythic+
+BoosterBox=30
+
+[Common]
+Base=Common:fromSheet("TMT cards")
+
+[Common-SourceMaterial]
+Base=Common:fromSheet("TMT cards")
+Replace=.0416F fromSheet("TMT source material")
+Replace=.0416F Common:fromSheet("TMT scene cards")
+
+[Uncommon]
+Base=Uncommon:fromSheet("TMT cards")
+Replace=.039F Uncommon:fromSheet("TMT scene cards")
+Replace=.078F Uncommon:fromSheet("TMT sewer cards")
+
+[Turtle]
+Base=Common:fromSheet("TMT legendary turtles")
+Replace=.131 Uncommon:fromSheet("TMT legendary turtles")
+Replace=.069 Rare:fromSheet("TMT legendary turtles")
+Replace=.034 Mythic:fromSheet("TMT legendary turtles")
+Replace=.046 Common:fromSheet("TMT scene cards")
+Replace=.065 Uncommon:fromSheet("TMT scene cards")
+Replace=.01 Rare:fromSheet("TMT scene cards")
+Replace=.0004 Mythic:fromSheet("TMT silhouette cards")
+
+[RareMythic]
+Base=Rare:fromSheet("TMT cards")
+Replace=.092F Mythic:fromSheet("TMT cards")
+Replace=.01F Rare:fromSheet("TMT scene cards")
+Replace=.0416F Uncommon:fromSheet("TMT sewer cards")
+Replace=.0004 Mythic:fromSheet("TMT silhouette cards")
+
+[Wildcard]
+Base=Uncommon:fromSheet("TMT cards")
+Replace=0.249F Common:fromSheet("TMT cards")
+Replace=0.076F Rare:fromSheet("TMT cards")
+Replace=0.0029F Mythic:fromSheet("TMT cards")
+Replace=0.008F Common:fromSheet("TMT scene cards")
+Replace=0.013F Uncommon:fromSheet("TMT scene cards")
+Replace=0.008F Rare:fromSheet("TMT scene cards")
+Replace=0.001F Mythic:fromSheet("TMT scene cards")
+Replace=0.026F Uncommon:fromSheet("TMT sewer cards")
+Replace=0.008F Rare:fromSheet("TMT sewer cards")
+Replace=0.001F Mythic:fromSheet("TMT sewer cards")
+Replace=.0004 Mythic:fromSheet("TMT silhouette cards")
+
+[WildcardFoil]
+Base=Common:fromSheet("TMT cards")
+Replace=0.277F Uncommon:fromSheet("TMT cards")
+Replace=0.067F Rare:fromSheet("TMT cards")
+Replace=0.008F Mythic:fromSheet("TMT cards")
+Replace=0.001F Common:fromSheet("TMT scene cards")
+Replace=0.001F Uncommon:fromSheet("TMT scene cards")
+Replace=0.001F Rare:fromSheet("TMT scene cards")
+Replace=0.005F Uncommon:fromSheet("TMT sewer cards")
+Replace=0.001F Rare:fromSheet("TMT sewer cards")
+Replace=0.001F Mythic:fromSheet("TMT sewer cards")
+Replace=0.0004F Mythic:fromSheet("TMT silhouette cards")
+
+[Land]
+Base=fromSheet("TMT dual lands")
+Replace=0.12 fromSheet("TMT dual lands")+
+Replace=0.32 fromSheet("TMT rooftop lands")
+Replace=0.08 fromSheet("TMT rooftop lands")+
+
 
 [cards]
 1 C Action News Crew @Gabriel Tanko
