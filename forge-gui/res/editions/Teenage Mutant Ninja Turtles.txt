@@ -101,7 +101,7 @@ Type=Expansion
 94 C Manhole Missile @Fajareka Setiawan
 95 C Mouser Attack! @Erikas Perl
 96 C Mouser Foundry @Jakob Eirich
-97 C Mutant Town Musicians @Levinky
+97 C Mutant Town Musicians @Leonardo Vincent (Levinky)
 98 C Null Group Biological Assets @Miklós Ligeti
 99 U Old Hob, Alleycat Blues @Rose Benjamin
 100 C Purple Dragon Punks @Rose Benjamin
