@@ -3675,6 +3675,7 @@ public class AbilityUtils {
             return doXMath(creatTypes.size(), CardFactoryUtil.extractOperators(def), source, ctb);
         }
 
+        //Per request for custom cards.
         if (def.startsWith("LandType")) {
             final Set<String> landTypes = Sets.newHashSet();
             for (Card card : paidList) {
