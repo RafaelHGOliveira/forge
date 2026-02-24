@@ -265,7 +265,7 @@ Replace=0.08 fromSheet("TMT rooftop lands")+
 189 L TCRI Building @Aenami
 190 U Turtle Lair @Marina Ortega Lorente
 
-[other]
+[printsheets]
 191 L Plains @BEMOCS
 192 L Island @BEMOCS
 193 L Swamp @BEMOCS
