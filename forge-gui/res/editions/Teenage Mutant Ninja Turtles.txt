@@ -446,7 +446,7 @@ Replace=0.08 fromSheet("TMT rooftop lands")+
 1 Michelangelo, Weirdness to 11|TMT|[214]
 
 [silhouette cards]
-1 Leonardo, Sewer|TMT|[215]
+1 Leonardo, Sewer Samurai|TMT|[215]
 1 Donatello, Mutant Mechanic|TMT|[216]
 1 Super Shredder|TMT|[217]
 1 Raphael, Ninja Destroyer|TMT|[218]
