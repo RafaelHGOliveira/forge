@@ -400,7 +400,7 @@ Replace=0.08 fromSheet("TMT rooftop lands")+
 299 M Dark Leo & Shredder @Yukke Morita
 300 M Krang, Utrom Warlord @Taka-F
 
-[promos]
+[promo]
 320 R Shark Shredder, Killer Clone @Adam Volker
 
 [tokens]
@@ -576,7 +576,7 @@ Replace=0.08 fromSheet("TMT rooftop lands")+
 1 Michelangelo, Weirdness to 11|TMT|[214]
 
 [legendary silhouette turtles]
-1 Leondaro, Sewer Samurai|TMT|[215]
+1 Leonardo, Sewer Samurai|TMT|[215]
 1 Donatello, Mutant Mechanic|TMT|[216]
 1 Raphael, Ninja Destroyer|TMT|[218]
 1 Michelangelo, Improviser|TMT|[219]
