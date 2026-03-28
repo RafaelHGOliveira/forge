@@ -349,8 +349,8 @@ public class InputPassPriority extends InputSyncronizedBase {
     private boolean checkHasAvailableActions() {
         Player player = getController().getPlayer();
         if (player == null) return false;
-        int manaEstimate = ComputerUtilMana.getAvailableManaEstimate(player);
-        player.getView().updateHasAvailableActions(player, manaEstimate);
+        player.getView().updateHasAvailableActions(player,
+            sa -> ComputerUtilMana.canPayManaCost(sa, player, 0, false));
         return player.getView().hasAvailableActions();
     }
 
