@@ -158,6 +158,7 @@ public class ForgePreferences extends PreferencesStore<ForgePreferences.FPref> {
         YIELD_DECLINE_SCOPE_STACK_YIELD("always"),  // Decline scope: "never", "always", "stack", "turn"
         YIELD_DECLINE_SCOPE_NO_ACTIONS("always"),  // Decline scope: "never", "always", "turn"
         YIELD_AUTO_PASS_NO_ACTIONS("true"),  // Auto-pass priority when no playable actions
+        YIELD_AUTO_YIELD_ON_PASS("false"),  // Auto-yield until your next turn when passing priority
 
         UI_STACK_EFFECT_NOTIFICATION_POLICY ("Never"),
         UI_LAND_PLAYED_NOTIFICATION_POLICY ("Never"),
