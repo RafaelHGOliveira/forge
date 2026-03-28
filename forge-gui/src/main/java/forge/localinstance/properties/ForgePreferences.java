@@ -144,7 +144,7 @@ public class ForgePreferences extends PreferencesStore<ForgePreferences.FPref> {
         UI_MANA_LOST_PROMPT ("false"), // Prompt on losing mana when passing priority
 
         // Experimental yield options (feature-gated)
-        YIELD_EXPERIMENTAL_OPTIONS("false"),
+        YIELD_EXPERIMENTAL_OPTIONS("true"),
         YIELD_INTERRUPT_ON_ATTACKERS("true"),
         YIELD_INTERRUPT_ON_BLOCKERS("true"),
         YIELD_INTERRUPT_ON_TARGETING("true"),
@@ -155,9 +155,9 @@ public class ForgePreferences extends PreferencesStore<ForgePreferences.FPref> {
         YIELD_INTERRUPT_ON_MASS_REMOVAL("true"),  // When mass removal spell cast
         YIELD_SUPPRESS_ON_OWN_TURN("true"),  // Suppress suggestions on player's own turn
         YIELD_SUPPRESS_AFTER_END("true"),  // Suppress suggestions for one priority pass after yield ends
-        YIELD_DECLINE_SCOPE_STACK_YIELD("stack"),  // Decline scope: "never", "always", "stack", "turn"
-        YIELD_DECLINE_SCOPE_NO_ACTIONS("turn"),  // Decline scope: "never", "always", "turn"
-        YIELD_AUTO_PASS_NO_ACTIONS("false"),  // Auto-pass priority when no playable actions
+        YIELD_DECLINE_SCOPE_STACK_YIELD("always"),  // Decline scope: "never", "always", "stack", "turn"
+        YIELD_DECLINE_SCOPE_NO_ACTIONS("always"),  // Decline scope: "never", "always", "turn"
+        YIELD_AUTO_PASS_NO_ACTIONS("true"),  // Auto-pass priority when no playable actions
 
         UI_STACK_EFFECT_NOTIFICATION_POLICY ("Never"),
         UI_LAND_PLAYED_NOTIFICATION_POLICY ("Never"),
@@ -199,7 +199,7 @@ public class ForgePreferences extends PreferencesStore<ForgePreferences.FPref> {
     	UI_SELECT_FROM_CARD_DISPLAYS("true"),
         UI_FOR_TOUCHSCREN("false"),
         UI_SWITCH_STATES_DECKVIEW("Switch back on hover"),
-        UI_ORDER_HAND("false"),
+        UI_ORDER_HAND("true"),
         UI_HAND_MAX_CARDS_PER_ROW("0"),
         UI_HAND_NO_OVERLAP("false"),
         UI_ZONE_TAB_NEW_COUNT("false"),
