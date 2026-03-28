@@ -96,6 +96,12 @@ Forge aims to deliver an immersive and customizable Magic: The Gathering experie
 ---
 
 **📄 License:** [GPL-3.0](LICENSE)
+
+## Credits
+
+This project is based on [Card-Forge/forge](https://github.com/Card-Forge/forge), the original open-source Magic: The Gathering engine.
+
+Includes the **YieldRework** feature from [MostCromulent/forge](https://github.com/MostCromulent/forge).
 <div align="center" style="display: flex; align-items: center; justify-content: center;">
     <div style="margin-left: auto;">
         <a href="#top">
