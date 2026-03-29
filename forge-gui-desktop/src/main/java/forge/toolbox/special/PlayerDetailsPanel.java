@@ -189,6 +189,7 @@ public class PlayerDetailsPanel extends JPanel {
             super(new FLabel.Builder().icon(FSkin.getImage(icon))
                     .opaque(false).fontSize(14).hoverable()
                     .fontStyle(Font.BOLD).iconInBackground()
+                    .iconScaleFactor(0.55)
                     .fontAlign(SwingConstants.RIGHT));
         }
 
