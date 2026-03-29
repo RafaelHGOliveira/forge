@@ -132,41 +132,33 @@ public class ListChooser<T> {
         }
         listScroller.setMinimumSize(new Dimension(minWidth, listScroller.getMinimumSize().height));
 
-        // Add search field for large lists (same threshold as mobile)
-        if (allItems.size() > 25) {
-            final FTextField searchField = new FTextField.Builder()
-                    .ghostText(Localizer.getInstance().getMessage("lblSearch"))
-                    .showGhostTextWithFocus()
-                    .build();
-            searchField.getDocument().addDocumentListener(new DocumentListener() {
-                @Override public void insertUpdate(DocumentEvent e) { applyFilter(searchField); }
-                @Override public void removeUpdate(DocumentEvent e) { applyFilter(searchField); }
-                @Override public void changedUpdate(DocumentEvent e) { applyFilter(searchField); }
-            });
-            searchField.addKeyListener(new KeyAdapter() {
-                @Override public void keyPressed(final KeyEvent e) {
-                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                        ListChooser.this.commit();
-                    } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                        lstChoices.requestFocusInWindow();
-                    }
+        final FTextField searchField = new FTextField.Builder()
+                .ghostText(Localizer.getInstance().getMessage("lblSearch"))
+                .showGhostTextWithFocus()
+                .build();
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) { applyFilter(searchField); }
+            @Override public void removeUpdate(DocumentEvent e) { applyFilter(searchField); }
+            @Override public void changedUpdate(DocumentEvent e) { applyFilter(searchField); }
+        });
+        searchField.addKeyListener(new KeyAdapter() {
+            @Override public void keyPressed(final KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    ListChooser.this.commit();
+                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                    lstChoices.requestFocusInWindow();
                 }
-            });
-
-            final JPanel panel = new JPanel(new BorderLayout(0, 4));
-            panel.setOpaque(false);
-            panel.add(searchField, BorderLayout.NORTH);
-            panel.add(listScroller, BorderLayout.CENTER);
-
-            this.optionPane = new FOptionPane(null, title, null, panel, options, minChoices < 0 ? 0 : -1);
-            if (minChoices != -1) {
-                this.optionPane.setDefaultFocus(searchField);
             }
-        } else {
-            this.optionPane = new FOptionPane(null, title, null, listScroller, options, minChoices < 0 ? 0 : -1);
-            if (minChoices != -1) {
-                this.optionPane.setDefaultFocus(this.lstChoices);
-            }
+        });
+
+        final JPanel panel = new JPanel(new BorderLayout(0, 4));
+        panel.setOpaque(false);
+        panel.add(searchField, BorderLayout.NORTH);
+        panel.add(listScroller, BorderLayout.CENTER);
+
+        this.optionPane = new FOptionPane(null, title, null, panel, options, minChoices < 0 ? 0 : -1);
+        if (minChoices != -1) {
+            this.optionPane.setDefaultFocus(searchField);
         }
 
         this.optionPane.setButtonEnabled(0, minChoices <= 0);
