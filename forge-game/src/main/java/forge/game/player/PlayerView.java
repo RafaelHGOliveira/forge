@@ -8,6 +8,7 @@ import forge.LobbyPlayer;
 import forge.card.CardType;
 import forge.card.MagicColor;
 import forge.card.mana.ManaAtom;
+import forge.game.Game;
 import forge.game.GameEntityView;
 import forge.game.card.Card;
 import forge.game.card.CardView;
@@ -567,7 +568,44 @@ public class PlayerView extends GameEntityView {
      * @param canAffordMana predicate that checks if a spell/ability's mana cost can be paid
      *                      (should account for cost reductions/increases)
      */
+    // Mini-cache for updateHasAvailableActions to avoid expensive re-scans
+    // when nothing relevant has changed since the last check
+    private transient int cachedActionsTurn = -1;
+    private transient forge.game.phase.PhaseType cachedActionsPhase = null;
+    private transient int cachedActionsHandSize = -1;
+    private transient int cachedActionsBattlefieldSize = -1;
+    private transient int cachedActionsGraveyardSize = -1;
+    private transient int cachedActionsManaPoolSize = -1;
+    private transient int cachedActionsStackSize = -1;
+
     public void updateHasAvailableActions(Player p, java.util.function.Predicate<SpellAbility> canAffordMana) {
+        // Quick cache check: if turn, phase, and zone sizes haven't changed, reuse last result
+        Game game = p.getGame();
+        forge.game.phase.PhaseHandler ph = game.getPhaseHandler();
+        int turn = ph.getTurn();
+        forge.game.phase.PhaseType phase = ph.getPhase();
+        int handSize = p.getZone(ZoneType.Hand).size();
+        int bfSize = p.getZone(ZoneType.Battlefield).size();
+        int gySize = p.getZone(ZoneType.Graveyard).size();
+        int manaSize = p.getManaPool().totalMana();
+        int stackSize = game.getStack().size();
+
+        if (turn == cachedActionsTurn && phase == cachedActionsPhase
+                && handSize == cachedActionsHandSize && bfSize == cachedActionsBattlefieldSize
+                && gySize == cachedActionsGraveyardSize && manaSize == cachedActionsManaPoolSize
+                && stackSize == cachedActionsStackSize) {
+            return; // nothing changed, keep last result
+        }
+
+        // Update cache fingerprint
+        cachedActionsTurn = turn;
+        cachedActionsPhase = phase;
+        cachedActionsHandSize = handSize;
+        cachedActionsBattlefieldSize = bfSize;
+        cachedActionsGraveyardSize = gySize;
+        cachedActionsManaPoolSize = manaSize;
+        cachedActionsStackSize = stackSize;
+
         // Check hand for playable spells that we can afford
         for (Card card : p.getCardsIn(ZoneType.Hand)) {
             for (SpellAbility sa : card.getAllPossibleAbilities(p, true)) {
