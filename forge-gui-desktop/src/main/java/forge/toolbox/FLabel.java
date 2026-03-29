@@ -588,9 +588,11 @@ public class FLabel extends SkinnedLabel implements ILocalRepaint, IButton {
             g.translate(1, 1);
         }
 
-        // Icon in background
+        // Icon in background — scale based on the smaller of width/height
+        // so icons shrink when the panel gets narrow, not just short
         if (iconInBackground) {
-            final int sh = (int) (h * iconScaleFactor);
+            final int basis = Math.min(h, w);
+            final int sh = (int) (basis * iconScaleFactor);
             final int sw = (int) (sh * iar);
 
             final int x = iconAlignX == SwingConstants.CENTER
