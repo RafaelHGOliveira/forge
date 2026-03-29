@@ -48,7 +48,6 @@ import forge.game.zone.PlayerZone;
 import forge.game.zone.Zone;
 import forge.game.zone.ZoneType;
 import forge.gamemodes.match.NextGameDecision;
-import forge.gamemodes.match.YieldMode;
 import forge.gamemodes.match.input.*;
 import forge.gamemodes.net.event.MessageEvent;
 import forge.gamemodes.net.server.FServerManager;
