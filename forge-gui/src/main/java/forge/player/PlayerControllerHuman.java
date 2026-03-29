@@ -2446,9 +2446,6 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         if (inp instanceof InputPassPriority) {
             if (passUntilEndOfTurn) {
                 autoPassUntilEndOfTurn();
-            } else if (FModel.getPreferences().getPrefBoolean(
-                    FPref.YIELD_AUTO_YIELD_ON_PASS)) {
-                getGui().setYieldMode(getLocalPlayerView(), YieldMode.UNTIL_YOUR_NEXT_TURN);
             }
             inp.selectButtonOK();
         } else {
