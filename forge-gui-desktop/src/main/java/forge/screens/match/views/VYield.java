@@ -51,7 +51,6 @@ public class VYield implements IVDoc<CYield> {
     private final FButton btnEndTurn = new FButton(localizer.getMessage("lblYieldBtnEndTurn"));
     private final FButton btnYourTurn = new FButton(localizer.getMessage("lblYieldBtnYourTurn"));
     private final FButton btnAutoPass = new FButton(localizer.getMessage("lblYieldBtnAutoPass"));
-    private final FButton btnAutoYieldOnPass = new FButton(localizer.getMessage("lblYieldBtnAutoYieldOnPass"));
     private final FButton btnSettings = new FButton(localizer.getMessage("lblSettings"));
 
     private final CYield controller;
@@ -68,7 +67,6 @@ public class VYield implements IVDoc<CYield> {
         btnEndTurn.setFont(smallFont);
         btnYourTurn.setFont(smallFont);
         btnAutoPass.setFont(smallFont);
-        btnAutoYieldOnPass.setFont(smallFont);
         btnSettings.setFont(smallFont);
 
         // Enable highlight mode: blue by default, red when active yield
@@ -79,7 +77,6 @@ public class VYield implements IVDoc<CYield> {
         btnEndTurn.setUseHighlightMode(true);
         btnYourTurn.setUseHighlightMode(true);
         btnAutoPass.setUseHighlightMode(true);
-        btnAutoYieldOnPass.setUseHighlightMode(true);
 
         // Set tooltips on yield buttons
         btnNextPhase.setToolTipText(localizer.getMessage("lblYieldBtnNextPhaseTooltip"));
@@ -89,7 +86,6 @@ public class VYield implements IVDoc<CYield> {
         btnEndTurn.setToolTipText(localizer.getMessage("lblYieldBtnEndTurnTooltip"));
         btnYourTurn.setToolTipText(localizer.getMessage("lblYieldBtnYourTurnTooltip"));
         btnAutoPass.setToolTipText(localizer.getMessage("lblYieldBtnAutoPassTooltip"));
-        btnAutoYieldOnPass.setToolTipText(localizer.getMessage("lblYieldBtnAutoYieldOnPassTooltip"));
         btnSettings.setToolTipText(localizer.getMessage("lblInterruptSettingsTooltip"));
     }
 
@@ -115,11 +111,10 @@ public class VYield implements IVDoc<CYield> {
         container.add(btnEndStep, buttonConstraints);
         container.add(btnClearStack, buttonConstraints);
 
-        // Row 3: Auto-pass and Auto-yield-on-pass
-        container.add(btnAutoPass, buttonConstraints);
-        container.add(btnAutoYieldOnPass, "span 2, " + (largerButtons
-            ? "w 10:66%, h 40px:40px:60px"
-            : "w 10:66%, hmin 24px"));
+        // Row 3: Auto-pass
+        container.add(btnAutoPass, "span 3, " + (largerButtons
+            ? "w 10:100%, h 40px:40px:60px"
+            : "w 10:100%, hmin 24px"));
 
         // Row 4: Settings button
         String settingsConstraints = largerButtons
@@ -161,6 +156,5 @@ public class VYield implements IVDoc<CYield> {
     public FButton getBtnEndTurn() { return btnEndTurn; }
     public FButton getBtnYourTurn() { return btnYourTurn; }
     public FButton getBtnAutoPass() { return btnAutoPass; }
-    public FButton getBtnAutoYieldOnPass() { return btnAutoYieldOnPass; }
     public FButton getBtnSettings() { return btnSettings; }
 }
