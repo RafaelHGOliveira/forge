@@ -111,10 +111,13 @@ public class VYield implements IVDoc<CYield> {
         container.add(btnNextPhase, buttonConstraints);
         container.add(btnClearStack, buttonConstraints);
 
-        // Row 2: Combat, End Step, Pre-Turn End
+        // Row 2: Combat, End Step, Pre-Turn End (span 2 to fill row)
         container.add(btnCombat, buttonConstraints);
         container.add(btnEndStep, buttonConstraints);
-        container.add(btnEndStepBeforeYourTurn, buttonConstraints);
+        String span2Constraints = largerButtons
+            ? "span 2, w 10:66%, h 40px:40px:60px"
+            : "span 2, w 10:66%, hmin 24px";
+        container.add(btnEndStepBeforeYourTurn, span2Constraints);
 
         // Row 3: Auto-pass (full width)
         String fullWidthConstraints = largerButtons
