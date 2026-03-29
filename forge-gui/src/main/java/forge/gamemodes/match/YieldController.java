@@ -120,6 +120,10 @@ public class YieldController {
      * This is a persistent preference toggle, not a one-shot yield mode.
      */
     private boolean shouldAutoPassNoActions(PlayerView player) {
+        // Don't apply host preferences to remote players — they must opt in themselves
+        if (gui.isRemoteGuiProxy()) {
+            return false;
+        }
         if (!isYieldExperimentalEnabled()) {
             return false;
         }

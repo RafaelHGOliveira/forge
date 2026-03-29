@@ -428,6 +428,14 @@ public abstract class AbstractGuiGame implements IGuiGame, IMayViewCards {
 
     // Auto-yield and other input-related code
 
+    /**
+     * Returns true if this GUI instance is a server-side proxy for a remote player.
+     * Used to prevent host preferences from being applied to remote players.
+     */
+    public boolean isRemoteGuiProxy() {
+        return false;
+    }
+
     // Yield controller manages all yield state and logic
     private YieldController yieldController;
 
