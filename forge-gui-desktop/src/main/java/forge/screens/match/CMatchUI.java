@@ -1063,7 +1063,7 @@ public final class CMatchUI
     }
 
     @Override
-    public void openView(final TrackableCollection<PlayerView> myPlayers) {
+    public boolean openView(final TrackableCollection<PlayerView> myPlayers) {
         final GameView gameView = getGameView();
         gameView.getGameLog().addObserver(cLog);
 
@@ -1093,6 +1093,7 @@ public final class CMatchUI
             FView.SINGLETON_INSTANCE.getPnlInsets().setForegroundImage(FSkin.getIcon(FSkinProp.BG_MATCH), true);
         else
             FView.SINGLETON_INSTANCE.getPnlInsets().setForegroundImage((Image)null);
+        return true;
     }
 
     /**
