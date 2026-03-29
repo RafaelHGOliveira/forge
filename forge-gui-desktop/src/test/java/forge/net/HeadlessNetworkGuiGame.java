@@ -67,8 +67,9 @@ public class HeadlessNetworkGuiGame extends AbstractGuiGame {
     // ========================================
 
     @Override
-    public void openView(TrackableCollection<PlayerView> myPlayers) {
+    public boolean openView(TrackableCollection<PlayerView> myPlayers) {
         openViewCalled = true;
+        return true;
     }
 
     @Override

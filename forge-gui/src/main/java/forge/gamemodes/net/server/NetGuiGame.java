@@ -107,12 +107,13 @@ public class NetGuiGame extends AbstractGuiGame {
     }
 
     @Override
-    public void openView(final TrackableCollection<PlayerView> myPlayers) {
+    public boolean openView(final TrackableCollection<PlayerView> myPlayers) {
         // sendAndWait ensures the client has fully processed openView
         // (registered game controllers, set up input handlers) before
         // the game thread proceeds to chooseStartingPlayer or other prompts.
-        sendAndWait(ProtocolMethod.openView, myPlayers);
+        Boolean result = sendAndWait(ProtocolMethod.openView, myPlayers);
         updateGameView();
+        return Boolean.TRUE.equals(result);
     }
 
     @Override

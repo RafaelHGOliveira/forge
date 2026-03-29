@@ -41,7 +41,7 @@ public interface IGuiGame {
 
     void setSpectator(IGameController spectator);
 
-    void openView(TrackableCollection<PlayerView> myPlayers);
+    boolean openView(TrackableCollection<PlayerView> myPlayers);
 
     void afterGameEnd();
 
