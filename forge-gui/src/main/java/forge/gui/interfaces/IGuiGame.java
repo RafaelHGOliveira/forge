@@ -271,7 +271,7 @@ public interface IGuiGame {
     void updateAutoPassPrompt();
 
     // Extended yield mode methods (experimental feature)
-    void setYieldMode(PlayerView player, YieldMode mode);
+    boolean setYieldMode(PlayerView player, YieldMode mode);
 
     /**
      * Update yield mode from remote client without triggering notification.

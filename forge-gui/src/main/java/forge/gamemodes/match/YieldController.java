@@ -28,6 +28,8 @@ import forge.model.FModel;
 import forge.trackable.TrackableTypes;
 import forge.util.Localizer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -159,6 +161,7 @@ public class YieldController {
                 case UNTIL_YOUR_NEXT_TURN -> loc.getMessage("lblYieldingUntilYourNextTurn");
                 case UNTIL_BEFORE_COMBAT -> loc.getMessage("lblYieldingUntilBeforeCombat");
                 case UNTIL_END_STEP -> loc.getMessage("lblYieldingUntilEndStep");
+                case UNTIL_END_STEP_BEFORE_YOUR_TURN -> loc.getMessage("lblYieldingUntilEndStepBeforeYourTurn");
                 default -> "";
             };
             gui.showPromptMessage(player, message);
@@ -168,20 +171,22 @@ public class YieldController {
 
     /**
      * Set the yield mode for a player.
+     * @return true if the mode was activated, false if it was rejected (e.g., stack already empty for UNTIL_STACK_CLEARS)
      */
-    public void setYieldMode(PlayerView player, final YieldMode mode) {
+    public boolean setYieldMode(PlayerView player, final YieldMode mode) {
         player = TrackableTypes.PlayerViewType.lookup(player); // ensure we use the correct player instance
         if (!isYieldExperimentalEnabled()) {
             // Fall back to legacy behavior for UNTIL_END_OF_TURN
             if (mode == YieldMode.UNTIL_END_OF_TURN) {
                 autoPassUntilEndOfTurn.add(player);
+                return true;
             }
-            return;
+            return false;
         }
 
         if (mode == null || mode == YieldMode.NONE) {
             clearYieldMode(player);
-            return;
+            return false;
         }
 
         // Clear any legacy auto-pass state to prevent interference
@@ -196,12 +201,21 @@ public class YieldController {
         // Use network-safe GameView properties instead of gameView.getGame()
         // This ensures proper operation for non-host players in multiplayer
         if (gameView == null) {
-            return;
+            return true;
         }
 
         forge.game.phase.PhaseType phase = gameView.getPhase();
         int currentTurn = gameView.getTurn();
         PlayerView currentPlayerTurn = gameView.getPlayerTurn();
+
+        // Don't activate UNTIL_STACK_CLEARS if the stack is already empty
+        if (mode == YieldMode.UNTIL_STACK_CLEARS) {
+            boolean stackEmpty = gameView.getStack() == null || gameView.getStack().isEmpty();
+            if (stackEmpty) {
+                yieldStates.remove(player);
+                return false;
+            }
+        }
 
         // Track mode-specific state
         switch (mode) {
@@ -216,6 +230,7 @@ public class YieldController {
                 state.startedAtOrAfterPhase = isAtOrAfterCombat(phase);
                 break;
             case UNTIL_END_STEP:
+            case UNTIL_END_STEP_BEFORE_YOUR_TURN:
                 state.startTurn = currentTurn;
                 state.startedAtOrAfterPhase = isAtOrAfterEndStep(phase);
                 break;
@@ -225,6 +240,7 @@ public class YieldController {
             default:
                 break;
         }
+        return true;
     }
 
     /**
@@ -423,6 +439,28 @@ public class YieldController {
                     if (differentTurn || sameTurnButStartedBeforeEndStep) {
                         clearYieldMode(player);
                         yield false;
+                    }
+                }
+                yield true;
+            }
+            case UNTIL_END_STEP_BEFORE_YOUR_TURN -> {
+                if (state.startTurn == null) {
+                    state.startTurn = currentTurn;
+                    state.startedAtOrAfterPhase = isAtOrAfterEndStep(currentPhase);
+                }
+
+                // Stop at the end step of the player who goes immediately before us in turn order.
+                // In a 4-player game (A, B, C, D), if we are C, we stop at B's end step.
+                // In a 2-player game, this is equivalent to stopping at the opponent's end step.
+                if (isAtOrAfterEndStep(currentPhase)) {
+                    boolean differentTurn = currentTurn > state.startTurn;
+                    boolean sameTurnButStartedBeforeEndStep = (currentTurn == state.startTurn.intValue()) && !Boolean.TRUE.equals(state.startedAtOrAfterPhase);
+
+                    if (differentTurn || sameTurnButStartedBeforeEndStep) {
+                        if (isPlayerBeforeUs(currentPlayerTurn, player, gameView)) {
+                            clearYieldMode(player);
+                            yield false;
+                        }
                     }
                 }
                 yield true;
@@ -653,6 +691,36 @@ public class YieldController {
      */
     private boolean isYieldExperimentalEnabled() {
         return FModel.getPreferences().getPrefBoolean(ForgePreferences.FPref.YIELD_EXPERIMENTAL_OPTIONS);
+    }
+
+    /**
+     * Check if the given player is the one who plays immediately before us in turn order.
+     * In a game with players [A, B, C, D], if we are C, the player before us is B.
+     */
+    private boolean isPlayerBeforeUs(PlayerView currentPlayerTurn, PlayerView us, GameView gameView) {
+        if (currentPlayerTurn == null || us == null) {
+            return true; // fallback: stop yielding if we can't determine
+        }
+
+        List<PlayerView> players = new ArrayList<>(gameView.getPlayers());
+        if (players == null || players.size() < 2) {
+            return true;
+        }
+
+        int ourIndex = -1;
+        for (int i = 0; i < players.size(); i++) {
+            if (players.get(i).equals(us)) {
+                ourIndex = i;
+                break;
+            }
+        }
+        if (ourIndex < 0) {
+            return true; // fallback
+        }
+
+        // The player before us is at (ourIndex - 1 + size) % size
+        int prevIndex = (ourIndex - 1 + players.size()) % players.size();
+        return players.get(prevIndex).equals(currentPlayerTurn);
     }
 
     /**
