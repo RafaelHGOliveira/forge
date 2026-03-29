@@ -50,7 +50,6 @@ public class CYield implements ICDoc {
     private final ActionListener actEndTurn = evt -> yieldUntilEndTurn();
     private final ActionListener actYourTurn = evt -> yieldUntilYourTurn();
     private final ActionListener actAutoPass = evt -> toggleAutoPass();
-    private final ActionListener actAutoYieldOnPass = evt -> toggleAutoYieldOnPass();
 
     public CYield(final CMatchUI matchUI) {
         this.matchUI = matchUI;
@@ -79,7 +78,6 @@ public class CYield implements ICDoc {
         initButton(view.getBtnEndTurn(), actEndTurn);
         initButton(view.getBtnYourTurn(), actYourTurn);
         initButton(view.getBtnAutoPass(), actAutoPass);
-        initButton(view.getBtnAutoYieldOnPass(), actAutoYieldOnPass);
         initButton(view.getBtnSettings(), evt -> new VYieldSettings().showDialog());
 
         // Set initial button state
@@ -133,14 +131,6 @@ public class CYield implements ICDoc {
         }
     }
 
-    private void toggleAutoYieldOnPass() {
-        ForgePreferences prefs = FModel.getPreferences();
-        boolean newState = !prefs.getPrefBoolean(FPref.YIELD_AUTO_YIELD_ON_PASS);
-        prefs.setPref(FPref.YIELD_AUTO_YIELD_ON_PASS, newState);
-        prefs.save();
-        updateYieldButtons();
-    }
-
     /**
      * Update yield buttons enabled state based on game state.
      * Buttons are disabled during mulligan, sideboarding, and game over.
@@ -164,9 +154,8 @@ public class CYield implements ICDoc {
         view.getBtnYourTurn().setEnabled(canYield);
         view.getBtnClearStack().setEnabled(canYield);
 
-        // Auto-pass and auto-yield-on-pass are persistent toggles
+        // Auto-pass is a persistent toggle
         view.getBtnAutoPass().setEnabled(canYield);
-        view.getBtnAutoYieldOnPass().setEnabled(canYield);
 
         // Highlight active yield button
         updateActiveYieldHighlight();
@@ -193,11 +182,9 @@ public class CYield implements ICDoc {
         view.getBtnEndTurn().setHighlighted(currentMode == YieldMode.UNTIL_END_OF_TURN);
         view.getBtnYourTurn().setHighlighted(currentMode == YieldMode.UNTIL_YOUR_NEXT_TURN);
 
-        // Auto-pass and auto-yield-on-pass highlights are based on preference state
+        // Auto-pass highlight is based on preference state
         view.getBtnAutoPass().setHighlighted(
             FModel.getPreferences().getPrefBoolean(FPref.YIELD_AUTO_PASS_NO_ACTIONS));
-        view.getBtnAutoYieldOnPass().setHighlighted(
-            FModel.getPreferences().getPrefBoolean(FPref.YIELD_AUTO_YIELD_ON_PASS));
     }
 
     /**
