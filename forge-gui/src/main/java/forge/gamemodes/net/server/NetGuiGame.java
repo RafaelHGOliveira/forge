@@ -50,6 +50,11 @@ public class NetGuiGame extends AbstractGuiGame {
         return slotIndex;
     }
 
+    @Override
+    public boolean isRemoteGuiProxy() {
+        return true;
+    }
+
     public void pause() {
         paused = true;
     }
