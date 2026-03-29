@@ -510,14 +510,20 @@ public abstract class AbstractGuiGame implements IGuiGame, IMayViewCards {
         waitingTimer.schedule(new java.util.TimerTask() {
             @Override
             public void run() {
-                FThreads.invokeInEdtLater(() -> updateWaitingDisplay(forPlayer, waitingForPlayerName));
+                FThreads.invokeInEdtLater(() -> updateWaitingDisplay(forPlayer));
             }
         }, 1000, 1000);
     }
 
-    private void updateWaitingDisplay(final PlayerView forPlayer, final String waitingForPlayerName) {
+    private void updateWaitingDisplay(final PlayerView forPlayer) {
         long elapsedSec = (System.currentTimeMillis() - waitingStartTime) / 1000;
         if (elapsedSec < 2) {
+            return;
+        }
+        // Re-resolve the waiting player name each tick so it updates
+        // when hasPriority is synchronized from the server
+        String currentName = findWaitingForPlayerName(forPlayer);
+        if (currentName == null) {
             return;
         }
         String timeStr;
@@ -526,7 +532,7 @@ public abstract class AbstractGuiGame implements IGuiGame, IMayViewCards {
         } else {
             timeStr = String.format("%d:%02d", elapsedSec / 60, elapsedSec % 60);
         }
-        showPromptMessageNoCancel(forPlayer, Localizer.getInstance().getMessage("lblWaitingForPlayer", waitingForPlayerName) + " (" + timeStr + ")");
+        showPromptMessageNoCancel(forPlayer, Localizer.getInstance().getMessage("lblWaitingForPlayer", currentName) + " (" + timeStr + ")");
     }
 
     protected void cancelWaitingTimer() {
