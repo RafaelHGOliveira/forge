@@ -33,7 +33,7 @@ import java.util.Map;
 public enum ProtocolMethod {
     // Server -> Client
     setGameView         (Mode.SERVER, Void.TYPE, GameView.class),
-    openView            (Mode.SERVER, Void.TYPE, TrackableCollection/*PlayerView*/.class),
+    openView            (Mode.SERVER, Boolean.TYPE, TrackableCollection/*PlayerView*/.class),
     afterGameEnd        (Mode.SERVER, Void.TYPE),
     showCombat          (Mode.SERVER, Void.TYPE),
     showPromptMessage   (Mode.SERVER, Void.TYPE, PlayerView.class, String.class),
