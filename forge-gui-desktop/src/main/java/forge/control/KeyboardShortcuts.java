@@ -155,8 +155,8 @@ public class KeyboardShortcuts {
                 if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
                 if (matchUI == null || matchUI.getCurrentPlayer() == null) { return; }
                 if (!FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS)) { return; }
-                matchUI.setYieldMode(matchUI.getCurrentPlayer(), YieldMode.UNTIL_STACK_CLEARS);
-                if (matchUI.getGameController() != null) {
+                boolean activated = matchUI.setYieldMode(matchUI.getCurrentPlayer(), YieldMode.UNTIL_STACK_CLEARS);
+                if (activated && matchUI.getGameController() != null) {
                     matchUI.getGameController().passPriority();
                 }
             }

@@ -171,20 +171,22 @@ public class YieldController {
 
     /**
      * Set the yield mode for a player.
+     * @return true if the mode was activated, false if it was rejected (e.g., stack already empty for UNTIL_STACK_CLEARS)
      */
-    public void setYieldMode(PlayerView player, final YieldMode mode) {
+    public boolean setYieldMode(PlayerView player, final YieldMode mode) {
         player = TrackableTypes.PlayerViewType.lookup(player); // ensure we use the correct player instance
         if (!isYieldExperimentalEnabled()) {
             // Fall back to legacy behavior for UNTIL_END_OF_TURN
             if (mode == YieldMode.UNTIL_END_OF_TURN) {
                 autoPassUntilEndOfTurn.add(player);
+                return true;
             }
-            return;
+            return false;
         }
 
         if (mode == null || mode == YieldMode.NONE) {
             clearYieldMode(player);
-            return;
+            return false;
         }
 
         // Clear any legacy auto-pass state to prevent interference
@@ -199,12 +201,21 @@ public class YieldController {
         // Use network-safe GameView properties instead of gameView.getGame()
         // This ensures proper operation for non-host players in multiplayer
         if (gameView == null) {
-            return;
+            return true;
         }
 
         forge.game.phase.PhaseType phase = gameView.getPhase();
         int currentTurn = gameView.getTurn();
         PlayerView currentPlayerTurn = gameView.getPlayerTurn();
+
+        // Don't activate UNTIL_STACK_CLEARS if the stack is already empty
+        if (mode == YieldMode.UNTIL_STACK_CLEARS) {
+            boolean stackEmpty = gameView.getStack() == null || gameView.getStack().isEmpty();
+            if (stackEmpty) {
+                yieldStates.remove(player);
+                return false;
+            }
+        }
 
         // Track mode-specific state
         switch (mode) {
@@ -229,6 +240,7 @@ public class YieldController {
             default:
                 break;
         }
+        return true;
     }
 
     /**
