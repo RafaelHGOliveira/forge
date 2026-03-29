@@ -181,8 +181,12 @@ public class InputPassPriority extends InputSyncronizedBase {
             pendingSuggestion = null;
             pendingSuggestionType = null;
             pendingSuggestionMessage = null;
-            getController().getGui().setYieldMode(getOwner(), mode);
-            stop();
+            boolean activated = getController().getGui().setYieldMode(getOwner(), mode);
+            if (activated) {
+                stop();
+            } else {
+                showNormalPrompt();
+            }
             return;
         }
 
