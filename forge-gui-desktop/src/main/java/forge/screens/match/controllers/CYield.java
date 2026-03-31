@@ -82,6 +82,14 @@ public class CYield implements ICDoc {
         initButton(view.getBtnAutoPass(), actAutoPass);
         initButton(view.getBtnSettings(), evt -> new VYieldSettings().showDialog());
 
+        // Always start each match with auto-pass disabled to avoid
+        // unexpected priority skips during early game setup
+        ForgePreferences prefs = FModel.getPreferences();
+        if (prefs.getPrefBoolean(FPref.YIELD_AUTO_PASS_NO_ACTIONS)) {
+            prefs.setPref(FPref.YIELD_AUTO_PASS_NO_ACTIONS, false);
+            prefs.save();
+        }
+
         // Set initial button state
         updateYieldButtons();
     }
