@@ -1534,6 +1534,9 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         }
 
         if (mayAutoPass()) {
+            // Update prompt so it doesn't stay stuck on the previous message
+            // (e.g. a trigger prompt that was already resolved)
+            getGui().updateAutoPassPrompt();
             // avoid prompting for input if current phase is set to be
             // auto-passed instead posing a short delay if needed to
             // prevent the game jumping ahead too quick
