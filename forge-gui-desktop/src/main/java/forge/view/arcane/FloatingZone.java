@@ -55,10 +55,15 @@ import forge.screens.match.views.VZone;
 import forge.toolbox.FMouseAdapter;
 import forge.toolbox.FScrollPane;
 import forge.toolbox.FSkin;
+import forge.toolbox.FTextField;
 import forge.toolbox.special.PlayerDetailsPanel;
 import forge.util.Localizer;
 import forge.util.collect.FCollection;
 import forge.view.FView;
+
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import org.apache.commons.lang3.StringUtils;
 
 public class FloatingZone extends FloatingCardArea {
     private static final long serialVersionUID = 1927906492186378596L;
@@ -541,8 +546,22 @@ public class FloatingZone extends FloatingCardArea {
         }
     }
 
+    private String searchFilter = "";
+
     private FloatingZone(final CMatchUI matchUI, final PlayerView player0, final ZoneType zone0) {
         super(matchUI, new FScrollPane(false, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER));
+
+        final FTextField searchField = new FTextField.Builder()
+                .ghostText(Localizer.getInstance().getMessage("lblSearch"))
+                .showGhostTextWithFocus()
+                .build();
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) { applySearchFilter(searchField); }
+            @Override public void removeUpdate(DocumentEvent e) { applySearchFilter(searchField); }
+            @Override public void changedUpdate(DocumentEvent e) { applySearchFilter(searchField); }
+        });
+
+        window.add(searchField, "growx, wrap");
         window.add(getScrollPane(), "grow, push");
         window.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE); //pfps so that old content does not reappear?
         getScrollPane().setViewportView(this);
@@ -553,12 +572,28 @@ public class FloatingZone extends FloatingCardArea {
         setVertical(true);
     }
 
+    private void applySearchFilter(final FTextField searchField) {
+        searchFilter = normalizeSearch(searchField.getText());
+        doRefresh();
+    }
+
+    private static String normalizeSearch(final String s) {
+        return StringUtils.stripAccents(s.toLowerCase()).replaceAll("[^a-z0-9 ]", "");
+    }
+
     @Override
     protected void doRefresh() {
         List<CardPanel> cardPanels = new ArrayList<>();
         Iterable<CardView> cards = getCards();
         if (cards != null) {
             for (final CardView card : cards) {
+                // Filter by search text — only match revealed (non-face-down) cards
+                if (!searchFilter.isEmpty() && !card.isFaceDown()) {
+                    final String cardName = normalizeSearch(card.getName());
+                    if (!cardName.contains(searchFilter)) {
+                        continue;
+                    }
+                }
                 CardPanel cardPanel = getCardPanel(card.getId());
                 if (cardPanel == null) {
                     cardPanel = new CardPanel(getMatchUI(), card);
