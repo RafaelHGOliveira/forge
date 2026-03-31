@@ -71,6 +71,14 @@ public class CardArea extends CardPanelContainer implements CardPanelMouseListen
     public CardArea(final CMatchUI matchUI, final FScrollPane scrollPane) {
         super(matchUI, scrollPane);
         this.setBackground(Color.white);
+        scrollPane.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(final java.awt.event.ComponentEvent e) {
+                if (!getCardPanels().isEmpty()) {
+                    revalidate();
+                }
+            }
+        });
     }
 
     @Override

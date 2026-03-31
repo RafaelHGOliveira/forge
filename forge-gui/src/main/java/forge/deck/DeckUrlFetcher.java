@@ -365,8 +365,9 @@ public class DeckUrlFetcher {
                 sb.append("\n");
             }
         }
-        // Remaining sections
+        // Remaining sections (skip Maybeboard — not imported)
         for (Map.Entry<String, List<String>> entry : sections.entrySet()) {
+            if (entry.getKey().equals("Maybeboard")) continue;
             if (!entry.getValue().isEmpty()) {
                 sb.append(entry.getKey()).append("\n");
                 for (String line : entry.getValue()) {
@@ -571,9 +572,14 @@ public class DeckUrlFetcher {
                 currentSection = "sideboard";
                 continue;
             }
+            if (lower.startsWith("maybeboard") || lower.startsWith("maybe board")) {
+                currentSection = "skip";
+                continue;
+            }
 
             Matcher cm = cardPattern.matcher(line);
             if (cm.matches()) {
+                if (currentSection.equals("skip")) continue;
                 int qty = Integer.parseInt(cm.group(1));
                 String name = cm.group(2).trim();
                 // Remove category tags that TappedOut sometimes appends
