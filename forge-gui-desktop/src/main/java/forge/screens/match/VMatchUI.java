@@ -174,12 +174,31 @@ public class VMatchUI implements IVTopLevelUI {
             }
         } else if (vYield.getParentCell() == null ||
                    !FView.SINGLETON_INSTANCE.getDragCells().contains(vYield.getParentCell())) {
-            // Yield enabled but not in any cell or has stale reference - add to prompt cell by default
+            // Yield enabled but not in any cell or has stale reference - create its own cell
+            // between the stack/log cell and the prompt cell
             DragCell promptCell = EDocID.REPORT_MESSAGE.getDoc().getParentCell();
-            if (promptCell == null) {
-                promptCell = EDocID.REPORT_LOG.getDoc().getParentCell();
+            DragCell stackCell = EDocID.REPORT_STACK.getDoc().getParentCell();
+            if (stackCell == null) {
+                stackCell = EDocID.REPORT_LOG.getDoc().getParentCell();
             }
-            if (promptCell != null) {
+            if (stackCell != null && promptCell != null) {
+                final RectangleOfDouble stackBounds = stackCell.getRoughBounds();
+                final RectangleOfDouble promptBounds = promptCell.getRoughBounds();
+                // Shrink stack cell and insert yield cell between stack and prompt
+                final double yieldH = 0.193;
+                final double newStackH = promptBounds.getY() - stackBounds.getY() - yieldH;
+                stackCell.setRoughBounds(new RectangleOfDouble(
+                        stackBounds.getX(), stackBounds.getY(),
+                        stackBounds.getW(), newStackH));
+                final DragCell yieldCell = new DragCell();
+                yieldCell.setRoughBounds(new RectangleOfDouble(
+                        stackBounds.getX(), stackBounds.getY() + newStackH,
+                        stackBounds.getW(), yieldH));
+                FView.SINGLETON_INSTANCE.addDragCell(yieldCell);
+                yieldCell.addDoc(vYield);
+                dynamicCells.add(yieldCell);
+                SResizingUtil.resizeWindow();
+            } else if (promptCell != null) {
                 promptCell.addDoc(vYield);
             }
         }
