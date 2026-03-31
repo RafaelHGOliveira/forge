@@ -134,6 +134,22 @@ public class YieldController {
         if (shouldInterruptYield(player)) {
             return false;
         }
+        // Conservative safety check: during main phases with empty stack,
+        // if the player has cards in hand and mana available, don't auto-pass.
+        // This prevents false negatives from the hasAvailableActions check
+        // (e.g. after resolving a scry trigger when spells are still castable).
+        GameView gameView = gui.getGameView();
+        if (gameView != null) {
+            forge.game.phase.PhaseType phase = gameView.getPhase();
+            boolean isMainPhase = phase == forge.game.phase.PhaseType.MAIN1
+                    || phase == forge.game.phase.PhaseType.MAIN2;
+            boolean stackEmpty = gameView.getStack() == null || gameView.getStack().isEmpty();
+            if (isMainPhase && stackEmpty
+                    && player.getHand() != null && !player.getHand().isEmpty()
+                    && player.hasManaAvailable()) {
+                return false;
+            }
+        }
         // Auto-pass if no playable actions
         return !player.hasAvailableActions();
     }
