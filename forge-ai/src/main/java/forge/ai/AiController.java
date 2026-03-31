@@ -1692,16 +1692,10 @@ public class AiController {
         try {
             return future.get(game.getAITimeout(), TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            try {
-                e.printStackTrace();
-                t.stop();
-            } catch (UnsupportedOperationException ex) {
-                // Android and Java 20 dropped support to stop so sadly thread will keep running
-                timeoutReached = true;
-                future.cancel(true);
-                // TODO wait a few more seconds to try and exit at a safe point before letting the engine continue
-                // TODO mark some as skipped to increase chance to find something playable next priority
-            }
+            e.printStackTrace();
+            timeoutReached = true;
+            future.cancel(true);
+            t.interrupt();
             return null;
         }
     }
