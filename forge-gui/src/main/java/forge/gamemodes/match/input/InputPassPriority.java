@@ -235,26 +235,22 @@ public class InputPassPriority extends InputSyncronizedBase {
     private void passPriority(final Runnable runnable) {
         if (FModel.getPreferences().getPrefBoolean(FPref.UI_MANA_LOST_PROMPT)) {
             //if gui player has mana floating that will be lost if phase ended right now, prompt before passing priority
-            GameView gv = getGameView();
+            final Game game = getController().getGame();
             PlayerView pv = getPlayerView();
-            if (gv != null && pv != null) {
-                FCollectionView<StackItemView> stack = gv.getStack();
+            if (game != null && pv != null && pv.isLobbyPlayer(GamePlayerUtil.getGuiPlayer())) {
+                GameView gv = getGameView();
+                FCollectionView<StackItemView> stack = gv != null ? gv.getStack() : null;
+                // Use live mana pool check (not cached PlayerView) to avoid stale state after spending mana
+                Player livePlayer = game.getPhaseHandler().getPriorityPlayer();
                 if ((stack == null || stack.isEmpty()) &&
-                    pv.willLoseManaAtEndOfPhase() &&
-                    pv.isLobbyPlayer(GamePlayerUtil.getGuiPlayer())) {
+                    livePlayer != null && livePlayer.getManaPool().willManaBeLostAtEndOfPhase()) {
                     //must invoke in game thread so dialog can be shown on mobile game
                     ThreadUtil.invokeInGameThread(() -> {
                         Localizer localizer = Localizer.getInstance();
                         String manaDesc = buildManaDescription(pv);
                         String message = localizer.getMessage("lblManaFloatingWithAmount", manaDesc);
-                        // Note: hasBurn check still needs the transient Game access for now
-                        // This is acceptable as the mana burn message is just supplementary info
-                        final Game game = getController().getGame();
-                        if (game != null) {
-                            Player player = game.getPhaseHandler().getPriorityPlayer();
-                            if (player != null && player.getManaPool().hasBurn()) {
-                                message += " " + localizer.getMessage("lblYouWillTakeManaBurnDamageEqualAmountFloatingManaLostThisWay");
-                            }
+                        if (livePlayer.getManaPool().hasBurn()) {
+                            message += " " + localizer.getMessage("lblYouWillTakeManaBurnDamageEqualAmountFloatingManaLostThisWay");
                         }
                         if (getController().getGui().showConfirmDialog(message, localizer.getMessage("lblManaFloating"), localizer.getMessage("lblOK"), localizer.getMessage("lblCancel"))) {
                             runnable.run();
