@@ -141,7 +141,7 @@ public class ForgePreferences extends PreferencesStore<ForgePreferences.FPref> {
         UI_MULTIPLAYER_FIELD_LAYOUT ("OFF"),
         UI_MULTIPLAYER_FIELD_PANELS ("SPLIT"),
         UI_CLOSE_ACTION ("NONE"),
-        UI_MANA_LOST_PROMPT ("false"), // Prompt on losing mana when passing priority
+        UI_MANA_LOST_PROMPT ("true"), // Prompt on losing mana when passing priority
 
         // Experimental yield options (feature-gated)
         YIELD_EXPERIMENTAL_OPTIONS("true"),
