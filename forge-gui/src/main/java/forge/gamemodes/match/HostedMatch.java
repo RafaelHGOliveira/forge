@@ -242,8 +242,19 @@ public class HostedMatch {
             }
         }
 
+        // Send openView to all GUIs in parallel — sequential sendAndWait calls deadlock
+        // with 3+ remote players because later clients never receive their openView call
+        // until earlier ones have responded.
+        final List<Thread> openViewThreads = new ArrayList<>();
         for (final Entry<IGuiGame, Collection<PlayerView>> e : playersPerGui.asMap().entrySet()) {
-            e.getKey().openView(new TrackableCollection<>(e.getValue()));
+            final IGuiGame gui = e.getKey();
+            final TrackableCollection<PlayerView> players = new TrackableCollection<>(e.getValue());
+            final Thread t = new Thread(() -> gui.openView(players), "openView");
+            openViewThreads.add(t);
+            t.start();
+        }
+        for (final Thread t : openViewThreads) {
+            try { t.join(); } catch (final InterruptedException ie) { Thread.currentThread().interrupt(); }
         }
 
         if (humanCount == 0) { //watch game but do not participate
