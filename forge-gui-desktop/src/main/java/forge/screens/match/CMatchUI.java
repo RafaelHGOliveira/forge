@@ -1067,15 +1067,15 @@ public final class CMatchUI
         final GameView gameView = getGameView();
         gameView.getGameLog().addObserver(cLog);
 
-        // Sort players
+        // Sort players — always put local player at index 0 so their field
+        // and hand occupy a consistent screen position across games.
         FCollectionView<PlayerView> players = gameView.getPlayers();
         if (players.size() == 2 && myPlayers != null && myPlayers.size() == 1 && myPlayers.get(0).equals(players.get(1))) {
             players = new FCollection<>(new PlayerView[]{players.get(1), players.get(0)});
         }
         // Multiplayer: sort by turn order with local player first
         final String layout = FModel.getPreferences().getPref(FPref.UI_MULTIPLAYER_FIELD_LAYOUT);
-        if (players.size() > 2 && myPlayers != null && myPlayers.size() >= 1
-                && !"OFF".equals(layout)) {
+        if (players.size() > 2 && myPlayers != null && myPlayers.size() >= 1) {
             players = new FCollection<>(sortPlayersForMultiplayer(players, myPlayers.get(0), "ROWS".equals(layout)));
         }
         initMatch(players, myPlayers);
