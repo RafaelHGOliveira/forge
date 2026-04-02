@@ -661,6 +661,21 @@ public final class FServerManager {
         return null;
     }
 
+    private void forceResumeNetGuiGame(final int slotIndex) {
+        final HostedMatch hostedMatch = localLobby.getHostedMatch();
+        if (hostedMatch == null) { return; }
+        final Game game = hostedMatch.getGame();
+        if (game == null) { return; }
+
+        for (final Player p : game.getPlayers()) {
+            final IGuiGame gui = hostedMatch.getGuiForPlayer(p);
+            if (gui instanceof NetGuiGame ngg && ngg.getSlotIndex() == slotIndex) {
+                ngg.resume();
+                return;
+            }
+        }
+    }
+
     private void pauseNetGuiGame(final int slotIndex) {
         final HostedMatch hostedMatch = localLobby.getHostedMatch();
         if (hostedMatch == null) { return; }
@@ -679,31 +694,48 @@ public final class FServerManager {
     private void resumeAndResync(final RemoteClient client) {
         final int slotIndex = client.getIndex();
         final HostedMatch hostedMatch = localLobby.getHostedMatch();
-        if (hostedMatch == null) { return; }
+        if (hostedMatch == null) {
+            Logger.error("Cannot resume slot {} — hostedMatch is null. Force-resuming NetGuiGame.", slotIndex);
+            forceResumeNetGuiGame(slotIndex);
+            return;
+        }
         final Game game = hostedMatch.getGame();
-        if (game == null) { return; }
+        if (game == null) {
+            Logger.error("Cannot resume slot {} — game is null. Force-resuming NetGuiGame.", slotIndex);
+            forceResumeNetGuiGame(slotIndex);
+            return;
+        }
 
         // Match by slot index — player names may be deduped by the game engine
         // so name matching is unreliable
         for (final Player p : game.getPlayers()) {
             final IGuiGame gui = hostedMatch.getGuiForPlayer(p);
             if (gui instanceof NetGuiGame netGui && netGui.getSlotIndex() == slotIndex) {
-                netGui.resume();
+                try {
+                    netGui.resume();
 
-                // Send current GameView before openView (matches HostedMatch.startGame() ordering)
-                netGui.updateGameView();
+                    // Send current GameView before openView (matches HostedMatch.startGame() ordering)
+                    netGui.updateGameView();
 
-                // Send full game state to the reconnected client
-                netGui.openView(new forge.trackable.TrackableCollection<>(netGui.getLocalPlayers()));
+                    // Send full game state to the reconnected client
+                    netGui.openView(new forge.trackable.TrackableCollection<>(netGui.getLocalPlayers()));
 
-                // Replay current prompt
-                final PlayerControllerHuman pch = findRemoteController(slotIndex);
-                if (pch != null) {
-                    pch.getInputQueue().updateObservers();
+                    // Replay current prompt
+                    final PlayerControllerHuman pch = findRemoteController(slotIndex);
+                    if (pch != null) {
+                        pch.getInputQueue().updateObservers();
+                    }
+                } catch (final Exception e) {
+                    Logger.error(e, "Error during resync for slot {}. Ensuring NetGuiGame is resumed.", slotIndex);
+                    netGui.resume();
                 }
                 return;
             }
         }
+
+        // No matching NetGuiGame found — should not happen, but don't leave paused state
+        Logger.error("No NetGuiGame found for slot {} during reconnect. Force-resuming.", slotIndex);
+        forceResumeNetGuiGame(slotIndex);
     }
 
     private void handleReconnectTimeout(final String username) {
@@ -734,7 +766,10 @@ public final class FServerManager {
 
         for (final Player p : game.getPlayers()) {
             final IGuiGame gui = hostedMatch.getGuiForPlayer(p);
-            if (gui instanceof NetGuiGame && ((NetGuiGame) gui).getSlotIndex() == slotIndex) {
+            if (gui instanceof NetGuiGame ngg && ngg.getSlotIndex() == slotIndex) {
+                // Resume paused NetGuiGame before replacing controller
+                ngg.resume();
+
                 final LobbyPlayerAi aiLobbyPlayer = new LobbyPlayerAi(p.getName(), null);
                 final PlayerControllerAi aiCtrl = new PlayerControllerAi(game, p, aiLobbyPlayer);
                 p.dangerouslySetController(aiCtrl);
