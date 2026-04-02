@@ -41,7 +41,7 @@ public class NetGuiGame extends AbstractGuiGame {
     private final int slotIndex;
     private volatile boolean paused;
     private GameEventForwarder forwarder;
-    private boolean flushing;
+    private volatile boolean flushing;
 
     public NetGuiGame(final IToClient client, final int slotIndex) {
         this.sender = new GameProtocolSender(client);
