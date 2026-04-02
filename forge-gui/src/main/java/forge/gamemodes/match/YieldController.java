@@ -336,8 +336,8 @@ public class YieldController {
             return false;
         }
 
-        // Check interrupt conditions
-        if (shouldInterruptYield(player)) {
+        // Check interrupt conditions (skip for remote players — host preferences don't apply)
+        if (!gui.isRemoteGuiProxy() && shouldInterruptYield(player)) {
             clearYieldMode(player);
             return false;
         }
