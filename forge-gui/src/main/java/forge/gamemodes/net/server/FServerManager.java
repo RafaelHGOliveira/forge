@@ -373,6 +373,124 @@ public final class FServerManager {
         }
     }
 
+    /**
+     * Returns all usable IPv4 addresses from all network interfaces.
+     * Each entry maps a friendly display name to its IPv4 address.
+     * Results are ordered: routable address first, then others alphabetically.
+     */
+    public static LinkedHashMap<String, String> getAllLocalAddresses() {
+        final LinkedHashMap<String, String> result = new LinkedHashMap<>();
+        final String routableAddress = getLocalAddress();
+
+        try {
+            final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            final TreeMap<String, String> sorted = new TreeMap<>();
+
+            while (interfaces.hasMoreElements()) {
+                final NetworkInterface iface = interfaces.nextElement();
+                if (!iface.isUp() || iface.isLoopback()) {
+                    continue;
+                }
+                final Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    final InetAddress addr = addresses.nextElement();
+                    if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
+                        final String ip = addr.getHostAddress();
+                        final String name = getFriendlyInterfaceName(iface.getName(), iface.getDisplayName(), ip);
+                        if (ip.equals(routableAddress)) {
+                            result.put(name, ip);
+                        } else {
+                            sorted.put(name, ip);
+                        }
+                    }
+                }
+            }
+            result.putAll(sorted);
+        } catch (final SocketException e) {
+            Logger.error(e, "Failed to enumerate network interfaces");
+            if (result.isEmpty()) {
+                result.put("Default", routableAddress);
+            }
+        }
+
+        if (result.isEmpty()) {
+            result.put("Default", routableAddress);
+        }
+        return result;
+    }
+
+    private static String getFriendlyInterfaceName(final String ifName, final String displayName, final String ip) {
+        final String lower = ifName.toLowerCase();
+        final String lowerDisplay = displayName.toLowerCase();
+
+        // Hamachi: interface name "ham0", "ham1", etc. or display name contains "hamachi"
+        if (lower.startsWith("ham") || lowerDisplay.contains("hamachi")) {
+            return "Hamachi";
+        }
+
+        // ZeroTier: interface name starts with "zt"
+        if (lower.startsWith("zt")) {
+            return "ZeroTier";
+        }
+
+        // Tailscale: uses 100.64.0.0/10 CGNAT range (100.64.x.x - 100.127.x.x)
+        if (isTailscaleAddress(ip)) {
+            return "Tailscale";
+        }
+
+        // WireGuard: interface name "wg0", "wg1", etc.
+        if (lower.startsWith("wg")) {
+            return "WireGuard";
+        }
+
+        // OpenVPN: common names "tun0", "tap0" (but not utun which is macOS system)
+        if ((lower.startsWith("tun") && !lower.startsWith("utun")) || lower.startsWith("tap")) {
+            return "VPN (" + ifName + ")";
+        }
+
+        // macOS: en0 = Wi-Fi or Ethernet, en1, etc.
+        if (lower.startsWith("en")) {
+            if (lowerDisplay.contains("wi-fi") || lowerDisplay.contains("wifi") || lowerDisplay.contains("airport")) {
+                return "Wi-Fi";
+            }
+            if (lowerDisplay.contains("thunderbolt") || lowerDisplay.contains("ethernet")) {
+                return "Ethernet";
+            }
+            return "LAN (" + ifName + ")";
+        }
+
+        // Linux: eth0, ens33, enp0s3, etc.
+        if (lower.startsWith("eth") || lower.startsWith("ens") || lower.startsWith("enp")) {
+            return "Ethernet";
+        }
+
+        // Linux: wlan0, wlp2s0, etc.
+        if (lower.startsWith("wl")) {
+            return "Wi-Fi";
+        }
+
+        // Radmin VPN
+        if (lowerDisplay.contains("radmin")) {
+            return "Radmin VPN";
+        }
+
+        // Fallback: use display name
+        return displayName;
+    }
+
+    private static boolean isTailscaleAddress(final String ip) {
+        try {
+            final String[] parts = ip.split("\\.");
+            if (parts.length == 4) {
+                final int first = Integer.parseInt(parts[0]);
+                final int second = Integer.parseInt(parts[1]);
+                // Tailscale CGNAT: 100.64.0.0/10 → first octet 100, second 64-127
+                return first == 100 && second >= 64 && second <= 127;
+            }
+        } catch (final NumberFormatException ignored) { }
+        return false;
+    }
+
     public static String getExternalAddress() {
         BufferedReader in = null;
         try {
