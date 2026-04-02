@@ -553,6 +553,9 @@ public class PlayerView extends GameEntityView {
         return val != null && val;
     }
 
+    // Cache version: skip expensive scan when game state hasn't changed
+    private long lastAvailableActionsTimestamp = -1;
+
     /**
      * Check if this player has any available actions (playable spells/abilities).
      * Used by the yield system to auto-pass when the player has nothing to do.
@@ -563,11 +566,20 @@ public class PlayerView extends GameEntityView {
      * mana affordability including cost reductions (Goblin Electromancer) and
      * increases (Thalia, Guardian of Thraben).
      *
+     * Uses Game.getTimestamp() as a version counter — the timestamp increments on
+     * every game state change (zone changes, ability resolutions, etc.), so if it
+     * hasn't changed since the last scan, the cached result is still valid.
+     *
      * @param p the player to check
      * @param canAffordMana predicate that checks if a spell/ability's mana cost can be paid
      *                      (should account for cost reductions/increases)
      */
     public void updateHasAvailableActions(Player p, java.util.function.Predicate<SpellAbility> canAffordMana) {
+        long currentTimestamp = p.getGame().getTimestamp();
+        if (currentTimestamp == lastAvailableActionsTimestamp) {
+            return; // game state unchanged, cached result is valid
+        }
+        lastAvailableActionsTimestamp = currentTimestamp;
         // Check hand for playable spells that we can afford
         for (Card card : p.getCardsIn(ZoneType.Hand)) {
             for (SpellAbility sa : card.getAllPossibleAbilities(p, true)) {
