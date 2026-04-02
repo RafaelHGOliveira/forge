@@ -28,7 +28,9 @@ import forge.trackable.TrackableCollection;
 import forge.util.FSerializableFunction;
 import forge.util.ITriggerEvent;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -184,7 +186,8 @@ public class NetGuiGame extends AbstractGuiGame {
     @Override
     public Iterable<PlayerZoneUpdate> tempShowZones(final PlayerView controller, final Iterable<PlayerZoneUpdate> zonesToUpdate) {
         sender.write(ProtocolMethod.setGameView, getGameView());
-        return sendAndWait(ProtocolMethod.tempShowZones, controller, zonesToUpdate);
+        final Iterable<PlayerZoneUpdate> result = sendAndWait(ProtocolMethod.tempShowZones, controller, zonesToUpdate);
+        return result != null ? result : Collections.emptyList();
     }
 
     @Override
@@ -221,7 +224,8 @@ public class NetGuiGame extends AbstractGuiGame {
 
     @Override
     public Map<Object, Integer> assignGenericAmount(final CardView effectSource, final Map<Object, Integer> targets, final int amount, final boolean atLeastOne, final String amountLabel) {
-        return sendAndWait(ProtocolMethod.assignGenericAmount, effectSource, targets, amount, atLeastOne, amountLabel);
+        final Map<Object, Integer> result = sendAndWait(ProtocolMethod.assignGenericAmount, effectSource, targets, amount, atLeastOne, amountLabel);
+        return result != null ? result : Collections.emptyMap();
     }
 
     @Override
@@ -248,7 +252,8 @@ public class NetGuiGame extends AbstractGuiGame {
 
     @Override
     public String showInputDialog(final String message, final String title, final FSkinProp icon, final String initialInput, final List<String> inputOptions, final boolean isNumeric) {
-        return sendAndWait(ProtocolMethod.showInputDialog, message, title, icon, initialInput, inputOptions, isNumeric);
+        final String result = sendAndWait(ProtocolMethod.showInputDialog, message, title, icon, initialInput, inputOptions, isNumeric);
+        return result != null ? result : initialInput;
     }
 
     @Override
@@ -259,17 +264,20 @@ public class NetGuiGame extends AbstractGuiGame {
 
     @Override
     public <T> List<T> getChoices(final String message, final int min, final int max, final List<T> choices, final List<T> selected, final FSerializableFunction<T, String> display) {
-        return sendAndWait(ProtocolMethod.getChoices, message, min, max, choices, selected, display);
+        final List<T> result = sendAndWait(ProtocolMethod.getChoices, message, min, max, choices, selected, display);
+        return result != null ? result : Collections.emptyList();
     }
 
     @Override
     public <T> List<T> order(final String title, final String top, final int remainingObjectsMin, final int remainingObjectsMax, final List<T> sourceChoices, final List<T> destChoices, final CardView referenceCard, final boolean sideboardingMode) {
-        return sendAndWait(ProtocolMethod.order, title, top, remainingObjectsMin, remainingObjectsMax, sourceChoices, destChoices, referenceCard, sideboardingMode);
+        final List<T> result = sendAndWait(ProtocolMethod.order, title, top, remainingObjectsMin, remainingObjectsMax, sourceChoices, destChoices, referenceCard, sideboardingMode);
+        return result != null ? result : new ArrayList<>();
     }
 
     @Override
     public List<PaperCard> sideboard(final CardPool sideboard, final CardPool main, final String message) {
-        return sendAndWait(ProtocolMethod.sideboard, sideboard, main, message);
+        final List<PaperCard> result = sendAndWait(ProtocolMethod.sideboard, sideboard, main, message);
+        return result != null ? result : main.toFlatList();
     }
 
     @Override
@@ -279,12 +287,14 @@ public class NetGuiGame extends AbstractGuiGame {
 
     @Override
     public List<GameEntityView> chooseEntitiesForEffect(final String title, final List<? extends GameEntityView> optionList, final int min, final int max, final DelayedReveal delayedReveal) {
-        return sendAndWait(ProtocolMethod.chooseEntitiesForEffect, title, optionList, min, max, delayedReveal);
+        final List<GameEntityView> result = sendAndWait(ProtocolMethod.chooseEntitiesForEffect, title, optionList, min, max, delayedReveal);
+        return result != null ? result : Collections.emptyList();
     }
 
     @Override
     public List<CardView> manipulateCardList(final String title, final Iterable<CardView> cards, final Iterable<CardView> manipulable, final boolean toTop, final boolean toBottom, final boolean toAnywhere) {
-        return sendAndWait(ProtocolMethod.manipulateCardList, title, cards, manipulable, toTop, toBottom, toAnywhere);
+        final List<CardView> result = sendAndWait(ProtocolMethod.manipulateCardList, title, cards, manipulable, toTop, toBottom, toAnywhere);
+        return result != null ? result : new ArrayList<>();
     }
 
     @Override
@@ -313,7 +323,8 @@ public class NetGuiGame extends AbstractGuiGame {
     @Override
     public PlayerZoneUpdates openZones(PlayerView controller, final Collection<ZoneType> zones, final Map<PlayerView, Object> players, boolean backupLastZones) {
         sender.write(ProtocolMethod.setGameView, getGameView());
-        return sendAndWait(ProtocolMethod.openZones, controller, zones, players, backupLastZones);
+        final PlayerZoneUpdates result = sendAndWait(ProtocolMethod.openZones, controller, zones, players, backupLastZones);
+        return result != null ? result : new PlayerZoneUpdates();
     }
 
     @Override
