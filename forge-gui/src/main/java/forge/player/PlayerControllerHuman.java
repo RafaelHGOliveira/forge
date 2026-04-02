@@ -1686,6 +1686,9 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         final List<String> labels;
         switch (kindOfChoice) {
             case HeadsOrTails:
+                if (FModel.getPreferences().getPrefBoolean(FPref.YIELD_AUTO_CALL_COIN_FLIP)) {
+                    return true; // Auto-call Heads — result is 50/50 regardless of call
+                }
                 labels = ImmutableList.of(localizer.getMessage("lblHeads"), localizer.getMessage("lblTails"));
                 break;
             case TapOrUntap:
@@ -1719,6 +1722,11 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
 
     @Override
     public boolean chooseFlipResult(final SpellAbility sa, final Player flipper, final boolean call) {
+        // For called flips (win/lose), auto-select the result matching our call to guarantee a win.
+        // For NoCall flips (heads/tails matters), always prompt the player.
+        if (call && FModel.getPreferences().getPrefBoolean(FPref.YIELD_AUTO_CALL_COIN_FLIP)) {
+            return true;
+        }
         final List<String> labelsSrc = call ? List.of(localizer.getMessage("lblHeads"), localizer.getMessage("lblTails"))
                 : List.of(localizer.getMessage("lblWinTheFlip"), localizer.getMessage("lblLoseTheFlip"));
         return getGui().one(sa.getHostCard().getDisplayName() + " - " + localizer.getMessage("lblChooseAResult"), labelsSrc).equals(labelsSrc.get(0));
