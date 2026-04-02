@@ -248,8 +248,8 @@ public class HostedMatch {
         final List<Thread> openViewThreads = new ArrayList<>();
         for (final Entry<IGuiGame, Collection<PlayerView>> e : playersPerGui.asMap().entrySet()) {
             final IGuiGame gui = e.getKey();
-            final TrackableCollection<PlayerView> players = new TrackableCollection<>(e.getValue());
-            final Thread t = new Thread(() -> gui.openView(players), "openView");
+            final TrackableCollection<PlayerView> guiPlayers = new TrackableCollection<>(e.getValue());
+            final Thread t = new Thread(() -> gui.openView(guiPlayers), "openView");
             openViewThreads.add(t);
             t.start();
         }
