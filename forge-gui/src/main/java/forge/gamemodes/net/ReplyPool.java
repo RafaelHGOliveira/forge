@@ -33,7 +33,7 @@ public class ReplyPool {
             future = pool.get(index);
         }
         try {
-            return future.get(5, TimeUnit.MINUTES);
+            return future.get(60, TimeUnit.SECONDS);
         } catch (final InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
