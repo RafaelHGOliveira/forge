@@ -133,14 +133,14 @@ public class NetGuiGame extends AbstractGuiGame {
 
     @Override
     public void showPromptMessage(final PlayerView playerView, final String message) {
-        updateGameView();
-        send(ProtocolMethod.showPromptMessage, playerView, message);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        sender.send(ProtocolMethod.showPromptMessage, playerView, message);
     }
 
     @Override
     public void showCardPromptMessage(final PlayerView playerView, final String message, final CardView card) {
-        updateGameView();
-        send(ProtocolMethod.showCardPromptMessage, playerView, message, card);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        sender.send(ProtocolMethod.showCardPromptMessage, playerView, message, card);
     }
 
     @Override
@@ -183,14 +183,14 @@ public class NetGuiGame extends AbstractGuiGame {
 
     @Override
     public Iterable<PlayerZoneUpdate> tempShowZones(final PlayerView controller, final Iterable<PlayerZoneUpdate> zonesToUpdate) {
-        updateGameView();
+        sender.write(ProtocolMethod.setGameView, getGameView());
         return sendAndWait(ProtocolMethod.tempShowZones, controller, zonesToUpdate);
     }
 
     @Override
     public void hideZones(final PlayerView controller, final Iterable<PlayerZoneUpdate> zonesToUpdate) {
-        updateGameView();
-        send(ProtocolMethod.hideZones, controller, zonesToUpdate);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        sender.send(ProtocolMethod.hideZones, controller, zonesToUpdate);
     }
 
     @Override
@@ -200,8 +200,8 @@ public class NetGuiGame extends AbstractGuiGame {
 
     @Override
     public void setPanelSelection(final CardView hostCard) {
-        updateGameView();
-        send(ProtocolMethod.setPanelSelection, hostCard);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        sender.send(ProtocolMethod.setPanelSelection, hostCard);
     }
 
     @Override
@@ -289,20 +289,20 @@ public class NetGuiGame extends AbstractGuiGame {
 
     @Override
     public void setCard(final CardView card) {
-        updateGameView();
-        send(ProtocolMethod.setCard, card);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        sender.send(ProtocolMethod.setCard, card);
     }
 
     @Override
     public void setSelectables(final Iterable<CardView> cards) {
-        updateGameView();
-        send(ProtocolMethod.setSelectables, cards);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        sender.send(ProtocolMethod.setSelectables, cards);
     }
 
     @Override
     public void clearSelectables() {
-        updateGameView();
-        send(ProtocolMethod.clearSelectables);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        sender.send(ProtocolMethod.clearSelectables);
     }
 
     @Override
@@ -312,7 +312,7 @@ public class NetGuiGame extends AbstractGuiGame {
 
     @Override
     public PlayerZoneUpdates openZones(PlayerView controller, final Collection<ZoneType> zones, final Map<PlayerView, Object> players, boolean backupLastZones) {
-        updateGameView();
+        sender.write(ProtocolMethod.setGameView, getGameView());
         return sendAndWait(ProtocolMethod.openZones, controller, zones, players, backupLastZones);
     }
 
