@@ -100,6 +100,7 @@ public enum CSubmenuOnlineLobby implements ICDoc, IMenuProvider {
         final Localizer localizer = Localizer.getInstance();
 
         final JPanel panel = new JPanel(new MigLayout("insets 0, gap 4 6, wrap 3", "[grow][grow][pref]"));
+        panel.setOpaque(false);
 
         // Header
         panel.add(new FLabel.Builder().text(localizer.getMessage("lblInterface")).fontStyle(java.awt.Font.BOLD).fontSize(12).build(), "growx");
