@@ -45,7 +45,7 @@ public class YieldController {
     private final IGuiGame gui;
 
     // Legacy auto-pass tracking
-    private final Set<PlayerView> autoPassUntilEndOfTurn = Sets.newHashSet();
+    private final Set<PlayerView> autoPassUntilEndOfTurn = Sets.newConcurrentHashSet();
 
     /**
      * Consolidated yield state for a player.
@@ -64,7 +64,7 @@ public class YieldController {
     }
 
     // Extended yield mode tracking (experimental feature)
-    private final Map<PlayerView, YieldState> yieldStates = Maps.newHashMap();
+    private final Map<PlayerView, YieldState> yieldStates = Maps.newConcurrentMap();
 
     /**
      * Create a new YieldController with the given GUI game for updates and state access.
