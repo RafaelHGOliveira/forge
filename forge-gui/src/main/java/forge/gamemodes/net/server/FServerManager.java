@@ -650,6 +650,25 @@ public final class FServerManager {
         return arg;
     }
 
+    /**
+     * Replace a disconnected player with AI. Called from the host UI button.
+     * @param username the name of the disconnected player
+     * @return true if the player was found and replaced
+     */
+    public boolean replaceDisconnectedWithAI(final String username) {
+        final RemoteClient client = disconnectedClients.remove(username);
+        if (client == null) { return false; }
+        final Timer timer = reconnectTimers.remove(username);
+        if (timer != null) { timer.cancel(); }
+        if (isMatchActive()) {
+            broadcastPlayerDisconnected(client.getIndex(), false);
+            convertToAI(client.getIndex(), username);
+        }
+        localLobby.disconnectPlayer(client.getIndex());
+        broadcast(new MessageEvent(String.format("Host replaced %s with AI.", username)));
+        return true;
+    }
+
     private static String formatTime(final int totalSeconds) {
         return String.format("%d:%02d", totalSeconds / 60, totalSeconds % 60);
     }
