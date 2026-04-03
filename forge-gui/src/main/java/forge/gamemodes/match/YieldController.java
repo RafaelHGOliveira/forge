@@ -84,11 +84,15 @@ public class YieldController {
     }
 
     /**
-     * Cancel auto-pass for the given player.
+     * Cancel auto-pass for the given player (legacy and experimental).
      */
     public void autoPassCancel(PlayerView player) {
         player = TrackableTypes.PlayerViewType.lookup(player); // ensure consistent PlayerView instance
-        if (!autoPassUntilEndOfTurn.remove(player)) {
+
+        boolean removedLegacy = autoPassUntilEndOfTurn.remove(player);
+        boolean removedExperimental = yieldStates.remove(player) != null;
+
+        if (!removedLegacy && !removedExperimental) {
             return;
         }
 
@@ -96,6 +100,11 @@ public class YieldController {
         gui.showPromptMessage(player, "");
         gui.updateButtons(player, false, false, false);
         gui.awaitNextInput();
+
+        // Sync experimental yield cancellation to network clients
+        if (removedExperimental) {
+            gui.syncYieldMode(player, YieldMode.NONE);
+        }
     }
 
     /**
