@@ -355,6 +355,11 @@ public class NetGuiGame extends AbstractGuiGame {
     }
 
     @Override
+    public void showPlayerDisconnected(final PlayerView player, final boolean disconnected) {
+        send(ProtocolMethod.showPlayerDisconnected, player, disconnected);
+    }
+
+    @Override
     public void handleGameEvent(GameEvent event) {
         handleGameEvents(List.of(event));
     }
