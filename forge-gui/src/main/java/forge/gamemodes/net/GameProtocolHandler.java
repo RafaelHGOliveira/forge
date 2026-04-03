@@ -109,7 +109,7 @@ public abstract class GameProtocolHandler<T> extends ChannelInboundHandlerAdapte
 
     @Override
     public final void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) {
-        cause.printStackTrace();
+        Logger.error(cause, "Network error on channel {} — closing connection", ctx.channel().remoteAddress());
         ctx.close();
     }
 

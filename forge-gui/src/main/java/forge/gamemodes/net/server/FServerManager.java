@@ -5,6 +5,7 @@ import forge.ai.LobbyPlayerAi;
 import forge.ai.PlayerControllerAi;
 import forge.game.Game;
 import forge.game.player.Player;
+import forge.game.player.PlayerView;
 import forge.gamemodes.match.HostedMatch;
 import forge.gamemodes.match.LobbySlot;
 import forge.gamemodes.match.LobbySlotType;
@@ -661,6 +662,37 @@ public final class FServerManager {
         return null;
     }
 
+    /**
+     * Notify all game GUIs that a player has disconnected or reconnected.
+     * The visual indicator is shown on each client's match screen.
+     */
+    private void broadcastPlayerDisconnected(final int slotIndex, final boolean disconnected) {
+        final HostedMatch hostedMatch = localLobby.getHostedMatch();
+        if (hostedMatch == null) { return; }
+        final Game game = hostedMatch.getGame();
+        if (game == null) { return; }
+
+        // Find the PlayerView for the disconnected slot
+        PlayerView disconnectedPlayerView = null;
+        for (final Player p : game.getPlayers()) {
+            final IGuiGame gui = hostedMatch.getGuiForPlayer(p);
+            if (gui instanceof NetGuiGame ngg && ngg.getSlotIndex() == slotIndex) {
+                disconnectedPlayerView = p.getView();
+                break;
+            }
+        }
+        if (disconnectedPlayerView == null) { return; }
+
+        // Notify all connected GUIs (host + other remote players)
+        for (final Player p : game.getPlayers()) {
+            final IGuiGame gui = hostedMatch.getGuiForPlayer(p);
+            if (gui instanceof NetGuiGame ngg && ngg.getSlotIndex() == slotIndex) {
+                continue; // Skip the disconnected player's own GUI
+            }
+            gui.showPlayerDisconnected(disconnectedPlayerView, disconnected);
+        }
+    }
+
     private void forceResumeNetGuiGame(final int slotIndex) {
         final HostedMatch hostedMatch = localLobby.getHostedMatch();
         if (hostedMatch == null) { return; }
@@ -725,6 +757,9 @@ public final class FServerManager {
                     if (pch != null) {
                         pch.getInputQueue().updateObservers();
                     }
+
+                    // Clear disconnect indicator on all other GUIs
+                    broadcastPlayerDisconnected(slotIndex, false);
                 } catch (final Exception e) {
                     Logger.error(e, "Error during resync for slot {}. Ensuring NetGuiGame is resumed.", slotIndex);
                     netGui.resume();
@@ -750,6 +785,7 @@ public final class FServerManager {
         }
 
         Logger.info("Reconnect timeout for {}. Converting to AI.", username);
+        broadcastPlayerDisconnected(client.getIndex(), false);
         convertToAI(client.getIndex(), username);
 
         // Reset lobby slot
@@ -968,6 +1004,7 @@ public final class FServerManager {
                     }
                 }, 30_000L, 30_000L);
 
+                broadcastPlayerDisconnected(client.getIndex(), true);
                 broadcast(new MessageEvent(
                     String.format("%s disconnected. Waiting %s for reconnect...", username, formatTime(RECONNECT_TIMEOUT_SECONDS))));
                 lobbyListener.message(null, "(Host can use /skipreconnect to replace disconnected player with AI, or /skiptimeout to wait indefinitely.)");

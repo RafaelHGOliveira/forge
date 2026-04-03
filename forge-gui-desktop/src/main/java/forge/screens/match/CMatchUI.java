@@ -530,6 +530,14 @@ public final class CMatchUI
         }
     }
 
+    @Override
+    public void showPlayerDisconnected(final PlayerView player, final boolean disconnected) {
+        final VField field = getFieldViewFor(player);
+        if (field != null) {
+            FThreads.invokeInEdtNowOrLater(() -> field.setDisconnected(disconnected));
+        }
+    }
+
     // Player's lives and poison counters
     @Override
     public void updateLives(final Iterable<PlayerView> livesUpdate) {
