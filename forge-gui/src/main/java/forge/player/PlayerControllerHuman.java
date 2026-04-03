@@ -1559,7 +1559,12 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
                     e.printStackTrace();
                 }
             }
-            return null;
+            // Re-check after delay: player may have cancelled yield during the sleep
+            if (!mayAutoPass()) {
+                // Yield was cancelled — fall through to show normal input prompt
+            } else {
+                return null;
+            }
         }
 
         if (stack.isEmpty()) {
