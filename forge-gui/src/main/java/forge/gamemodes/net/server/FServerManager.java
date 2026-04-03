@@ -429,8 +429,8 @@ public final class FServerManager {
             return "Hamachi";
         }
 
-        // ZeroTier: interface name starts with "zt"
-        if (lower.startsWith("zt")) {
+        // ZeroTier: "zt*" on Linux, display name contains "zerotier" on macOS/Windows
+        if (lower.startsWith("zt") || lowerDisplay.contains("zerotier")) {
             return "ZeroTier";
         }
 
