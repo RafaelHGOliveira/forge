@@ -67,6 +67,7 @@ import forge.game.spellability.SpellAbilityView;
 import forge.game.spellability.StackItemView;
 import forge.game.zone.ZoneType;
 import forge.gamemodes.match.AbstractGuiGame;
+import forge.gamemodes.net.server.FServerManager;
 import forge.gui.FNetOverlay;
 import forge.gui.FThreads;
 import forge.gui.GuiBase;
@@ -533,9 +534,18 @@ public final class CMatchUI
     @Override
     public void showPlayerDisconnected(final PlayerView player, final boolean disconnected) {
         final VField field = getFieldViewFor(player);
-        if (field != null) {
-            FThreads.invokeInEdtNowOrLater(() -> field.setDisconnected(disconnected));
+        if (field == null) { return; }
+
+        Runnable replaceAction = null;
+        if (disconnected) {
+            final FServerManager server = FServerManager.getInstance();
+            if (server != null && server.isHosting()) {
+                final String playerName = player.getName();
+                replaceAction = () -> server.replaceDisconnectedWithAI(playerName);
+            }
         }
+        final Runnable action = replaceAction;
+        FThreads.invokeInEdtNowOrLater(() -> field.setDisconnected(disconnected, action));
     }
 
     // Player's lives and poison counters

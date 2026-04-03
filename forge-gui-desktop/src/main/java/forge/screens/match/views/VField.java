@@ -85,6 +85,9 @@ public class VField implements IVDoc<CField> {
     private final FLabel lblDisconnected = new FLabel.Builder()
             .fontAlign(SwingConstants.CENTER).fontStyle(Font.BOLD).fontSize(11)
             .opaque(true).build();
+    private final FLabel btnReplaceAI = new FLabel.ButtonBuilder()
+            .text("Replace AI").fontStyle(Font.BOLD).fontSize(10)
+            .hoverable().selectable().build();
 
     private final PhaseIndicator phaseIndicator = new PhaseIndicator();
 
@@ -128,10 +131,14 @@ public class VField implements IVDoc<CField> {
         lblDisconnected.setVisible(false);
         lblDisconnected.setFocusable(false);
 
+        btnReplaceAI.setVisible(false);
+        btnReplaceAI.setFocusable(true);
+
         avatarArea.setOpaque(false);
         avatarArea.setBackground(FSkin.getColor(FSkin.Colors.CLR_HOVER));
         avatarArea.setLayout(new MigLayout("insets 0, gap 0"));
         avatarArea.add(lblDisconnected, "w 100%!, h 16px!, hidemode 3, wrap");
+        avatarArea.add(btnReplaceAI, "w 100%!, h 18px!, hidemode 3, wrap");
         avatarArea.add(lblAvatar, "w 100%-6px!, h 100%-23px!, wrap, gap 3 3 3 0");
         avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
 
@@ -218,8 +225,20 @@ public class VField implements IVDoc<CField> {
         return control.getMatchUI().isHighlighted(player);
     }
 
-    public void setDisconnected(final boolean disconnected) {
+    public void setDisconnected(final boolean disconnected, final Runnable replaceAction) {
         lblDisconnected.setVisible(disconnected);
+        if (disconnected && replaceAction != null) {
+            // Remove old listeners to avoid duplicates
+            for (final java.awt.event.MouseListener ml : btnReplaceAI.getMouseListeners()) {
+                if (ml instanceof java.awt.event.MouseAdapter) {
+                    btnReplaceAI.removeMouseListener(ml);
+                }
+            }
+            btnReplaceAI.setCommand(replaceAction);
+            btnReplaceAI.setVisible(true);
+        } else {
+            btnReplaceAI.setVisible(false);
+        }
         if (disconnected) {
             avatarArea.setBorder(new LineBorder(new Color(180, 40, 40), 2));
         } else {
