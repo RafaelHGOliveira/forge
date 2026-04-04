@@ -177,6 +177,7 @@
                                             <fileset dir="${basedir}/../" includes="docs/**" />
                                             <fileset dir="${project.build.directory}/../../forge-gui-desktop/target" includes="forge-gui-desktop-${project.version}-jar-with-dependencies.jar" />
                                             <fileset dir="${project.build.directory}/../../forge-gui-desktop/target" includes="forge.exe" />
+                                            <fileset dir="${project.build.directory}/../../forge-gui-desktop/target" includes="forge-beta.exe" />
                                             <fileset dir="${project.build.directory}/../../adventure-editor/tools" includes="gdx-particle-editor.jar" />
                                             <fileset dir="${project.build.directory}/../../adventure-editor/target" includes="adventure-editor.exe" />
                                             <fileset dir="${project.build.directory}/../../adventure-editor/target" includes="adventure-editor.sh" />
@@ -202,6 +203,7 @@
                                         <chmod file="${project.build.directory}/${project.build.finalName}/adventure-editor.command" perm="a+rx" />
                                         <chmod file="${project.build.directory}/${project.build.finalName}/adventure-editor.cmd" perm="a+rx" />
                                         <chmod file="${project.build.directory}/${project.build.finalName}/forge.exe" perm="a+rx" />
+                                        <chmod file="${project.build.directory}/${project.build.finalName}/forge-beta.exe" perm="a+rx" />
                                         <chmod file="${project.build.directory}/${project.build.finalName}/forge-adventure.exe" perm="a+rx" />
                                         <chmod file="${project.build.directory}/${project.build.finalName}/adventure-editor.exe" perm="a+rx" />
                                         <copy todir="${basedir}/target">
@@ -221,6 +223,7 @@
                                                 <include name="forge.command" />
                                                 <include name="forge.cmd" />
                                                 <include name="forge.exe" />
+                                                <include name="forge-beta.exe" />
                                                 <include name="forge-adventure.sh" />
                                                 <include name="forge-adventure.command" />
                                                 <include name="forge-adventure.cmd" />
@@ -237,6 +240,7 @@
                                                 <exclude name="forge.command" />
                                                 <exclude name="forge.cmd" />
                                                 <exclude name="forge.exe" />
+                                                <exclude name="forge-beta.exe" />
                                                 <exclude name="forge-adventure.sh" />
                                                 <exclude name="forge-adventure.command" />
                                                 <exclude name="forge-adventure.cmd" />
