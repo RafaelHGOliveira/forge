@@ -106,30 +106,31 @@ public class VYield implements IVDoc<CYield> {
         // Layout: 4 columns to accommodate all yield options
         container.setLayout(new MigLayout("wrap 4, gap 2px!, insets 3px"));
 
-        // Row 1: Your Turn, End Turn, Next Phase, Clear Stack
-        container.add(btnYourTurn, buttonConstraints);
-        container.add(btnEndTurn, buttonConstraints);
-        container.add(btnNextPhase, buttonConstraints);
-        container.add(btnClearStack, buttonConstraints);
-
-        // Row 2: Combat, End Step, Pre-Turn End (span 2 to fill row)
-        container.add(btnCombat, buttonConstraints);
-        container.add(btnEndStep, buttonConstraints);
         String span2Constraints = largerButtons
             ? "span 2, w 10:66%, h 40px:40px:60px"
             : "span 2, w 10:66%, hmin 24px";
-        container.add(btnEndStepBeforeYourTurn, span2Constraints);
-
-        // Row 3: Auto-pass (full width)
         String fullWidthConstraints = largerButtons
             ? "span 4, w 10:100%, h 40px:40px:60px"
             : "span 4, w 10:100%, hmin 24px";
-        container.add(btnAutoPass, fullWidthConstraints);
-
-        // Row 4: Settings button
         String settingsConstraints = largerButtons
             ? "span 4, gaptop 3px, w 10:100%, h 40px:40px:60px"
             : "span 4, gaptop 3px, w 10:100%, hmin 24px";
+
+        // Row 1: longest skips — Your Turn | End Turn | End Step Before Your Turn (span 2)
+        container.add(btnYourTurn, buttonConstraints);
+        container.add(btnEndTurn, buttonConstraints);
+        container.add(btnEndStepBeforeYourTurn, span2Constraints);
+
+        // Row 2: phase-level skips in game-phase order: Next Phase → Combat → End Step → Clear Stack
+        container.add(btnNextPhase, buttonConstraints);
+        container.add(btnCombat, buttonConstraints);
+        container.add(btnEndStep, buttonConstraints);
+        container.add(btnClearStack, buttonConstraints);
+
+        // Row 3: Auto-pass toggle (full width)
+        container.add(btnAutoPass, fullWidthConstraints);
+
+        // Row 4: Settings (full width)
         container.add(btnSettings, settingsConstraints);
     }
 
