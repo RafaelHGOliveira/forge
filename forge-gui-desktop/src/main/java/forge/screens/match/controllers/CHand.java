@@ -61,17 +61,6 @@ public class CHand implements ICDoc {
         this.matchUI = matchUI;
         this.player = p0;
         this.view = v0;
-        v0.getHandArea().addCardPanelMouseListener(new CardPanelMouseAdapter() {
-            @Override
-            public void mouseDragEnd(final CardPanel dragPanel, final MouseEvent evt) {
-                final int index = CHand.this.view.getHandArea().getCardPanels().indexOf(dragPanel);
-                synchronized (ordering) {
-                    ordering.remove(dragPanel.getCard());
-                    ordering.add(index, dragPanel.getCard());
-                    matchUI.getGameController(p0).reorderHand(dragPanel.getCard(), index);
-                }
-            }
-        });
     }
 
     @Override
@@ -80,6 +69,17 @@ public class CHand implements ICDoc {
 
     @Override
     public void initialize() {
+        view.getHandArea().addCardPanelMouseListener(new CardPanelMouseAdapter() {
+            @Override
+            public void mouseDragEnd(final CardPanel dragPanel, final MouseEvent evt) {
+                final int index = CHand.this.view.getHandArea().getCardPanels().indexOf(dragPanel);
+                synchronized (ordering) {
+                    ordering.remove(dragPanel.getCard());
+                    ordering.add(index, dragPanel.getCard());
+                    matchUI.getGameController(player).reorderHand(dragPanel.getCard(), index);
+                }
+            }
+        });
     }
 
     public void updateHand() {

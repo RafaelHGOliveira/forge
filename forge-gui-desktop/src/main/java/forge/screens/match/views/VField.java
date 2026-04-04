@@ -57,6 +57,7 @@ import forge.toolbox.FSkin.SkinnedPanel;
 import forge.toolbox.special.PhaseIndicator;
 import forge.toolbox.special.PlayerDetailsPanel;
 import forge.util.Localizer;
+import forge.view.arcane.HandArea;
 import forge.view.arcane.PlayArea;
 import net.miginfocom.swing.MigLayout;
 
@@ -87,6 +88,8 @@ public class VField implements IVDoc<CField> {
     // Top-level containers
     private final FScrollPane scroller = new FScrollPane(false);
     private final PlayArea tabletop;
+    private HandArea handArea;
+    private FScrollPane handScroller;
     private final SkinnedPanel avatarArea = new SkinnedPanel();
 
     private final PlayerDetailsPanel detailsPanel;
@@ -167,6 +170,10 @@ public class VField implements IVDoc<CField> {
 
         scroller.setViewportView(this.tabletop);
 
+        handScroller = new FScrollPane(false);
+        handArea = new HandArea(matchUI, handScroller);
+        handScroller.setViewportView(handArea);
+
         updateDetails();
     }
 
@@ -234,6 +241,7 @@ public class VField implements IVDoc<CField> {
             main.add(inlineZonePanel, "hidemode 3, growx, h 0:180:");
             main.add(phaseIndicator, "h 16!, growx");
             main.add(scroller, "grow");
+            main.add(handScroller, "h 110!, growx");
 
             pnl.add(sidebar, "w 60!, growy");
             pnl.add(main, "grow");
@@ -247,6 +255,7 @@ public class VField implements IVDoc<CField> {
             pnl.add(zoneBarView, "h 26!, growx, wrap");
             pnl.add(inlineZonePanel, "hidemode 3, growx, h 0:180:, wrap");
             pnl.add(phaseIndicator, "h 16!, growx, wrap");
+            pnl.add(handScroller, "h 60!, growx, wrap");
             pnl.add(scroller, "grow");
         }
     }
@@ -354,6 +363,10 @@ public class VField implements IVDoc<CField> {
 
     public PhaseIndicator getPhaseIndicator() {
         return phaseIndicator;
+    }
+
+    public HandArea getHandArea() {
+        return handArea;
     }
 
     public PlayerDetailsPanel getDetailsPanel() {

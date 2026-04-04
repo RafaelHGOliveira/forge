@@ -51,6 +51,7 @@ public class VHand implements IVDoc<CHand> {
     // Top-level containers
     private final FScrollPane scroller = new FScrollPane(false);
     private final HandArea hand;
+    private HandArea externalHandArea = null;
 
     //========= Constructor
     /**
@@ -85,6 +86,9 @@ public class VHand implements IVDoc<CHand> {
      */
     @Override
     public void populate() {
+        if (externalHandArea != null) {
+            return; // Hand rendered inside VField's handScroller
+        }
         final JPanel pnl = parentCell.getBody();
         pnl.setLayout(new MigLayout("insets 0, gap 0"));
 
@@ -138,7 +142,15 @@ public class VHand implements IVDoc<CHand> {
      * @return {@link forge.view.arcane.HandArea}
      */
     public HandArea getHandArea() {
-        return VHand.this.hand;
+        return externalHandArea != null ? externalHandArea : VHand.this.hand;
+    }
+
+    public void setExternalHandArea(final HandArea h) {
+        this.externalHandArea = h;
+    }
+
+    public boolean isIntegrated() {
+        return externalHandArea != null;
     }
 
     private boolean isTabVisible() {

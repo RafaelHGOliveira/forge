@@ -103,6 +103,8 @@ import forge.screens.match.controllers.CDock;
 import forge.screens.match.controllers.CLog;
 import forge.screens.match.controllers.CPrompt;
 import forge.screens.match.controllers.CStack;
+import forge.screens.match.arena.ArenaLayoutPolicy;
+import forge.screens.match.controllers.CYield;
 import forge.screens.match.menus.CMatchUIMenus;
 import forge.screens.match.views.VField;
 import forge.screens.match.views.VHand;
@@ -320,11 +322,20 @@ public final class CMatchUI
         final List<VHand> hands = new ArrayList<>();
         final Iterable<PlayerView> localPlayers = getLocalPlayers();
 
+        final boolean isArena = ArenaLayoutPolicy.shouldActivate(
+                sortedPlayers.size(),
+                FModel.getPreferences().getPref(FPref.UI_MULTIPLAYER_FIELD_LAYOUT),
+                FModel.getPreferences().getPrefBoolean(FPref.UI_COMMANDER_ENHANCED));
+        final List<VField> fields = view.getFieldViews();
+
         int i = 0;
         for (final PlayerView p : sortedPlayers) {
             if (allHands || isLocalPlayer(p) || CardView.mayViewAny(p.getHand(), localPlayers)) {
                 final EDocID doc = EDocID.Hands[i];
                 final VHand newHand = new VHand(this, doc, p);
+                if (isArena && i < fields.size()) {
+                    newHand.setExternalHandArea(fields.get(i).getHandArea());
+                }
                 newHand.getLayoutControl().initialize();
                 hands.add(newHand);
                 myDocs.put(doc, newHand);
