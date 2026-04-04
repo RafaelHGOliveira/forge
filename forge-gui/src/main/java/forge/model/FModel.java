@@ -162,7 +162,8 @@ public final class FModel {
             // Beta launcher override (in-memory only, never persisted)
             forge.localinstance.properties.BetaPreferenceOverride.apply(
                 (k, v) -> preferences.setPref(ForgePreferences.FPref.valueOf(k), v),
-                System.getProperties()
+                System.getProperties(),
+                () -> preferences.getPref(FPref.UI_MULTIPLAYER_FIELD_LAYOUT)
             );
             GamePlayerUtil.getGuiPlayer().setName(preferences.getPref(FPref.PLAYER_NAME));
         }
