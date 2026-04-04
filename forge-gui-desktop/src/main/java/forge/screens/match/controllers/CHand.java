@@ -91,12 +91,19 @@ public class CHand implements ICDoc {
         if (vf == null) {
             return;
         }
-        final Rectangle rctLibraryLabel = vf.getDetailsPanel().getLblLibrary().getBounds();
 
-        // Animation starts from the library label and runs to the hand panel.
-        // This check prevents animation running if label hasn't been realized yet.
-        if (rctLibraryLabel.isEmpty()) {
-            return;
+        // In arena mode the hand is embedded inside VField — detailsPanel is not
+        // added to the layout so its lblLibrary bounds are always zero.  Skip the
+        // bounds guard and the fly-in animation; just populate directly.
+        final boolean integrated = view.isIntegrated();
+
+        if (!integrated) {
+            final Rectangle rctLibraryLabel = vf.getDetailsPanel().getLblLibrary().getBounds();
+            // Animation starts from the library label and runs to the hand panel.
+            // This check prevents animation running if label hasn't been realized yet.
+            if (rctLibraryLabel.isEmpty()) {
+                return;
+            }
         }
 
         // Don't perform animations if the user's in another tab.
@@ -147,7 +154,12 @@ public class CHand implements ICDoc {
         p.setCardPanels(cardPanels);
         view.updateTabLabel(ordering.size());
 
+        if (integrated || placeholders.isEmpty()) {
+            return;
+        }
+
         //animate new cards into positions defined by placeholders
+        final Rectangle rctLibraryLabel = vf.getDetailsPanel().getLblLibrary().getBounds();
         final JLayeredPane layeredPane = Singletons.getView().getFrame().getLayeredPane();
         int fromZoneX = 0, fromZoneY = 0;
 
