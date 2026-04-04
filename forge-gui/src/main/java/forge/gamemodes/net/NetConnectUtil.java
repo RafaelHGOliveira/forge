@@ -24,10 +24,68 @@ import forge.util.Localizer;
 import forge.util.URLValidator;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static forge.util.URLValidator.parseURL;
 
 public class NetConnectUtil {
     private NetConnectUtil() { }
+
+    private static final int MAX_HISTORY = 10;
+    private static final String URL_SEPARATOR = ",";
+
+    public static List<String> loadFavorites() {
+        final String raw = FModel.getNetPreferences().getPref(ForgeNetPreferences.FNetPref.NET_SERVER_FAVORITES);
+        return splitUrls(raw);
+    }
+
+    public static List<String> loadHistory() {
+        final String raw = FModel.getNetPreferences().getPref(ForgeNetPreferences.FNetPref.NET_SERVER_HISTORY);
+        return splitUrls(raw);
+    }
+
+    public static void addToHistory(final String url) {
+        if (url == null || url.isEmpty()) { return; }
+        final List<String> history = loadHistory();
+        history.remove(url);
+        history.add(0, url);
+        final List<String> trimmed = history.size() > MAX_HISTORY ? history.subList(0, MAX_HISTORY) : history;
+        FModel.getNetPreferences().setPref(ForgeNetPreferences.FNetPref.NET_SERVER_HISTORY, joinUrls(trimmed));
+        FModel.getNetPreferences().save();
+    }
+
+    public static void addToFavorites(final String url) {
+        if (url == null || url.isEmpty()) { return; }
+        final List<String> favorites = loadFavorites();
+        if (!favorites.contains(url)) {
+            favorites.add(url);
+            FModel.getNetPreferences().setPref(ForgeNetPreferences.FNetPref.NET_SERVER_FAVORITES, joinUrls(favorites));
+            FModel.getNetPreferences().save();
+        }
+    }
+
+    public static void removeFromFavorites(final String url) {
+        final List<String> favorites = loadFavorites();
+        if (favorites.remove(url)) {
+            FModel.getNetPreferences().setPref(ForgeNetPreferences.FNetPref.NET_SERVER_FAVORITES, joinUrls(favorites));
+            FModel.getNetPreferences().save();
+        }
+    }
+
+    private static List<String> splitUrls(final String csv) {
+        final List<String> result = new ArrayList<>();
+        if (csv == null || csv.trim().isEmpty()) { return result; }
+        for (final String s : csv.split(URL_SEPARATOR)) {
+            final String trimmed = s.trim();
+            if (!trimmed.isEmpty()) { result.add(trimmed); }
+        }
+        return result;
+    }
+
+    private static String joinUrls(final List<String> urls) {
+        return String.join(URL_SEPARATOR, urls);
+    }
 
     public static String getServerUrl() {
         final String url = SOptionPane.showInputDialog(Localizer.getInstance().getMessage("lblOnlineMultiplayerDest"), Localizer.getInstance().getMessage("lblConnectToServer"));
