@@ -91,7 +91,8 @@ public class VYield implements IVDoc<CYield> {
         btnYourTurn.setToolTipText(localizer.getMessage("lblYieldBtnYourTurnTooltip"));
         btnAutoPass.setToolTipText(localizer.getMessage("lblYieldBtnAutoPassTooltip"));
         btnSettings.setToolTipText(localizer.getMessage("lblInterruptSettingsTooltip"));
-        btnSettings.setFocusable(false); // Settings opens a dialog; no keyboard focus needed (prevents FOCUS images making it look selected)
+        btnSettings.setFocusable(false); // Settings opens a dialog; no keyboard focus needed
+        btnSettings.setUseHighlightMode(true); // Use FOCUS (blue) as default, matching other yield buttons
     }
 
     @Override

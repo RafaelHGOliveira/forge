@@ -105,7 +105,6 @@ public class VYieldSettings extends FDialog {
         add(btnOk, btnX, y, BUTTON_WIDTH, BUTTON_HEIGHT);
         y += BUTTON_HEIGHT + PADDING;
 
-        this.pack();
         this.setSize(width, y + 3 * PADDING);
     }
 
