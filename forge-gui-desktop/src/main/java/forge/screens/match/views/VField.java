@@ -55,7 +55,13 @@ import net.miginfocom.swing.MigLayout;
  */
 public class VField implements IVDoc<CField> {
     private final static int LIFE_CRITICAL = 5;
+    private final static int LIFE_WARNING  = 10; // orange warning below this
     private final static int POISON_CRITICAL = 8;
+
+    // MigLayout constraints for lblAvatar height: leaves room for stat rows below.
+    // 20px life row + 3px gap = 23px; + 20px counter row = 43px.
+    private static final String AVATAR_CONSTRAINT        = "w 100%-6px!, h 100%-23px!, wrap, gap 3 3 3 0";
+    private static final String AVATAR_CONSTRAINT_COUNTER = "w 100%-6px!, h 100%-43px!, wrap, gap 3 3 3 0";
 
     // Fields used with interface IVDoc
     private final CField control;
@@ -139,7 +145,7 @@ public class VField implements IVDoc<CField> {
         avatarArea.setLayout(new MigLayout("insets 0, gap 0"));
         avatarArea.add(lblDisconnected, "w 100%!, h 16px!, hidemode 3, wrap");
         avatarArea.add(btnReplaceAI, "w 100%!, h 18px!, hidemode 3, wrap");
-        avatarArea.add(lblAvatar, "w 100%-6px!, h 100%-23px!, wrap, gap 3 3 3 0");
+        avatarArea.add(lblAvatar, AVATAR_CONSTRAINT);
         avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
 
         // Player area hover effect
@@ -264,7 +270,7 @@ public class VField implements IVDoc<CField> {
         avatarArea.remove(lblAvatar);
         avatarArea.remove(lblLife);
         lblLife.setIcon(null);
-        avatarArea.add(lblAvatar, "w 100%-6px!, h 100%-43px!, wrap, gap 3 3 3 0");
+        avatarArea.add(lblAvatar, AVATAR_CONSTRAINT_COUNTER);
         avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
         avatarArea.add(counterLbl, "w 100%!, h 20px!, wrap");
     }
@@ -274,7 +280,7 @@ public class VField implements IVDoc<CField> {
         avatarArea.remove(lblAvatar);
         avatarArea.remove(lblLife);
         lblLife.setIcon(null);
-        avatarArea.add(lblAvatar, "w 100%-6px!, h 100%-23px!, wrap, gap 3 3 3 0");
+        avatarArea.add(lblAvatar, AVATAR_CONSTRAINT);
         avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
     }
 
@@ -352,8 +358,10 @@ public class VField implements IVDoc<CField> {
         // Update life total
         final int life = player.getLife();
         lblLife.setText(String.valueOf(life));
-        if (life > LIFE_CRITICAL) {
+        if (life > LIFE_WARNING) {
             lblLife.setForeground(FSkin.getColor(FSkin.Colors.CLR_TEXT));
+        } else if (life > LIFE_CRITICAL) {
+            lblLife.setForeground(Color.ORANGE);
         } else {
             lblLife.setForeground(Color.RED);
         }
