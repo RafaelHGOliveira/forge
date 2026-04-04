@@ -2,19 +2,19 @@ package forge.screens.match.arena;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 public final class CommanderDeckExtractor {
     private CommanderDeckExtractor() {}
 
-    public static Optional<String> extractName(final Supplier<Iterable<String>> cardNamesSupplier) {
-        if (cardNamesSupplier == null) return Optional.empty();
+    public static String extractName(final Supplier<Iterable<String>> cardNamesSupplier) {
+        if (cardNamesSupplier == null) return "?";
         Iterable<String> cards = cardNamesSupplier.get();
-        if (cards == null) return Optional.empty();
+        if (cards == null) return "?";
         Iterator<String> it = cards.iterator();
-        if (!it.hasNext()) return Optional.empty();
-        return Optional.ofNullable(it.next());
+        if (!it.hasNext()) return "?";
+        String name = it.next();
+        return name != null ? name : "?";
     }
 
     public static boolean hasPartner(final List<String> commanderNames) {
