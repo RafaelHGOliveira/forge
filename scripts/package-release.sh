@@ -17,7 +17,7 @@ if [ -z "$STABLE_TAR" ]; then
     echo "ERROR: no stable tarball. Run 'mvn -B -P windows-linux install -DskipTests' first."
     exit 1
 fi
-tar -xjf "$STABLE_TAR" -C "$STAGING/forge" --strip-components 1
+tar -xjf "$STABLE_TAR" -C "$STAGING/forge"
 
 echo "==> Copying beta jar"
 BETA_JAR=$(ls ../forge-beta/forge-installer/target/forge-installer-*-SNAPSHOT/forge.jar 2>/dev/null | head -1)
