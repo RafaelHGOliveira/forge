@@ -197,6 +197,9 @@ public class VField implements IVDoc<CField> {
         handScroller = new FScrollPane(false);
         handArea = new HandArea(matchUI, handScroller);
         handScroller.setViewportView(handArea);
+        handArea.setOpaque(true);
+        handArea.setBackground(new java.awt.Color(18, 18, 28));
+        handScroller.getViewport().setBackground(new java.awt.Color(18, 18, 28));
 
         updateDetails();
     }
