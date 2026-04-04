@@ -159,6 +159,11 @@ public final class FModel {
             if (adjustPrefs != null) {
                 adjustPrefs.apply(preferences);
             }
+            // Beta launcher override (in-memory only, never persisted)
+            forge.localinstance.properties.BetaPreferenceOverride.apply(
+                (k, v) -> preferences.setPref(ForgePreferences.FPref.valueOf(k), v),
+                System.getProperties()
+            );
             GamePlayerUtil.getGuiPlayer().setName(preferences.getPref(FPref.PLAYER_NAME));
         }
         catch (final Exception exn) {
