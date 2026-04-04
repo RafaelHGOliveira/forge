@@ -4,12 +4,12 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import forge.game.GameEntity;
+import forge.game.GameEntityView;
 import forge.game.GameObject;
 import forge.game.ability.ApiType;
 import forge.game.card.Card;
 import forge.game.card.CardView;
 import forge.game.player.Player;
-import forge.game.player.PlayerView;
 import forge.game.spellability.SpellAbility;
 import forge.game.spellability.TargetRestrictions;
 import forge.gui.FThreads;
@@ -84,7 +84,7 @@ public final class InputSelectTargets extends InputSyncronizedBase {
         FThreads.invokeInEdtNowOrLater(() -> {
             for (final GameEntity c : targets) {
                 if (c instanceof Card) {
-                    controller.getGui().setUsedToPay(CardView.get((Card) c), true);
+                    controller.getGui().setHighlighted(GameEntityView.get(c), true);
                 }
             }
             controller.getGui().updateZones(zonesToUpdate);
@@ -395,14 +395,11 @@ public final class InputSelectTargets extends InputSyncronizedBase {
 
     private void addTarget(final GameEntity ge) {
         sa.getTargets().add(ge);
-        if (ge instanceof Card) {
-            getController().getGui().setUsedToPay(CardView.get((Card) ge), true);
-            lastTarget = (Card) ge;
-        }
-        else if (ge instanceof Player) {
-            getController().getGui().setHighlighted(PlayerView.get((Player) ge), true);
-        }
         targets.add(ge);
+        if (ge instanceof Card c) {
+            lastTarget = c;
+        }
+        getController().getGui().setHighlighted(GameEntityView.get(ge), true);
 
         if (hasAllTargets()) {
             bOk = true;
@@ -423,31 +420,19 @@ public final class InputSelectTargets extends InputSyncronizedBase {
         }
         targets.remove(ge);
         sa.getTargets().remove(ge);
-        if (ge instanceof Card c) {
-            getController().getGui().setUsedToPay(CardView.get(c), false);
+        if (ge instanceof Card) {
             // try to get last selected card
             lastTarget = Iterables.getLast(IterableUtil.filter(targets, Card.class), null);
         }
-        else if (ge instanceof Player p) {
-            getController().getGui().setHighlighted(PlayerView.get(p), false);
-            // Re-highlight if still a valid candidate (player de-selected but still targetable)
-            if (validPlayerCandidates.contains(p)) {
-                getController().getGui().setHighlighted(PlayerView.get(p), true);
-            }
-        }
+        getController().getGui().setHighlighted(GameEntityView.get(ge), false);
 
         this.showMessage();
     }
 
     private void done() {
-        for (final GameEntity c : targets) {
+        for (final GameEntity ge : targets) {
             //getController().macros().addRememberedAction(new TargetEntityAction(c.getView()));
-            if (c instanceof Card) {
-                getController().getGui().setUsedToPay(CardView.get((Card) c), false);
-            }
-            else if (c instanceof Player) {
-                getController().getGui().setHighlighted(PlayerView.get((Player) c), false);
-            }
+            getController().getGui().setHighlighted(GameEntityView.get(ge), false);
         }
         // Clear pre-highlighted player candidates that were not ultimately targeted
         for (Player p : validPlayerCandidates) {

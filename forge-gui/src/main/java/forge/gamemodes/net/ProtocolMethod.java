@@ -79,6 +79,7 @@ public enum ProtocolMethod {
     setHostYieldEnabled (Mode.SERVER, Void.TYPE, Boolean.TYPE),
     showWaitingTimer    (Mode.SERVER, Void.TYPE, PlayerView.class, String.class),
     showPlayerDisconnected(Mode.SERVER, Void.TYPE, PlayerView.class, Boolean.TYPE),
+    setHighlighted      (Mode.SERVER, Void.TYPE, GameEntityView.class, Boolean.TYPE),
     handleGameEvents    (Mode.SERVER, Void.TYPE, List.class),
 
     // Client -> Server
