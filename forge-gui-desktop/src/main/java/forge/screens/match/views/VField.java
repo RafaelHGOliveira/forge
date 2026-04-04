@@ -244,7 +244,7 @@ public class VField implements IVDoc<CField> {
             main.add(inlineZonePanel, "hidemode 3, growx, h 0:180:");
             main.add(phaseIndicator, "h 16!, growx");
             main.add(scroller, "grow");
-            main.add(handScroller, "h 110!, growx");
+            main.add(handScroller, "h 150!, growx");
 
             pnl.add(sidebar, "w 60!, growy");
             pnl.add(main, "grow");

@@ -59,6 +59,7 @@ public class CardArea extends CardPanelContainer implements CardPanelMouseListen
     private int maxRows = 0;
     private int maxCardsPerRow = 0; // 0 = unlimited
     private boolean noOverlap = false;
+    private boolean centerCards = false;
 
     // Computed in layout.
     private float cardSpacingX;
@@ -156,7 +157,13 @@ public class CardArea extends CardPanelContainer implements CardPanelMouseListen
                 }
             }
 
-            float x = CardArea.GUTTER_X;
+            // Centering: compute starting x so columns are centered in the available width.
+            final int numColumns = (int) Math.ceil(this.getCardPanels().size() / (float) Math.max(1, this.actualCardsPerRow));
+            final int colStep = cardWidth + (int) this.cardSpacingX;
+            final int totalColsWidth = numColumns * cardWidth + (numColumns - 1) * (int) this.cardSpacingX;
+            float x = centerCards
+                    ? Math.max(CardArea.GUTTER_X, (cardAreaWidth - totalColsWidth) / 2.0f)
+                    : CardArea.GUTTER_X;
             int y = CardArea.GUTTER_Y;
             int zOrder = this.getCardPanels().size() - 1, rowCount = 0;
             int maxZOrder = this.getComponentCount() - 1; //needed to prevent crash for certain situations when not all card panels actually show up in component
@@ -177,7 +184,7 @@ public class CardArea extends CardPanelContainer implements CardPanelMouseListen
                 rowCount++;
                 if (rowCount == this.actualCardsPerRow) {
                     rowCount = 0;
-                    x += cardWidth + this.cardSpacingX;
+                    x += colStep;
                     y = CardArea.GUTTER_Y;
                 }
             }
@@ -221,9 +228,13 @@ public class CardArea extends CardPanelContainer implements CardPanelMouseListen
                 }
             }
 
-            float x = CardArea.GUTTER_X;
+            final int totalCards = this.getCardPanels().size();
+            float rowStartX = centerCards
+                    ? computeRowStartX(Math.min(this.actualCardsPerRow, totalCards), cardWidth, cardAreaWidth)
+                    : CardArea.GUTTER_X;
+            float x = rowStartX;
             int y = CardArea.GUTTER_Y;
-            int zOrder = 0, rowCount = 0;
+            int zOrder = 0, rowCount = 0, cardsDone = 0;
             for (final CardPanel panel : this.getCardPanels()) {
                 if (panel != this.getMouseDragPanel()) {
                     panel.setCardBounds((int) Math.floor(x), y, cardWidth, cardHeight);
@@ -234,9 +245,14 @@ public class CardArea extends CardPanelContainer implements CardPanelMouseListen
                 this.setComponentZOrder(panel, zOrder);
                 zOrder++;
                 rowCount++;
+                cardsDone++;
                 if (rowCount == this.actualCardsPerRow) {
                     rowCount = 0;
-                    x = CardArea.GUTTER_X;
+                    int cardsLeft = totalCards - cardsDone;
+                    rowStartX = centerCards
+                            ? computeRowStartX(Math.min(this.actualCardsPerRow, cardsLeft), cardWidth, cardAreaWidth)
+                            : CardArea.GUTTER_X;
+                    x = rowStartX;
                     y += cardHeight + cardSpacingY;
                 }
             }
@@ -360,5 +376,19 @@ public class CardArea extends CardPanelContainer implements CardPanelMouseListen
     }
     public final void setNoOverlap(final boolean noOverlap) {
         this.noOverlap = noOverlap;
+    }
+
+    private float computeRowStartX(final int cardsInRow, final int cardWidth, final int areaWidth) {
+        if (cardsInRow <= 0) return CardArea.GUTTER_X;
+        final int rowWidth = (int) Math.floor(((cardsInRow - 1) * this.cardSpacingX) + cardWidth);
+        final float offset = (areaWidth - rowWidth) / 2.0f;
+        return Math.max(CardArea.GUTTER_X, offset);
+    }
+
+    public final boolean isCenterCards() {
+        return this.centerCards;
+    }
+    public final void setCenterCards(final boolean centerCards) {
+        this.centerCards = centerCards;
     }
 }
