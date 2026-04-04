@@ -122,6 +122,55 @@
                             </versionInfo>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>l4j-gui-beta</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>launch4j</goal>
+                        </goals>
+                        <configuration>
+                            <headerType>gui</headerType>
+                            <outfile>${project.build.directory}/forge-beta.exe</outfile>
+                            <jar>forge-beta.jar</jar>
+                            <dontWrapJar>true</dontWrapJar>
+                            <errTitle>forge-beta</errTitle>
+                            <downloadUrl>https://bell-sw.com/pages/downloads/#jdk-17-lts</downloadUrl>
+                            <icon>src/main/config/forge.ico</icon>
+                            <classPath>
+                                <mainClass>forge.view.Main</mainClass>
+                                <addDependencies>false</addDependencies>
+                                <preCp>anything</preCp>
+                            </classPath>
+                            <jre>
+                                <minVersion>17</minVersion>
+                                <requiresJdk>true</requiresJdk>
+                                <maxHeapSize>4096</maxHeapSize>
+                                <opts>
+                                    <opt>${mandatory.java.args} -Dforge.commander.enhanced=true</opt>
+                                    <opt>${addopen.java.args}</opt>
+                                </opts>
+                            </jre>
+                            <versionInfo>
+                                <fileVersion>
+                                    ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}.0
+                                </fileVersion>
+                                <txtFileVersion>
+                                    ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}.0
+                                </txtFileVersion>
+                                <fileDescription>Forge Beta</fileDescription>
+                                <copyright>Forge</copyright>
+                                <productVersion>
+                                    ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}.0
+                                </productVersion>
+                                <txtProductVersion>
+                                    ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}.0
+                                </txtProductVersion>
+                                <productName>Forge Beta</productName>
+                                <internalName>forge-beta</internalName>
+                                <originalFilename>forge-beta.exe</originalFilename>
+                            </versionInfo>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

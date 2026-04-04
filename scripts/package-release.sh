@@ -19,26 +19,38 @@ if [ -z "$STABLE_TAR" ]; then
 fi
 tar -xjf "$STABLE_TAR" -C "$STAGING/forge"
 
-echo "==> Copying beta jar"
-BETA_JAR=$(ls ../forge-beta/forge-installer/target/forge-installer-*-SNAPSHOT/forge.jar 2>/dev/null | head -1)
-if [ -z "$BETA_JAR" ]; then
-    echo "ERROR: no beta jar. Build ../forge-beta first."
+echo "==> Locating desktop jar"
+DESKTOP_JAR=$(ls "$STAGING/forge/forge-gui-desktop-"*"-jar-with-dependencies.jar" 2>/dev/null | head -1)
+if [ -z "$DESKTOP_JAR" ]; then
+    echo "ERROR: forge-gui-desktop jar not found in staging."
     exit 1
 fi
-cp "$BETA_JAR" "$STAGING/forge/forge-beta.jar"
+JAR_BASENAME=$(basename "$DESKTOP_JAR")
+
+echo "==> Copying beta jar"
+cp "$DESKTOP_JAR" "$STAGING/forge/forge-beta.jar"
 
 echo "==> Generating forge-beta launchers"
 for ext in command sh; do
     if [ -f "$STAGING/forge/forge.$ext" ]; then
-        sed -e 's/forge\.jar/forge-beta.jar/g' \
+        sed -e "s/${JAR_BASENAME}/forge-beta.jar/g" \
             -e 's|java |java -Dforge.commander.enhanced=true |g' \
             "$STAGING/forge/forge.$ext" > "$STAGING/forge/forge-beta.$ext"
         chmod +x "$STAGING/forge/forge-beta.$ext"
     fi
 done
-if [ -f "$STAGING/forge/forge.exe" ]; then
-    cp "$STAGING/forge/forge.exe" "$STAGING/forge/forge-beta.exe"
-    echo "NOTE: forge-beta.exe points to forge.jar -- VM prop not injected on Windows."
+# forge-beta.exe comes from the Maven build (Launch4j) — already in the tarball
+# Windows batch launcher with JVM flag (fallback for systems without the exe)
+if [ -f "$STAGING/forge/forge.bat" ]; then
+    sed -e "s/${JAR_BASENAME}/forge-beta.jar/g" \
+        -e 's|java |java -Dforge.commander.enhanced=true |g' \
+        "$STAGING/forge/forge.bat" > "$STAGING/forge/forge-beta.bat"
+else
+    cat > "$STAGING/forge/forge-beta.bat" <<'BAT'
+@echo off
+cd /d "%~dp0"
+java -Xmx4096m -Dforge.commander.enhanced=true -Dio.netty.tryReflectionSetAccessible=true -Dfile.encoding=UTF-8 -jar forge-beta.jar %*
+BAT
 fi
 
 echo "==> Creating release zip"
