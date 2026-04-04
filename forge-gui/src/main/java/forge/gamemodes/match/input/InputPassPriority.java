@@ -29,7 +29,6 @@ import forge.game.spellability.SpellAbility;
 import forge.game.spellability.StackItemView;
 import forge.gamemodes.match.YieldMode;
 import forge.gui.GuiBase;
-import forge.localinstance.properties.ForgePreferences;
 import forge.localinstance.properties.ForgePreferences.FPref;
 import forge.model.FModel;
 import forge.player.GamePlayerUtil;
@@ -75,33 +74,11 @@ public class InputPassPriority extends InputSyncronizedBase {
             && getController().didYieldJustEnd();
 
         if (isExperimentalYieldEnabled() && !isAlreadyYielding() && !suppressDueToYieldEnd) {
-            ForgePreferences prefs = FModel.getPreferences();
-            Localizer loc = Localizer.getInstance();
-
             // Track stack transitions for per-stack decline scope
             GameView gvForStack = getGameView();
             boolean stackNonEmpty = gvForStack != null && gvForStack.getStack() != null
                 && !gvForStack.getStack().isEmpty();
             getController().onPriorityReceived(stackNonEmpty);
-
-            // Suggestion 1: Stack items but can't respond
-            if (shouldShowStackYieldPrompt()
-                && !getController().isSuggestionDeclined("STACK_YIELD")) {
-                pendingSuggestion = YieldMode.UNTIL_STACK_CLEARS;
-                pendingSuggestionType = "STACK_YIELD";
-                pendingSuggestionMessage = loc.getMessage("lblCannotRespondToStackYieldPrompt");
-                showYieldSuggestionPrompt();
-                return;
-            }
-            // Suggestion 2: No available actions (empty hand, no abilities)
-            if (shouldShowNoActionsPrompt()
-                && !getController().isSuggestionDeclined("NO_ACTIONS")) {
-                pendingSuggestion = getDefaultYieldMode();
-                pendingSuggestionType = "NO_ACTIONS";
-                pendingSuggestionMessage = loc.getMessage("lblNoActionsAvailableYieldPrompt");
-                showYieldSuggestionPrompt();
-                return;
-            }
         }
 
         showNormalPrompt();

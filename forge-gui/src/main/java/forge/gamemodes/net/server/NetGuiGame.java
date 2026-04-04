@@ -322,12 +322,6 @@ public class NetGuiGame extends AbstractGuiGame {
     }
 
     @Override
-    public void setHighlighted(final PlayerView pv, final boolean b) {
-        sender.write(ProtocolMethod.setGameView, getGameView());
-        sender.send(ProtocolMethod.setHighlighted, pv, b);
-    }
-
-    @Override
     public void setPlayerAvatar(final LobbyPlayer player, final IHasIcon ihi) {
         // TODO Auto-generated method stub
     }
