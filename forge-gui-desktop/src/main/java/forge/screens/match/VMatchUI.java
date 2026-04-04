@@ -244,7 +244,10 @@ public class VMatchUI implements IVTopLevelUI {
                     handId.setDoc(new VEmptyDoc(handId));
                 }
             } else if (myVHand.isIntegrated()) {
-                // Hand is embedded in VField's handScroller — skip DragCell management
+                // Hand is embedded in VField's handScroller — remove from any DragCell so it disappears
+                if (parentCell != null) {
+                    parentCell.removeDoc(myVHand);
+                }
             } else {
                 // Hand present, add it if necessary (check isShowing for stale references)
                 if (parentCell == null || !parentCell.isShowing()) {
@@ -339,7 +342,9 @@ public class VMatchUI implements IVTopLevelUI {
         final boolean preferTop = !rowsMode && (lstFields.size() % 2 == 1);
         final Map<Integer, List<VField>> fieldsByCell = new LinkedHashMap<>();
         for (int i = 2; i < lstFields.size(); i++) {
-            final int target = rowsMode ? 1 : (preferTop ? ((i + 1) % 2) : (i % 2));
+            // In arena mode all extra fields (opponents) go to cell 1 (opponent band at top).
+            final int target = arenaMode ? 1
+                    : (rowsMode ? 1 : (preferTop ? ((i + 1) % 2) : (i % 2)));
             fieldsByCell.computeIfAbsent(target, k -> new ArrayList<>()).add(lstFields.get(i));
         }
 
