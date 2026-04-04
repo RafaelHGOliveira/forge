@@ -4,7 +4,7 @@ public final class ArenaLayoutPolicy {
     public static final int PLAYERS_REQUIRED = 4;
     public static final String LAYOUT_VALUE = "ARENA";
     public static final double PHASE_STRIP_PCT = 0.03;
-    public static final double OPPONENT_BAND_PCT = 0.40;
+    public static final double OPPONENT_BAND_PCT = 0.48;
 
     private ArenaLayoutPolicy() {}
 
