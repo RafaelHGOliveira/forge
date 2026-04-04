@@ -362,6 +362,14 @@ public final class CMatchUI
         }
     }
 
+    public boolean isArenaMode() {
+        final List<VField> fields = getFieldViews();
+        return ArenaLayoutPolicy.shouldActivate(
+                fields != null ? fields.size() : 0,
+                forge.model.FModel.getPreferences().getPref(forge.localinstance.properties.ForgePreferences.FPref.UI_MULTIPLAYER_FIELD_LAYOUT),
+                forge.model.FModel.getPreferences().getPrefBoolean(forge.localinstance.properties.ForgePreferences.FPref.UI_COMMANDER_ENHANCED));
+    }
+
     public List<VField> getFieldViews() {
         if (view == null) {
             return null;
@@ -509,6 +517,9 @@ public final class CMatchUI
                             break;
                         default:
                             if(!FLOATING_ZONE_TYPES.contains(zone))
+                                break;
+                            // In arena mode, zones are shown inline via ZoneBarView — skip floating windows.
+                            if (isArenaMode())
                                 break;
                             if (FloatingZone.show(this,player,zone)) {
                                 updatedPlayerZones.add(update);
