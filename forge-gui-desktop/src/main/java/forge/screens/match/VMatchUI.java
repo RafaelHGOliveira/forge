@@ -36,6 +36,10 @@ import forge.view.FView;
  * <br><br><i>(V at beginning of class name denotes a view class.)</i>
  */
 public class VMatchUI implements IVTopLevelUI {
+    // Fractional height (0–1) reserved for the yield options panel when it is
+    // inserted between the stack/log cell and the prompt cell.
+    private static final double YIELD_PANEL_HEIGHT_FRACTION = 0.193;
+
     private List<VField> lstFields = new ArrayList<>();
     private List<VHand> lstHands = new ArrayList<>();
 
@@ -185,7 +189,7 @@ public class VMatchUI implements IVTopLevelUI {
                 final RectangleOfDouble stackBounds = stackCell.getRoughBounds();
                 final RectangleOfDouble promptBounds = promptCell.getRoughBounds();
                 // Shrink stack cell and insert yield cell between stack and prompt
-                final double yieldH = 0.193;
+                final double yieldH = YIELD_PANEL_HEIGHT_FRACTION;
                 final double newStackH = promptBounds.getY() - stackBounds.getY() - yieldH;
                 stackCell.setRoughBounds(new RectangleOfDouble(
                         stackBounds.getX(), stackBounds.getY(),

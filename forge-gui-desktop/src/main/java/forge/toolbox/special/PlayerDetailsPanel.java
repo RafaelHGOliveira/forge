@@ -317,7 +317,10 @@ public class PlayerDetailsPanel extends JPanel {
             this.addMouseListener(new FMouseAdapter() {
                 @Override
                 public void onLeftClick(MouseEvent e) {
-                    popupMenu.show(e.getComponent(), e.getX(), e.getY());
+                    // Show above the label so the popup doesn't clip off the bottom of
+                    // the screen — the details panel sits near the bottom of the avatar area.
+                    final int popupH = popupMenu.getPreferredSize().height;
+                    popupMenu.show(e.getComponent(), 0, -popupH);
                 }
             });
         }
