@@ -260,98 +260,92 @@ public class VField implements IVDoc<CField> {
         detailsPanel.updateZones();
     }
 
+    private void addCounterRow(final FLabel counterLbl) {
+        avatarArea.remove(lblAvatar);
+        avatarArea.remove(lblLife);
+        lblLife.setIcon(null);
+        avatarArea.add(lblAvatar, "w 100%-6px!, h 100%-43px!, wrap, gap 3 3 3 0");
+        avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
+        avatarArea.add(counterLbl, "w 100%!, h 20px!, wrap");
+    }
+
+    private void removeCounterRow(final FLabel counterLbl) {
+        avatarArea.remove(counterLbl);
+        avatarArea.remove(lblAvatar);
+        avatarArea.remove(lblLife);
+        lblLife.setIcon(null);
+        avatarArea.add(lblAvatar, "w 100%-6px!, h 100%-23px!, wrap, gap 3 3 3 0");
+        avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
+    }
+
     private void addLblTicket() {
         if (lblTicket.isShowing() || lblExperience.isShowing() || lblEnergy.isShowing() || lblPoison.isShowing()) {
             return; // experience, energy, poison take precedence
         }
-        avatarArea.remove(lblLife);
-        lblLife.setIcon(FSkin.getImage(FSkinProp.ICO_QUEST_LIFE));
-        avatarArea.add(lblLife, "w 50%!, h 20px!, split 2");
-        avatarArea.add(lblTicket, "w 50%!, h 20px!, wrap");
+        addCounterRow(lblTicket);
     }
 
     private void removeLblTicket() {
         if (!lblTicket.isShowing()) {
             return;
         }
-        avatarArea.remove(lblTicket);
-        avatarArea.remove(lblLife);
-        avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
+        removeCounterRow(lblTicket);
     }
 
     private void addLblRad() {
         if (lblRad.isShowing() || lblExperience.isShowing() || lblEnergy.isShowing() || lblPoison.isShowing()) {
             return;
         }
-        avatarArea.remove(lblLife);
-        lblLife.setIcon(FSkin.getImage(FSkinProp.ICO_QUEST_LIFE));
-        avatarArea.add(lblLife, "w 50%!, h 20px!, split 2");
-        avatarArea.add(lblRad, "w 50%!, h 20px!, wrap");
+        addCounterRow(lblRad);
     }
 
     private void removeLblRad() {
         if (!lblRad.isShowing()) {
             return;
         }
-        avatarArea.remove(lblRad);
-        avatarArea.remove(lblLife);
-        avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
+        removeCounterRow(lblRad);
     }
 
     private void addLblExperience() {
         if (lblExperience.isShowing() || lblEnergy.isShowing() || lblPoison.isShowing()) {
             return; // energy and poison take precedence
         }
-        avatarArea.remove(lblLife);
-        lblLife.setIcon(FSkin.getImage(FSkinProp.ICO_QUEST_LIFE));
-        avatarArea.add(lblLife, "w 50%!, h 20px!, split 2");
-        avatarArea.add(lblExperience, "w 50%!, h 20px!, wrap");
+        addCounterRow(lblExperience);
     }
 
     private void removeLblExperience() {
         if (!lblExperience.isShowing()) {
             return;
         }
-        avatarArea.remove(lblExperience);
-        avatarArea.remove(lblLife);
-        avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
+        removeCounterRow(lblExperience);
     }
 
     private void addLblEnergy() {
         if (lblEnergy.isShowing() || lblPoison.isShowing()) {
             return; // poison takes precedence
         }
-        avatarArea.remove(lblLife);
-        lblLife.setIcon(FSkin.getImage(FSkinProp.ICO_QUEST_LIFE));
-        avatarArea.add(lblLife, "w 50%!, h 20px!, split 2");
-        avatarArea.add(lblEnergy, "w 50%!, h 20px!, wrap");
+        addCounterRow(lblEnergy);
     }
-    
+
     private void removeLblEnergy() {
         if (!lblEnergy.isShowing()) {
             return;
         }
-        avatarArea.remove(lblEnergy);
-        avatarArea.remove(lblLife);
-        avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
+        removeCounterRow(lblEnergy);
     }
 
     private void addLblPoison() {
         if (lblPoison.isShowing()) {
             return;
         }
-        avatarArea.remove(lblLife);
-        lblLife.setIcon(FSkin.getImage(FSkinProp.ICO_QUEST_LIFE));
-        avatarArea.add(lblLife, "w 50%!, h 20px!, split 2");
-        avatarArea.add(lblPoison, "w 50%!, h 20px!, wrap");
+        addCounterRow(lblPoison);
     }
+
     private void removeLblPoison() {
         if (!lblPoison.isShowing()) {
             return;
         }
-        avatarArea.remove(lblPoison);
-        avatarArea.remove(lblLife);
-        avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
+        removeCounterRow(lblPoison);
     }
 
     public void updateDetails() {
