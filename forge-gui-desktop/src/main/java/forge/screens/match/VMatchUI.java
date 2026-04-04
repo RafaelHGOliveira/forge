@@ -292,6 +292,8 @@ public class VMatchUI implements IVTopLevelUI {
                     parentCell.removeDoc(handId.getDoc());
                     handId.setDoc(new VEmptyDoc(handId));
                 }
+            } else if (myVHand.isIntegrated()) {
+                // Hand is embedded in VField's handScroller — skip DragCell management
             } else {
                 // Hand present, add it if necessary (check isShowing for stale references)
                 if (parentCell == null || !parentCell.isShowing()) {
