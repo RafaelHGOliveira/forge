@@ -363,11 +363,10 @@ public final class CMatchUI
     }
 
     public boolean isArenaMode() {
-        final List<VField> fields = getFieldViews();
-        return ArenaLayoutPolicy.shouldActivate(
-                fields != null ? fields.size() : 0,
-                forge.model.FModel.getPreferences().getPref(forge.localinstance.properties.ForgePreferences.FPref.UI_MULTIPLAYER_FIELD_LAYOUT),
-                forge.model.FModel.getPreferences().getPrefBoolean(forge.localinstance.properties.ForgePreferences.FPref.UI_COMMANDER_ENHANCED));
+        // Check prefs directly — field list may be empty during game init (timing issue).
+        final forge.localinstance.properties.ForgePreferences prefs = forge.model.FModel.getPreferences();
+        return prefs.getPrefBoolean(forge.localinstance.properties.ForgePreferences.FPref.UI_COMMANDER_ENHANCED)
+                && ArenaLayoutPolicy.LAYOUT_VALUE.equals(prefs.getPref(forge.localinstance.properties.ForgePreferences.FPref.UI_MULTIPLAYER_FIELD_LAYOUT));
     }
 
     public List<VField> getFieldViews() {
