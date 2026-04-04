@@ -461,6 +461,19 @@ public class VLobby implements ILobbyView {
             }
             fireDeckChangeListener(playerIndex, deck);
         }
+        if (isCommanderDeck && lobby.getGameType() == GameType.Commander && deck != null
+                && deck.has(DeckSection.Commander)) {
+            final java.util.List<String> names = new java.util.ArrayList<>();
+            final CardPool cp = deck.get(DeckSection.Commander);
+            if (cp != null) {
+                for (final forge.item.PaperCard pc : cp.toFlatList()) {
+                    names.add(pc.getName());
+                }
+            }
+            final String cmdName = forge.screens.match.arena.CommanderDeckExtractor.extractName(() -> names);
+            final boolean partner = forge.screens.match.arena.CommanderDeckExtractor.hasPartner(names);
+            getPlayerPanel(playerIndex).setCommanderPreview(cmdName, partner, true);
+        }
         mainChooser.saveState();
     }
 
@@ -651,6 +664,11 @@ public class VLobby implements ILobbyView {
         if (visible) {
             lblCommanderInfo.setText(
                 forge.screens.match.arena.CommanderInfoStripText.format(activePlayersNum));
+        }
+        if (!visible) {
+            for (final PlayerPanel pp : playerPanels) {
+                pp.setCommanderPreview(null, false, false);
+            }
         }
     }
 
