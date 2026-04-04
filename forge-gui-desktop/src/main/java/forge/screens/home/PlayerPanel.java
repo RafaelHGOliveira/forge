@@ -178,10 +178,6 @@ public class PlayerPanel extends FPanel {
         aeTeamComboBox.addTo(this, variantBtnConstraints + ", cell 2 " + cellY + ", growx, gaptop 5px, wrap");
 
         createReadyButton();
-        if (allowNetworking) {
-            this.add(radioOpen, "cell 4 4, ax left, sx 2");
-            this.add(chkReady, "cell 5 4, ax left, sx 2, wrap");
-        }
 
         this.add(deckLabel, variantBtnConstraints + ", cell 0 5, sx 2, ax right");
         this.add(deckBtn, variantBtnConstraints + ", cell 2 5, pushx, growx, wmax 100%-153px, h 30px, spanx 4, wrap");
@@ -189,7 +185,14 @@ public class PlayerPanel extends FPanel {
         addHandlersDeckSelector();
 
         this.add(cmdLabel, variantBtnConstraints + ", cell 0 2, sx 2, ax right");
-        this.add(cmdDeckSelectorBtn, variantBtnConstraints + ", cell 2 2, pushx, growx, wmax 100%-153px, h 30px, spanx 4, wrap");
+        if (allowNetworking) {
+            // Open/Ready share the commander deck row (cols 4-5), so shrink the deck btn to cols 2-3
+            this.add(cmdDeckSelectorBtn, variantBtnConstraints + ", cell 2 2, pushx, growx, h 30px, spanx 2");
+            this.add(radioOpen, "cell 4 2, ax left");
+            this.add(chkReady, "cell 5 2, ax left, wrap");
+        } else {
+            this.add(cmdDeckSelectorBtn, variantBtnConstraints + ", cell 2 2, pushx, growx, wmax 100%-153px, h 30px, spanx 4, wrap");
+        }
 
         this.add(scmLabel, variantBtnConstraints + ", cell 0 4, sx 2, ax right");
         this.add(scmDeckSelectorBtn, variantBtnConstraints + ", cell 2 4, growx, pushx");
