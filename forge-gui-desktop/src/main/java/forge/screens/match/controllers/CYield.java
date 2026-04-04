@@ -82,6 +82,14 @@ public class CYield implements ICDoc {
         initButton(view.getBtnAutoPass(), actAutoPass);
         initButton(view.getBtnSettings(), evt -> new VYieldSettings().showDialog());
 
+        // Always start each match with auto-pass disabled to avoid
+        // unexpected priority skips during early game setup
+        ForgePreferences prefs = FModel.getPreferences();
+        if (prefs.getPrefBoolean(FPref.YIELD_AUTO_PASS_NO_ACTIONS)) {
+            prefs.setPref(FPref.YIELD_AUTO_PASS_NO_ACTIONS, false);
+            prefs.save();
+        }
+
         // Set initial button state
         updateYieldButtons();
     }
@@ -103,10 +111,23 @@ public class CYield implements ICDoc {
     private void toggleYieldMode(YieldMode mode) {
         if (matchUI == null || matchUI.getCurrentPlayer() == null) return;
         PlayerView player = matchUI.getCurrentPlayer();
-        if (matchUI.getYieldMode(player) == mode) {
+        YieldMode currentMode = matchUI.getYieldMode(player);
+        if (currentMode == mode) {
+            // Mode is active — deactivate it
             matchUI.clearYieldMode(player);
-        } else {
+            updateYieldButtons();
+        } else if (currentMode != YieldMode.NONE) {
+            // A different yield mode is active — clear it first, then activate the new one
+            matchUI.clearYieldMode(player);
             boolean activated = matchUI.setYieldMode(player, mode);
+            updateYieldButtons();
+            if (activated && matchUI.getGameController() != null) {
+                matchUI.getGameController().selectButtonOk();
+            }
+        } else {
+            // No yield active — activate the requested mode
+            boolean activated = matchUI.setYieldMode(player, mode);
+            updateYieldButtons();
             if (activated && matchUI.getGameController() != null) {
                 matchUI.getGameController().selectButtonOk();
             }

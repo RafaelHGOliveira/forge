@@ -21,6 +21,7 @@ import forge.ai.ComputerUtilMana;
 import forge.game.Game;
 import forge.game.GameView;
 import forge.game.card.Card;
+import forge.game.mana.ManaPool;
 import forge.game.player.Player;
 import forge.game.player.PlayerView;
 import forge.game.player.actions.PassPriorityAction;
@@ -176,6 +177,15 @@ public class InputPassPriority extends InputSyncronizedBase {
                 stop();
                 return;
             }
+            // Check if the auto-pass toggle was just enabled (user clicked the button,
+            // which called selectButtonOk() — don't also activate the suggestion mode)
+            if (FModel.getPreferences().getPrefBoolean(FPref.YIELD_AUTO_PASS_NO_ACTIONS)) {
+                pendingSuggestion = null;
+                pendingSuggestionType = null;
+                pendingSuggestionMessage = null;
+                stop();
+                return;
+            }
 
             YieldMode mode = pendingSuggestion;
             pendingSuggestion = null;
@@ -235,26 +245,23 @@ public class InputPassPriority extends InputSyncronizedBase {
     private void passPriority(final Runnable runnable) {
         if (FModel.getPreferences().getPrefBoolean(FPref.UI_MANA_LOST_PROMPT)) {
             //if gui player has mana floating that will be lost if phase ended right now, prompt before passing priority
-            GameView gv = getGameView();
+            final Game game = getController().getGame();
             PlayerView pv = getPlayerView();
-            if (gv != null && pv != null) {
-                FCollectionView<StackItemView> stack = gv.getStack();
+            if (game != null && pv != null && pv.isLobbyPlayer(GamePlayerUtil.getGuiPlayer())) {
+                GameView gv = getGameView();
+                FCollectionView<StackItemView> stack = gv != null ? gv.getStack() : null;
+                // Use live mana pool check (not cached PlayerView) to avoid stale state after spending mana
+                Player livePlayer = game.getPhaseHandler().getPriorityPlayer();
                 if ((stack == null || stack.isEmpty()) &&
-                    pv.willLoseManaAtEndOfPhase() &&
-                    pv.isLobbyPlayer(GamePlayerUtil.getGuiPlayer())) {
+                    livePlayer != null && livePlayer.getManaPool().willManaBeLostAtEndOfPhase()) {
                     //must invoke in game thread so dialog can be shown on mobile game
                     ThreadUtil.invokeInGameThread(() -> {
                         Localizer localizer = Localizer.getInstance();
-                        String manaDesc = buildManaDescription(pv);
-                        String message = localizer.getMessage("lblManaFloatingWithAmount", manaDesc);
-                        // Note: hasBurn check still needs the transient Game access for now
-                        // This is acceptable as the mana burn message is just supplementary info
-                        final Game game = getController().getGame();
-                        if (game != null) {
-                            Player player = game.getPhaseHandler().getPriorityPlayer();
-                            if (player != null && player.getManaPool().hasBurn()) {
-                                message += " " + localizer.getMessage("lblYouWillTakeManaBurnDamageEqualAmountFloatingManaLostThisWay");
-                            }
+                        String manaDesc = buildManaDescription(livePlayer.getManaPool());
+                        String phaseName = game.getPhaseHandler().getPhase().nameForUi;
+                        String message = localizer.getMessage("lblManaFloatingWithAmount", manaDesc, phaseName);
+                        if (livePlayer.getManaPool().hasBurn()) {
+                            message += " " + localizer.getMessage("lblYouWillTakeManaBurnDamageEqualAmountFloatingManaLostThisWay");
                         }
                         if (getController().getGui().showConfirmDialog(message, localizer.getMessage("lblManaFloating"), localizer.getMessage("lblOK"), localizer.getMessage("lblCancel"))) {
                             runnable.run();
@@ -267,14 +274,21 @@ public class InputPassPriority extends InputSyncronizedBase {
         runnable.run(); //just pass priority immediately if no mana floating that would be lost
     }
 
-    private static String buildManaDescription(PlayerView pv) {
+    private static String buildManaDescription(ManaPool pool) {
         StringBuilder sb = new StringBuilder();
         byte[] types = forge.card.mana.ManaAtom.MANATYPES;
         String[] symbols = {"{W}", "{U}", "{B}", "{R}", "{G}", "{C}"};
         for (int i = 0; i < types.length; i++) {
-            int amount = pv.getMana(types[i]);
-            for (int j = 0; j < amount; j++) {
-                sb.append(symbols[i]);
+            int amount = pool.getAmountOfColor(types[i]);
+            if (amount == 0) {
+                continue;
+            }
+            if (amount <= 3) {
+                for (int j = 0; j < amount; j++) {
+                    sb.append(symbols[i]);
+                }
+            } else {
+                sb.append(symbols[i]).append("x").append(amount);
             }
         }
         return sb.toString();

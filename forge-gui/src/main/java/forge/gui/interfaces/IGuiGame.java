@@ -235,9 +235,7 @@ public interface IGuiGame {
 
     void restoreOldZones(PlayerView playerView, PlayerZoneUpdates playerZoneUpdates);
 
-    void setHighlighted(PlayerView pv, boolean b);
-
-    void setUsedToPay(CardView card, boolean value);
+    void setHighlighted(GameEntityView pv, boolean b);
 
     void setSelectables(final Iterable<CardView> cards);
 
@@ -328,6 +326,9 @@ public interface IGuiGame {
 
     /** Signal to start a client-side elapsed timer for waiting display. */
     void showWaitingTimer(PlayerView forPlayer, String waitingForPlayerName);
+
+    /** Show or hide a visual disconnect indicator for a remote player. */
+    default void showPlayerDisconnected(PlayerView player, boolean disconnected) { }
 
     /** Returns true if this game instance is a network game. */
     boolean isNetGame();

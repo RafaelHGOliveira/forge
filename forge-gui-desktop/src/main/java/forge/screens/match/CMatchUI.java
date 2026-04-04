@@ -67,6 +67,7 @@ import forge.game.spellability.SpellAbilityView;
 import forge.game.spellability.StackItemView;
 import forge.game.zone.ZoneType;
 import forge.gamemodes.match.AbstractGuiGame;
+import forge.gamemodes.net.server.FServerManager;
 import forge.gui.FNetOverlay;
 import forge.gui.FThreads;
 import forge.gui.GuiBase;
@@ -528,6 +529,23 @@ public final class CMatchUI
         for (final PlayerView p : manaPoolUpdate) {
             getFieldViewFor(p).updateManaPool();
         }
+    }
+
+    @Override
+    public void showPlayerDisconnected(final PlayerView player, final boolean disconnected) {
+        final VField field = getFieldViewFor(player);
+        if (field == null) { return; }
+
+        Runnable replaceAction = null;
+        if (disconnected) {
+            final FServerManager server = FServerManager.getInstance();
+            if (server != null && server.isHosting()) {
+                final String playerName = player.getName();
+                replaceAction = () -> server.replaceDisconnectedWithAI(playerName);
+            }
+        }
+        final Runnable action = replaceAction;
+        FThreads.invokeInEdtNowOrLater(() -> field.setDisconnected(disconnected, action));
     }
 
     // Player's lives and poison counters
@@ -1067,15 +1085,15 @@ public final class CMatchUI
         final GameView gameView = getGameView();
         gameView.getGameLog().addObserver(cLog);
 
-        // Sort players
+        // Sort players — always put local player at index 0 so their field
+        // and hand occupy a consistent screen position across games.
         FCollectionView<PlayerView> players = gameView.getPlayers();
         if (players.size() == 2 && myPlayers != null && myPlayers.size() == 1 && myPlayers.get(0).equals(players.get(1))) {
             players = new FCollection<>(new PlayerView[]{players.get(1), players.get(0)});
         }
         // Multiplayer: sort by turn order with local player first
         final String layout = FModel.getPreferences().getPref(FPref.UI_MULTIPLAYER_FIELD_LAYOUT);
-        if (players.size() > 2 && myPlayers != null && myPlayers.size() >= 1
-                && !"OFF".equals(layout)) {
+        if (players.size() > 2 && myPlayers != null && myPlayers.size() >= 1) {
             players = new FCollection<>(sortPlayersForMultiplayer(players, myPlayers.get(0), "ROWS".equals(layout)));
         }
         initMatch(players, myPlayers);

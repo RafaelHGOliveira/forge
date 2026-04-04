@@ -60,6 +60,7 @@ import forge.util.Localizer;
 import forge.util.collect.FCollection;
 import forge.view.FView;
 
+
 public class FloatingZone extends FloatingCardArea {
     private static final long serialVersionUID = 1927906492186378596L;
 
@@ -543,6 +544,7 @@ public class FloatingZone extends FloatingCardArea {
 
     private FloatingZone(final CMatchUI matchUI, final PlayerView player0, final ZoneType zone0) {
         super(matchUI, new FScrollPane(false, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER));
+
         window.add(getScrollPane(), "grow, push");
         window.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE); //pfps so that old content does not reappear?
         getScrollPane().setViewportView(this);

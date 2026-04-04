@@ -1527,13 +1527,17 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
     public List<SpellAbility> chooseSpellAbilityToPlay() {
         final MagicStack stack = getGame().getStack();
 
-        if (FModel.getPreferences().getPrefBoolean(FPref.YIELD_AUTO_PASS_NO_ACTIONS)) {
+        if (FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS)
+                && FModel.getPreferences().getPrefBoolean(FPref.YIELD_AUTO_PASS_NO_ACTIONS)) {
             final Player player = getPlayer();
             getPlayer().getView().updateHasAvailableActions(player,
                 sa -> ComputerUtilMana.canPayManaCost(sa, player, 0, false));
         }
 
         if (mayAutoPass()) {
+            // Update prompt so it doesn't stay stuck on the previous message
+            // (e.g. a trigger prompt that was already resolved)
+            getGui().updateAutoPassPrompt();
             // avoid prompting for input if current phase is set to be
             // auto-passed instead posing a short delay if needed to
             // prevent the game jumping ahead too quick
@@ -1555,7 +1559,12 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
                     e.printStackTrace();
                 }
             }
-            return null;
+            // Re-check after delay: player may have cancelled yield during the sleep
+            if (!mayAutoPass()) {
+                // Yield was cancelled — fall through to show normal input prompt
+            } else {
+                return null;
+            }
         }
 
         if (stack.isEmpty()) {
@@ -1683,6 +1692,9 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         final List<String> labels;
         switch (kindOfChoice) {
             case HeadsOrTails:
+                if (FModel.getPreferences().getPrefBoolean(FPref.YIELD_AUTO_CALL_COIN_FLIP)) {
+                    return true; // Auto-call Heads — result is 50/50 regardless of call
+                }
                 labels = ImmutableList.of(localizer.getMessage("lblHeads"), localizer.getMessage("lblTails"));
                 break;
             case TapOrUntap:
@@ -1716,6 +1728,11 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
 
     @Override
     public boolean chooseFlipResult(final SpellAbility sa, final Player flipper, final boolean call) {
+        // For called flips (win/lose), auto-select the result matching our call to guarantee a win.
+        // For NoCall flips (heads/tails matters), always prompt the player.
+        if (call && FModel.getPreferences().getPrefBoolean(FPref.YIELD_AUTO_CALL_COIN_FLIP)) {
+            return true;
+        }
         final List<String> labelsSrc = call ? List.of(localizer.getMessage("lblHeads"), localizer.getMessage("lblTails"))
                 : List.of(localizer.getMessage("lblWinTheFlip"), localizer.getMessage("lblLoseTheFlip"));
         return getGui().one(sa.getHostCard().getDisplayName() + " - " + localizer.getMessage("lblChooseAResult"), labelsSrc).equals(labelsSrc.get(0));

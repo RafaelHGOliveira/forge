@@ -1,6 +1,7 @@
 package forge.gamemodes.net;
 
 import forge.gamemodes.net.event.GuiGameEvent;
+import org.tinylog.Logger;
 
 import java.util.concurrent.TimeoutException;
 
@@ -29,7 +30,7 @@ public final class GameProtocolSender {
             method.checkReturnValue(returned);
             return (T) returned;
         } catch (final TimeoutException e) {
-            e.printStackTrace();
+            Logger.warn("Timeout waiting for reply to {} — returning null", method.name());
         }
         return null;
     }

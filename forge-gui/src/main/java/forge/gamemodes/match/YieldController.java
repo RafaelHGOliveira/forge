@@ -45,7 +45,7 @@ public class YieldController {
     private final IGuiGame gui;
 
     // Legacy auto-pass tracking
-    private final Set<PlayerView> autoPassUntilEndOfTurn = Sets.newHashSet();
+    private final Set<PlayerView> autoPassUntilEndOfTurn = Sets.newConcurrentHashSet();
 
     /**
      * Consolidated yield state for a player.
@@ -64,7 +64,7 @@ public class YieldController {
     }
 
     // Extended yield mode tracking (experimental feature)
-    private final Map<PlayerView, YieldState> yieldStates = Maps.newHashMap();
+    private final Map<PlayerView, YieldState> yieldStates = Maps.newConcurrentMap();
 
     /**
      * Create a new YieldController with the given GUI game for updates and state access.
@@ -142,6 +142,25 @@ public class YieldController {
         // Interrupt conditions still break through (attackers, blockers, targeting, etc.)
         if (shouldInterruptYield(player)) {
             return false;
+        }
+        // Conservative safety check: during main phases with empty stack,
+        // never auto-pass on the player's own turn if they have cards in hand.
+        // hasAvailableActions uses AI mana logic and produces false negatives for human
+        // players — in particular it doesn't account for playing a land, which is always
+        // legal on your own turn. On an opponent's turn, also protect against false
+        // negatives when the player has mana available.
+        GameView gameView = gui.getGameView();
+        if (gameView != null) {
+            forge.game.phase.PhaseType phase = gameView.getPhase();
+            boolean isMainPhase = phase == forge.game.phase.PhaseType.MAIN1
+                    || phase == forge.game.phase.PhaseType.MAIN2;
+            boolean stackEmpty = gameView.getStack() == null || gameView.getStack().isEmpty();
+            boolean isOurTurn = player.equals(gameView.getPlayerTurn());
+            if (isMainPhase && stackEmpty
+                    && player.getHand() != null && !player.getHand().isEmpty()
+                    && (isOurTurn || player.hasManaAvailable())) {
+                return false;
+            }
         }
         // Auto-pass if no playable actions
         return !player.hasAvailableActions();
@@ -329,8 +348,8 @@ public class YieldController {
             return false;
         }
 
-        // Check interrupt conditions
-        if (shouldInterruptYield(player)) {
+        // Check interrupt conditions (skip for remote players — host preferences don't apply)
+        if (!gui.isRemoteGuiProxy() && shouldInterruptYield(player)) {
             clearYieldMode(player);
             return false;
         }

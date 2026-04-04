@@ -89,6 +89,8 @@ public class VYieldSettings extends FDialog {
             new String[] { "never", "always", "turn" },
             prefs);
 
+        y = addCheckbox(x, y, w, localizer.getMessage("lblAutoCallCoinFlip"), FPref.YIELD_AUTO_CALL_COIN_FLIP, prefs);
+
         y += SECTION_GAP;
 
         y = addCheckbox(x, y, w, localizer.getMessage("lblSuppressOnOwnTurn"), FPref.YIELD_SUPPRESS_ON_OWN_TURN, prefs);

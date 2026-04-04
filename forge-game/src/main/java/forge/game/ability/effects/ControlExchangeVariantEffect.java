@@ -23,6 +23,8 @@ public class ControlExchangeVariantEffect extends SpellAbilityEffect {
     @Override
     public void resolve(SpellAbility sa) {
         final Player activator = sa.getActivatingPlayer();
+        // Exchange requires exactly 2 targeted players; this checks targets, not
+        // total game players, so it works correctly in multiplayer (3+ player) games.
         final List<Player> players = getTargetPlayers(sa);
         if (players.size() != 2) {
             return;
