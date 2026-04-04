@@ -177,6 +177,15 @@ public class InputPassPriority extends InputSyncronizedBase {
                 stop();
                 return;
             }
+            // Check if the auto-pass toggle was just enabled (user clicked the button,
+            // which called selectButtonOk() — don't also activate the suggestion mode)
+            if (FModel.getPreferences().getPrefBoolean(FPref.YIELD_AUTO_PASS_NO_ACTIONS)) {
+                pendingSuggestion = null;
+                pendingSuggestionType = null;
+                pendingSuggestionMessage = null;
+                stop();
+                return;
+            }
 
             YieldMode mode = pendingSuggestion;
             pendingSuggestion = null;

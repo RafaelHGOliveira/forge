@@ -144,18 +144,21 @@ public class YieldController {
             return false;
         }
         // Conservative safety check: during main phases with empty stack,
-        // if the player has cards in hand and mana available, don't auto-pass.
-        // This prevents false negatives from the hasAvailableActions check
-        // (e.g. after resolving a scry trigger when spells are still castable).
+        // never auto-pass on the player's own turn if they have cards in hand.
+        // hasAvailableActions uses AI mana logic and produces false negatives for human
+        // players — in particular it doesn't account for playing a land, which is always
+        // legal on your own turn. On an opponent's turn, also protect against false
+        // negatives when the player has mana available.
         GameView gameView = gui.getGameView();
         if (gameView != null) {
             forge.game.phase.PhaseType phase = gameView.getPhase();
             boolean isMainPhase = phase == forge.game.phase.PhaseType.MAIN1
                     || phase == forge.game.phase.PhaseType.MAIN2;
             boolean stackEmpty = gameView.getStack() == null || gameView.getStack().isEmpty();
+            boolean isOurTurn = player.equals(gameView.getPlayerTurn());
             if (isMainPhase && stackEmpty
                     && player.getHand() != null && !player.getHand().isEmpty()
-                    && player.hasManaAvailable()) {
+                    && (isOurTurn || player.hasManaAvailable())) {
                 return false;
             }
         }
