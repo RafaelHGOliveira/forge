@@ -198,8 +198,8 @@ public class VField implements IVDoc<CField> {
 
     private void populateArena(final boolean isLocal) {
         final JPanel pnl = parentCell.getBody();
-        pnl.setLayout(new MigLayout("insets 0, gap 0, fill"));
         pnl.removeAll();
+        pnl.setLayout(new MigLayout("insets 0, gap 0, fill"));
 
         // Build zone bar
         zoneBarView = new ZoneBarView(isLocal);

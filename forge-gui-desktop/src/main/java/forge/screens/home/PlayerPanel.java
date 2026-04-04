@@ -113,7 +113,7 @@ public class PlayerPanel extends FPanel {
     private FDeckChooser deckChooser;
 
     private final javax.swing.JLabel lblCmdThumbnail = new javax.swing.JLabel();
-    private final javax.swing.JLabel lblCmdName = new javax.swing.JLabel("Select a commander");
+    private final javax.swing.JLabel lblCmdName = new javax.swing.JLabel("Selecione um commander");
 
     private final VLobby lobby;
     public PlayerPanel(final VLobby lobby, final boolean allowNetworking, final int index, final LobbySlot slot, final boolean mayEdit, final boolean mayControl) {
@@ -547,7 +547,7 @@ public class PlayerPanel extends FPanel {
     }
 
     public void setCommanderPreview(final String commanderName, final boolean hasPartner, final boolean visible) {
-        final String text = commanderName == null ? "Select a commander" :
+        final String text = commanderName == null ? "Selecione um commander" :
                             hasPartner ? commanderName + " & Partner" : commanderName;
         lblCmdName.setText(text);
         lblCmdThumbnail.setVisible(visible);
