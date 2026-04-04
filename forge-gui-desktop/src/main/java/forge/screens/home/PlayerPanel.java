@@ -112,6 +112,9 @@ public class PlayerPanel extends FPanel {
 
     private FDeckChooser deckChooser;
 
+    private final javax.swing.JLabel lblCmdThumbnail = new javax.swing.JLabel();
+    private final javax.swing.JLabel lblCmdName = new javax.swing.JLabel("Selecione um commander");
+
     private final VLobby lobby;
     public PlayerPanel(final VLobby lobby, final boolean allowNetworking, final int index, final LobbySlot slot, final boolean mayEdit, final boolean mayControl) {
         super();
@@ -215,6 +218,18 @@ public class PlayerPanel extends FPanel {
         this.type = slot == null ? LobbySlotType.LOCAL : slot.getType();
         this.setPlayerName(slot == null ? "" : slot.getName());
         this.setAvatarIndex(slot == null ? 0 : slot.getAvatarIndex());
+
+        // Commander thumbnail strip
+        lblCmdThumbnail.setPreferredSize(new java.awt.Dimension(20, 28));
+        lblCmdThumbnail.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(124, 58, 237), 1));
+        lblCmdThumbnail.setOpaque(true);
+        lblCmdThumbnail.setBackground(new java.awt.Color(26, 22, 54));
+        lblCmdThumbnail.setVisible(false);
+        lblCmdName.setFont(lblCmdName.getFont().deriveFont(9f));
+        lblCmdName.setForeground(new java.awt.Color(167, 139, 250));
+        lblCmdName.setVisible(false);
+        this.add(lblCmdThumbnail, "split 2, hidemode 3");
+        this.add(lblCmdName, "hidemode 3, wrap");
 
         update();
     }
@@ -529,6 +544,14 @@ public class PlayerPanel extends FPanel {
 
     public void setCommanderDeckSelectorButtonText(final String text) {
         cmdDeckSelectorBtn.setText(text);
+    }
+
+    public void setCommanderPreview(final String commanderName, final boolean hasPartner, final boolean visible) {
+        final String text = commanderName == null ? "Selecione um commander" :
+                            hasPartner ? commanderName + " & Partner" : commanderName;
+        lblCmdName.setText(text);
+        lblCmdThumbnail.setVisible(visible);
+        lblCmdName.setVisible(visible);
     }
 
     public void focusOnAvatar() {

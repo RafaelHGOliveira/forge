@@ -105,6 +105,9 @@ public class VLobby implements ILobbyView {
     private final Map<FPref, FDeckChooser> cachedDeckChoosers = new HashMap<>();
 
     private final FLabel addPlayerBtn = new FLabel.ButtonBuilder().fontSize(14).text(localizer.getMessage("lblAddAPlayer")).build();
+    private final FLabel lblCommanderInfo = new FLabel.Builder()
+            .fontAlign(javax.swing.SwingConstants.CENTER)
+            .fontSize(11).text("").build();
 
     // Deck frame elements
     private final JPanel decksFrame = new JPanel(new MigLayout("insets 0, gap 0, wrap, hidemode 3"));
@@ -160,8 +163,11 @@ public class VLobby implements ILobbyView {
         if (lobby.hasControl()) {
             addPlayerBtn.setFocusable(true);
             addPlayerBtn.setCommand(lobby::addSlot);
-            playersFrame.add(addPlayerBtn, "height 30px!, growx, pushx");
+            playersFrame.add(addPlayerBtn, "height 30px!, growx, pushx, wrap");
         }
+
+        lblCommanderInfo.setVisible(false);
+        playersFrame.add(lblCommanderInfo, "height 20px!, growx, pushx, wrap");
 
         constructedFrame.add(playersFrame, "gapright 10px, w 50%-5px, growy, pushy");
 
@@ -329,6 +335,7 @@ public class VLobby implements ILobbyView {
             populateDeckPanel(lobby.getGameType());
         }
         refreshPanels(true, true);
+        updateCommanderInfoStrip();
     }
 
     public void setPlayerChangeListener(final IPlayerChangeListener listener) {
@@ -453,6 +460,19 @@ public class VLobby implements ILobbyView {
                 getPlayerPanel(playerIndex).setDeckSelectorButtonText(text);
             }
             fireDeckChangeListener(playerIndex, deck);
+        }
+        if (isCommanderDeck && lobby.getGameType() == GameType.Commander && deck != null
+                && deck.has(DeckSection.Commander)) {
+            final java.util.List<String> names = new java.util.ArrayList<>();
+            final CardPool cp = deck.get(DeckSection.Commander);
+            if (cp != null) {
+                for (final forge.item.PaperCard pc : cp.toFlatList()) {
+                    names.add(pc.getName());
+                }
+            }
+            final String cmdName = forge.screens.match.arena.CommanderDeckExtractor.extractName(() -> names);
+            final boolean partner = forge.screens.match.arena.CommanderDeckExtractor.hasPartner(names);
+            getPlayerPanel(playerIndex).setCommanderPreview(cmdName, partner, true);
         }
         mainChooser.saveState();
     }
@@ -636,6 +656,20 @@ public class VLobby implements ILobbyView {
     }
     boolean hasFocus(final int iPlayer) {
         return iPlayer == playerWithFocus;
+    }
+
+    private void updateCommanderInfoStrip() {
+        final boolean visible = lobby.getGameType() == GameType.Commander;
+        lblCommanderInfo.setVisible(visible);
+        if (visible) {
+            lblCommanderInfo.setText(
+                forge.screens.match.arena.CommanderInfoStripText.format(activePlayersNum));
+        }
+        if (!visible) {
+            for (final PlayerPanel pp : playerPanels) {
+                pp.setCommanderPreview(null, false, false);
+            }
+        }
     }
 
     void setCurrentGameMode(final GameType mode) {
