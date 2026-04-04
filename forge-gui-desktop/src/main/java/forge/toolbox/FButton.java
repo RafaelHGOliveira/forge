@@ -171,7 +171,7 @@ public class FButton extends SkinnedButton implements ILocalRepaint, IButton {
                 imgR = FSkin.getIcon(FSkinProp.IMG_BTN_FOCUS_RIGHT);
             }
         }
-        else if (isFocusOwner()) {
+        else if (isFocusable() && isFocusOwner()) {
             imgL = FSkin.getIcon(FSkinProp.IMG_BTN_FOCUS_LEFT);
             imgM = FSkin.getIcon(FSkinProp.IMG_BTN_FOCUS_CENTER);
             imgR = FSkin.getIcon(FSkinProp.IMG_BTN_FOCUS_RIGHT);
