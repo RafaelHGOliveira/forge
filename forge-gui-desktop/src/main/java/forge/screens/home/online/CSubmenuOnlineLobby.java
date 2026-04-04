@@ -99,8 +99,8 @@ public enum CSubmenuOnlineLobby implements ICDoc, IMenuProvider {
             final JPanel topRow = new JPanel(new MigLayout("insets 0, gap 4", "[grow][pref][pref]"));
             topRow.setOpaque(false);
             final FTextField txtIP = new FTextField.Builder().build();
-            final FButton btnConnect = new FButton("Conectar");
-            final FButton btnHost = new FButton("Hospedar");
+            final FButton btnConnect = new FButton("Connect");
+            final FButton btnHost = new FButton("Host");
             topRow.add(txtIP, "growx");
             topRow.add(btnConnect, "w 100!, h 26!");
             topRow.add(btnHost, "w 100!, h 26!");
@@ -122,7 +122,7 @@ public enum CSubmenuOnlineLobby implements ICDoc, IMenuProvider {
                 final List<String> history = NetConnectUtil.loadHistory();
 
                 if (!favorites.isEmpty()) {
-                    serversPanel.add(makeSectionLabel("Favoritos"), "growx, gaptop 4");
+                    serversPanel.add(makeSectionLabel("Favorites"), "growx, gaptop 4");
                     for (final String url : favorites) {
                         serversPanel.add(makeServerRow(url, true, paneHolder, resultUrl, accepted, rebuildRef), "growx");
                     }
@@ -133,7 +133,7 @@ public enum CSubmenuOnlineLobby implements ICDoc, IMenuProvider {
                     if (!favorites.contains(h)) { historyOnly.add(h); }
                 }
                 if (!historyOnly.isEmpty()) {
-                    serversPanel.add(makeSectionLabel("Recentes"), "growx, gaptop 4");
+                    serversPanel.add(makeSectionLabel("Recent"), "growx, gaptop 4");
                     for (final String url : historyOnly) {
                         serversPanel.add(makeServerRow(url, false, paneHolder, resultUrl, accepted, rebuildRef), "growx");
                     }
@@ -144,8 +144,8 @@ public enum CSubmenuOnlineLobby implements ICDoc, IMenuProvider {
             };
             rebuildRef[0].run();
 
-            // Outer panel
-            final JPanel outer = new JPanel(new MigLayout("insets 0, gap 4 4, wrap 1", "[grow]"));
+            // Outer panel — enforce minimum width so IP field is usable
+            final JPanel outer = new JPanel(new MigLayout("insets 0, gap 4 4, wrap 1", "[grow, 380::]"));
             outer.setOpaque(false);
             outer.add(topRow, "growx");
 
@@ -174,8 +174,8 @@ public enum CSubmenuOnlineLobby implements ICDoc, IMenuProvider {
                 }
             });
 
-            final FOptionPane pane = new FOptionPane(null, "Conectar ao servidor", null, outer,
-                    ImmutableList.of("Cancelar"), -1);
+            final FOptionPane pane = new FOptionPane(null, "Connect to Server", null, outer,
+                    ImmutableList.of("Cancel"), -1);
             paneHolder[0] = pane;
             pane.setDefaultFocus(txtIP);
             pane.setVisible(true);
@@ -212,7 +212,7 @@ public enum CSubmenuOnlineLobby implements ICDoc, IMenuProvider {
 
         final FLabel lblUrl = new FLabel.Builder().text(url).fontSize(12).build();
 
-        final FButton btnConn = new FButton("Conectar");
+        final FButton btnConn = new FButton("Connect");
         btnConn.setFont(FSkin.getFont(11));
         btnConn.addActionListener(e -> {
             resultUrl[0] = url;

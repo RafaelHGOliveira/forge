@@ -269,7 +269,7 @@ public class VField implements IVDoc<CField> {
     private void addCounterRow(final FLabel counterLbl) {
         avatarArea.remove(lblAvatar);
         avatarArea.remove(lblLife);
-        lblLife.setIcon(null);
+        lblLife.setIcon((javax.swing.Icon) null);
         avatarArea.add(lblAvatar, AVATAR_CONSTRAINT_COUNTER);
         avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
         avatarArea.add(counterLbl, "w 100%!, h 20px!, wrap");
@@ -279,7 +279,7 @@ public class VField implements IVDoc<CField> {
         avatarArea.remove(counterLbl);
         avatarArea.remove(lblAvatar);
         avatarArea.remove(lblLife);
-        lblLife.setIcon(null);
+        lblLife.setIcon((javax.swing.Icon) null);
         avatarArea.add(lblAvatar, AVATAR_CONSTRAINT);
         avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
     }
