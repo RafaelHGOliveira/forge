@@ -61,6 +61,151 @@ public enum CSubmenuOnlineLobby implements ICDoc, IMenuProvider {
         });
     }
 
+    private static String showConnectDialog() {
+        if (StringUtils.isBlank(FModel.getPreferences().getPref(FPref.PLAYER_NAME))) {
+            GamePlayerUtil.setPlayerName();
+        }
+
+        final Callable<String> task = () -> {
+            final String[] resultUrl = {null};
+            final boolean[] accepted = {false};
+            final FOptionPane[] paneHolder = {null};
+
+            // Top row: IP field + Connect + Host buttons
+            final JPanel topRow = new JPanel(new MigLayout("insets 0, gap 4", "[grow][pref][pref]"));
+            topRow.setOpaque(false);
+            final FTextField txtIP = new FTextField.Builder().build();
+            final FButton btnConnect = new FButton("Connect");
+            final FButton btnHost = new FButton("Host");
+            topRow.add(txtIP, "growx");
+            topRow.add(btnConnect, "w 100!, h 26!");
+            topRow.add(btnHost, "w 100!, h 26!");
+
+            // Server list panel (rebuilt on star toggles)
+            final JPanel serversPanel = new JPanel(new MigLayout("insets 0, gap 2 2, wrap 1", "[grow]"));
+            serversPanel.setOpaque(false);
+            final JScrollPane scroll = new JScrollPane(serversPanel,
+                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            scroll.setOpaque(false);
+            scroll.getViewport().setOpaque(false);
+            scroll.setBorder(null);
+
+            final Runnable[] rebuildRef = {null};
+            rebuildRef[0] = () -> {
+                serversPanel.removeAll();
+                final List<String> favorites = NetConnectUtil.loadFavorites();
+                final List<String> history = NetConnectUtil.loadHistory();
+
+                if (!favorites.isEmpty()) {
+                    serversPanel.add(makeSectionLabel("Favorites"), "growx, gaptop 4");
+                    for (final String url : favorites) {
+                        serversPanel.add(makeServerRow(url, true, paneHolder, resultUrl, accepted, rebuildRef), "growx");
+                    }
+                }
+
+                final List<String> historyOnly = new ArrayList<>();
+                for (final String h : history) {
+                    if (!favorites.contains(h)) { historyOnly.add(h); }
+                }
+                if (!historyOnly.isEmpty()) {
+                    serversPanel.add(makeSectionLabel("Recent"), "growx, gaptop 4");
+                    for (final String url : historyOnly) {
+                        serversPanel.add(makeServerRow(url, false, paneHolder, resultUrl, accepted, rebuildRef), "growx");
+                    }
+                }
+
+                serversPanel.revalidate();
+                serversPanel.repaint();
+            };
+            rebuildRef[0].run();
+
+            // Outer panel — enforce minimum width so IP field is usable
+            final JPanel outer = new JPanel(new MigLayout("insets 0, gap 4 4, wrap 1", "[grow, 380::]"));
+            outer.setOpaque(false);
+            outer.add(topRow, "growx");
+
+            final boolean hasEntries = !NetConnectUtil.loadFavorites().isEmpty()
+                    || !NetConnectUtil.loadHistory().isEmpty();
+            if (hasEntries) {
+                outer.add(scroll, "growx, h 50::180");
+            }
+
+            // Wire up connect action
+            final Runnable doConnect = () -> {
+                resultUrl[0] = txtIP.getText().trim();
+                accepted[0] = true;
+                if (paneHolder[0] != null) { paneHolder[0].setResult(0); }
+            };
+            btnConnect.addActionListener(e -> doConnect.run());
+            btnHost.addActionListener(e -> {
+                resultUrl[0] = "";
+                accepted[0] = true;
+                if (paneHolder[0] != null) { paneHolder[0].setResult(0); }
+            });
+            txtIP.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(final KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) { doConnect.run(); }
+                }
+            });
+
+            final FOptionPane pane = new FOptionPane(null, "Connect to Server", null, outer,
+                    ImmutableList.of("Cancel"), -1);
+            paneHolder[0] = pane;
+            pane.setDefaultFocus(txtIP);
+            pane.setVisible(true);
+            pane.dispose();
+
+            return accepted[0] ? resultUrl[0] : null;
+        };
+
+        final FutureTask<String> future = new FutureTask<>(task);
+        FThreads.invokeInEdtAndWait(future);
+        try {
+            return future.get();
+        } catch (final Exception e) {
+            return null;
+        }
+    }
+
+    private static JPanel makeServerRow(final String url, final boolean isFavorite,
+            final FOptionPane[] paneHolder, final String[] resultUrl, final boolean[] accepted,
+            final Runnable[] rebuildRef) {
+        final JPanel row = new JPanel(new MigLayout("insets 2 0 2 0, gap 4", "[pref][grow][pref]"));
+        row.setOpaque(false);
+
+        final FButton btnStar = new FButton(isFavorite ? "\u2605" : "\u2606");
+        btnStar.setFont(FSkin.getFont(14));
+        btnStar.addActionListener(e -> {
+            if (isFavorite) {
+                NetConnectUtil.removeFromFavorites(url);
+            } else {
+                NetConnectUtil.addToFavorites(url);
+            }
+            rebuildRef[0].run();
+        });
+
+        final FLabel lblUrl = new FLabel.Builder().text(url).fontSize(12).build();
+
+        final FButton btnConn = new FButton("Connect");
+        btnConn.setFont(FSkin.getFont(11));
+        btnConn.addActionListener(e -> {
+            resultUrl[0] = url;
+            accepted[0] = true;
+            if (paneHolder[0] != null) { paneHolder[0].setResult(0); }
+        });
+
+        row.add(btnStar, "w 30!, h 24!");
+        row.add(lblUrl, "growx");
+        row.add(btnConn, "w 80!, h 24!");
+        return row;
+    }
+
+    private static FLabel makeSectionLabel(final String text) {
+        return new FLabel.Builder().text(text).fontStyle(Font.BOLD).fontSize(12).build();
+    }
+
     private void host() {
         SwingUtilities.invokeLater(() -> {
             SOverlayUtils.startGameOverlay(Localizer.getInstance().getMessage("lblStartingServer"));

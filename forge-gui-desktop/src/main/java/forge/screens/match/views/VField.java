@@ -219,6 +219,24 @@ public class VField implements IVDoc<CField> {
         detailsPanel.updateZones();
     }
 
+    private void addCounterRow(final FLabel counterLbl) {
+        avatarArea.remove(lblAvatar);
+        avatarArea.remove(lblLife);
+        lblLife.setIcon((javax.swing.Icon) null);
+        avatarArea.add(lblAvatar, AVATAR_CONSTRAINT_COUNTER);
+        avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
+        avatarArea.add(counterLbl, "w 100%!, h 20px!, wrap");
+    }
+
+    private void removeCounterRow(final FLabel counterLbl) {
+        avatarArea.remove(counterLbl);
+        avatarArea.remove(lblAvatar);
+        avatarArea.remove(lblLife);
+        lblLife.setIcon((javax.swing.Icon) null);
+        avatarArea.add(lblAvatar, AVATAR_CONSTRAINT);
+        avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
+    }
+
     private void addLblTicket() {
         if (lblTicket.isShowing() || lblExperience.isShowing() || lblEnergy.isShowing() || lblPoison.isShowing()) {
             return; // experience, energy, poison take precedence
