@@ -27,6 +27,13 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
+import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JLabel;
+
+import forge.game.card.CardView;
 import forge.game.card.CounterEnumType;
 import forge.game.player.PlayerView;
 import forge.game.zone.ZoneType;
@@ -34,8 +41,13 @@ import forge.gui.framework.DragCell;
 import forge.gui.framework.DragTab;
 import forge.gui.framework.EDocID;
 import forge.gui.framework.IVDoc;
+import forge.localinstance.properties.ForgePreferences.FPref;
 import forge.localinstance.skin.FSkinProp;
+import forge.model.FModel;
 import forge.screens.match.CMatchUI;
+import forge.screens.match.arena.CommanderDamageView;
+import forge.screens.match.arena.ZoneBarView;
+import forge.screens.match.arena.ZoneBarState;
 import forge.screens.match.controllers.CField;
 import forge.toolbox.FLabel;
 import forge.toolbox.FScrollPane;
@@ -65,6 +77,12 @@ public class VField implements IVDoc<CField> {
 
     // Other fields
     private final PlayerView player;
+    private final CMatchUI matchUI;
+
+    // Arena mode components
+    private ZoneBarView zoneBarView;
+    private CommanderDamageView cmdDamageView;
+    private JPanel inlineZonePanel;
 
     // Top-level containers
     private final FScrollPane scroller = new FScrollPane(false);
@@ -97,6 +115,7 @@ public class VField implements IVDoc<CField> {
      */
     public VField(final CMatchUI matchUI, final EDocID id0, final PlayerView p, final boolean mirror) {
         this.docID = id0;
+        this.matchUI = matchUI;
 
         this.player = p;
         if (p != null) { tab.setText(Localizer.getInstance().getMessage("lblPlayField", p.getName())); }
@@ -153,6 +172,19 @@ public class VField implements IVDoc<CField> {
 
     @Override
     public void populate() {
+        final boolean enhanced = FModel.getPreferences().getPrefBoolean(FPref.UI_COMMANDER_ENHANCED);
+        if (enhanced) {
+            populateArena(isLocalPlayer());
+        } else {
+            populateClassic();
+        }
+    }
+
+    public boolean isLocalPlayer() {
+        return matchUI != null && matchUI.isLocalPlayer(player);
+    }
+
+    private void populateClassic() {
         final JPanel pnl = parentCell.getBody();
         pnl.setLayout(new MigLayout("insets 0, gap 0"));
 
@@ -160,6 +192,129 @@ public class VField implements IVDoc<CField> {
         pnl.add(phaseIndicator, "w 5%!, h 100%!, span 1 2");
         pnl.add(scroller, "w 85%!, h 100%!, span 1 2, wrap");
         pnl.add(detailsPanel, "w 10%!, h 64%!, gapleft 1px");
+    }
+
+    private void populateArena(final boolean isLocal) {
+        final JPanel pnl = parentCell.getBody();
+        pnl.setLayout(new MigLayout("insets 0, gap 0, fill"));
+        pnl.removeAll();
+
+        // Build zone bar
+        zoneBarView = new ZoneBarView(isLocal);
+        zoneBarView.bind(player);
+        zoneBarView.setOnToggle(result -> {
+            if (result == ZoneBarState.Result.OPENED || result == ZoneBarState.Result.SWITCHED) {
+                populateInlineZone(zoneBarView.getState().getExpandedZone());
+            } else {
+                hideInlineZone();
+            }
+        });
+
+        // Inline zone panel (hidden initially, hidemode 3)
+        inlineZonePanel = new JPanel(new MigLayout("insets 2, gap 2, wrap 8"));
+        inlineZonePanel.setOpaque(false);
+        inlineZonePanel.setVisible(false);
+
+        if (isLocal) {
+            // Sidebar: avatar + cmdDamageView (60px wide)
+            JPanel sidebar = new JPanel(new MigLayout("insets 0, gap 2, flowy, fillx"));
+            sidebar.setOpaque(false);
+            sidebar.add(avatarArea, "w 60!, growx");
+            cmdDamageView = buildCmdDamageView();
+            if (cmdDamageView != null) {
+                sidebar.add(cmdDamageView, "growx");
+            }
+
+            // Main area
+            JPanel main = new JPanel(new MigLayout("insets 0, gap 0, flowy, fill"));
+            main.setOpaque(false);
+            main.add(zoneBarView, "h 26!, growx");
+            main.add(inlineZonePanel, "hidemode 3, growx, h 0:180:");
+            main.add(phaseIndicator, "h 16!, growx");
+            main.add(scroller, "grow");
+
+            pnl.add(sidebar, "w 60!, growy");
+            pnl.add(main, "grow");
+        } else {
+            // Opponent: header + zone bar + inline + phase + scroller
+            JPanel header = new JPanel(new MigLayout("insets 0, gap 0, fill"));
+            header.setOpaque(false);
+            header.add(avatarArea, "grow");
+
+            pnl.add(header, "h 28!, growx, wrap");
+            pnl.add(zoneBarView, "h 26!, growx, wrap");
+            pnl.add(inlineZonePanel, "hidemode 3, growx, h 0:180:, wrap");
+            pnl.add(phaseIndicator, "h 16!, growx, wrap");
+            pnl.add(scroller, "grow");
+        }
+    }
+
+    private CommanderDamageView buildCmdDamageView() {
+        if (matchUI == null) return null;
+        List<PlayerView> opponents = new ArrayList<>();
+        if (matchUI.getGameView() != null) {
+            for (PlayerView p : matchUI.getGameView().getPlayers()) {
+                if (!p.equals(player)) opponents.add(p);
+            }
+        }
+        return new CommanderDamageView(player, opponents);
+    }
+
+    private void hideInlineZone() {
+        if (inlineZonePanel != null) {
+            inlineZonePanel.setVisible(false);
+            inlineZonePanel.revalidate();
+            inlineZonePanel.repaint();
+        }
+    }
+
+    private void populateInlineZone(final ZoneType zone) {
+        if (inlineZonePanel == null || zone == null) return;
+        inlineZonePanel.removeAll();
+
+        List<CardView> cards = resolveCards(zone);
+        int max = Math.min(cards.size(), 16);
+        for (int i = 0; i < max; i++) {
+            CardView c = cards.get(i);
+            JLabel thumb = new JLabel();
+            thumb.setPreferredSize(new Dimension(28, 40));
+            thumb.setToolTipText(c.toString());
+            thumb.setOpaque(true);
+            thumb.setBackground(new java.awt.Color(30, 30, 50));
+            inlineZonePanel.add(thumb);
+        }
+        inlineZonePanel.setVisible(true);
+        inlineZonePanel.revalidate();
+        inlineZonePanel.repaint();
+    }
+
+    private List<CardView> resolveCards(final ZoneType zone) {
+        List<CardView> result = new ArrayList<>();
+        if (player == null) return result;
+        Iterable<CardView> cards = null;
+        if (zone == ZoneType.Graveyard) {
+            cards = player.getGraveyard();
+        } else if (zone == ZoneType.Exile) {
+            cards = player.getExile();
+        } else if (zone == ZoneType.Command) {
+            cards = player.getCommand();
+        } else if (zone == ZoneType.Hand) {
+            cards = player.getHand();
+        } else {
+            cards = player.getCards(zone);
+        }
+        if (cards != null) for (CardView c : cards) result.add(c);
+        return result;
+    }
+
+    public void refreshInlineZone() {
+        if (zoneBarView == null) return;
+        ZoneType open = zoneBarView.getState().getExpandedZone();
+        if (open != null) {
+            populateInlineZone(open);
+        }
+        zoneBarView.refresh();
+        if (cmdDamageView != null) cmdDamageView.refresh();
     }
 
     @Override
