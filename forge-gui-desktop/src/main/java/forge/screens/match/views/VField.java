@@ -173,7 +173,8 @@ public class VField implements IVDoc<CField> {
     @Override
     public void populate() {
         final boolean enhanced = FModel.getPreferences().getPrefBoolean(FPref.UI_COMMANDER_ENHANCED);
-        if (enhanced) {
+        final String layout = FModel.getPreferences().getPref(FPref.UI_MULTIPLAYER_FIELD_LAYOUT);
+        if (enhanced && "ARENA".equals(layout)) {
             populateArena(isLocalPlayer());
         } else {
             populateClassic();
@@ -186,6 +187,7 @@ public class VField implements IVDoc<CField> {
 
     private void populateClassic() {
         final JPanel pnl = parentCell.getBody();
+        pnl.removeAll();
         pnl.setLayout(new MigLayout("insets 0, gap 0"));
 
         pnl.add(avatarArea, "w 10%!, h 35%!");
