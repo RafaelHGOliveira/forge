@@ -154,7 +154,15 @@ public class CHand implements ICDoc {
         p.setCardPanels(cardPanels);
         view.updateTabLabel(ordering.size());
 
-        if (integrated || placeholders.isEmpty()) {
+        if (placeholders.isEmpty()) {
+            return;
+        }
+
+        // In arena mode skip the fly-in animation but still enable display on each new panel.
+        if (integrated) {
+            for (final CardPanel placeholder : placeholders) {
+                Animation.moveCard(placeholder);
+            }
             return;
         }
 
