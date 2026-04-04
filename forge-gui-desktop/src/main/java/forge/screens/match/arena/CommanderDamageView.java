@@ -57,7 +57,7 @@ public class CommanderDamageView extends JPanel {
 
         JLabel val = new JLabel(String.valueOf(dmg));
         val.setFont(val.getFont().deriveFont(Font.BOLD, 7f));
-        val.setForeground(CommanderDamageCalculator.isWarning(dmg)
+        val.setForeground((CommanderDamageCalculator.isWarning(dmg) || CommanderDamageCalculator.isLethal(dmg))
             ? new Color(239, 68, 68) : new Color(226, 232, 240));
 
         row.add(name, "w 28!");
