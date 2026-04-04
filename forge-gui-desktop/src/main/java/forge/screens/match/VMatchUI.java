@@ -19,6 +19,7 @@ import forge.gui.framework.VEmptyDoc;
 import forge.localinstance.properties.ForgePreferences;
 import forge.localinstance.properties.ForgePreferences.FPref;
 import forge.model.FModel;
+import forge.screens.match.arena.ArenaLayoutPolicy;
 import forge.screens.match.views.VDev;
 import forge.screens.match.views.VField;
 import forge.screens.match.views.VHand;
@@ -281,9 +282,12 @@ public class VMatchUI implements IVTopLevelUI {
         final ForgePreferences preferences = FModel.getPreferences();
         final String layout = preferences.getPref(FPref.UI_MULTIPLAYER_FIELD_LAYOUT);
         // OFF disables all field layout features — use vanilla i%2 tabbed behavior.
-        final boolean rowsMode = "ROWS".equals(layout);
-        final boolean splitMode = !"OFF".equals(layout)
-                && "SPLIT".equals(preferences.getPref(FPref.UI_MULTIPLAYER_FIELD_PANELS));
+        final boolean arenaMode = ArenaLayoutPolicy.shouldActivate(
+                lstFields.size(), layout,
+                preferences.getPrefBoolean(FPref.UI_COMMANDER_ENHANCED));
+        final boolean rowsMode = "ROWS".equals(layout) && !arenaMode;
+        final boolean splitMode = arenaMode || (!"OFF".equals(layout)
+                && "SPLIT".equals(preferences.getPref(FPref.UI_MULTIPLAYER_FIELD_PANELS)));
 
         // When ROWS mode is active and c0/c1 share the same row (e.g.
         // side-by-side layout after gap-fill), rearrange them vertically
@@ -307,6 +311,23 @@ public class VMatchUI implements IVTopLevelUI {
                             left, rb0.getY() + halfH, fullW, halfH));
                     rearrangedRows = true;
                 }
+            }
+        }
+
+        if (arenaMode) {
+            final DragCell c0 = lstFields.get(0).getParentCell();
+            final DragCell c1 = lstFields.get(1).getParentCell();
+            if (c0 != null && c1 != null) {
+                final RectangleOfDouble rb0 = c0.getRoughBounds();
+                final RectangleOfDouble rb1 = c1.getRoughBounds();
+                final double left  = Math.min(rb0.getX(), rb1.getX());
+                final double right = Math.max(rb0.getX() + rb0.getW(), rb1.getX() + rb1.getW());
+                final double top   = Math.min(rb0.getY(), rb1.getY());
+                final double bot   = Math.max(rb0.getY() + rb0.getH(), rb1.getY() + rb1.getH());
+                final ArenaLayoutPolicy.Bounds ab = ArenaLayoutPolicy.computeBounds(
+                        left, top, right - left, bot - top);
+                c1.setRoughBounds(new RectangleOfDouble(ab.x, ab.opponentY, ab.w, ab.opponentH));
+                c0.setRoughBounds(new RectangleOfDouble(ab.x, ab.localY, ab.w, ab.localH));
             }
         }
 
