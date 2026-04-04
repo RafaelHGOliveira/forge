@@ -449,6 +449,16 @@ public final class FServerManager {
             return "VPN (" + ifName + ")";
         }
 
+        // macOS: utun* = generic tunnel (VPN clients, iCloud Private Relay, etc.)
+        if (lower.startsWith("utun")) {
+            return "VPN Tunnel";
+        }
+
+        // macOS: feth* = fake/virtual ethernet (Docker, virtualization, dev tools)
+        if (lower.startsWith("feth")) {
+            return "Virtual Network";
+        }
+
         // macOS: en0 = Wi-Fi or Ethernet, en1, etc.
         if (lower.startsWith("en")) {
             if (lowerDisplay.contains("wi-fi") || lowerDisplay.contains("wifi") || lowerDisplay.contains("airport")) {
