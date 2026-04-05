@@ -64,6 +64,9 @@ public class HandArea extends CardArea {
     @Override
     public final void mouseOver(final CardPanel panel, final MouseEvent evt) {
         getMatchUI().setCard(panel.getCard(), evt.isShiftDown());
+        if (panel.getCard() != null) {
+            panel.setToolTipText(PlayArea.buildCardTooltip(panel.getCard(), evt.isShiftDown()));
+        }
         super.mouseOver(panel, evt);
     }
 
