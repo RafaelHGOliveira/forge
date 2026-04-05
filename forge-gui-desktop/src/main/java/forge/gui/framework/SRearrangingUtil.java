@@ -435,7 +435,10 @@ public final class SRearrangingUtil {
             return;
         }
 
-        throw new UnsupportedOperationException("Gap was not filled.");
+        // No single neighbor spans the full gap (can happen in custom arena layouts).
+        // Log and recover gracefully rather than crashing the EDT.
+        System.err.println("SRearrangingUtil: gap not filled for cell at "
+                + srcX + "," + srcY + " " + srcW + "x" + srcH);
     }
 
     /**
