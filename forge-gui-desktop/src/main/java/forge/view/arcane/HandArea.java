@@ -53,6 +53,14 @@ public class HandArea extends CardArea {
         this.setMaxCardsPerRow(FModel.getPreferences().getPrefInt(FPref.UI_HAND_MAX_CARDS_PER_ROW));
         this.setNoOverlap(FModel.getPreferences().getPrefBoolean(FPref.UI_HAND_NO_OVERLAP));
         this.setCenterCards(true);
+        this.setToolTipText(""); // register container with ToolTipManager (see getToolTipText override)
+    }
+
+    @Override
+    public String getToolTipText(final MouseEvent evt) {
+        final CardPanel hit = getCardPanel(evt.getX(), evt.getY());
+        if (hit == null || hit.getCard() == null) { return null; }
+        return PlayArea.buildCardTooltip(hit.getCard(), evt.isShiftDown());
     }
 
     @Override
@@ -64,9 +72,6 @@ public class HandArea extends CardArea {
     @Override
     public final void mouseOver(final CardPanel panel, final MouseEvent evt) {
         getMatchUI().setCard(panel.getCard(), evt.isShiftDown());
-        if (panel.getCard() != null) {
-            panel.setToolTipText(PlayArea.buildCardTooltip(panel.getCard(), evt.isShiftDown()));
-        }
         super.mouseOver(panel, evt);
     }
 

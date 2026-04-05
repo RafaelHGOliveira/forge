@@ -86,6 +86,14 @@ public class PlayArea extends CardPanelContainer implements CardPanelMouseListen
         this.zone = zone;
         this.makeTokenRow = FModel.getPreferences().getPrefBoolean(FPref.UI_TOKENS_IN_SEPARATE_ROW);
         this.stackCreatures = FModel.getPreferences().getPrefBoolean(FPref.UI_STACK_CREATURES);
+        this.setToolTipText(""); // register container with ToolTipManager (see getToolTipText override)
+    }
+
+    @Override
+    public String getToolTipText(final MouseEvent evt) {
+        final CardPanel hit = getCardPanel(evt.getX(), evt.getY());
+        if (hit == null || hit.getCard() == null) { return null; }
+        return buildCardTooltip(hit.getCard(), evt.isShiftDown());
     }
 
     private CardStackRow collectAllLands(List<CardPanel> remainingPanels) {
@@ -662,9 +670,6 @@ public class PlayArea extends CardPanelContainer implements CardPanelMouseListen
     @Override
     public final void mouseOver(final CardPanel panel, final MouseEvent evt) {
         getMatchUI().setCard(panel.getCard(), evt.isShiftDown());
-        if (panel.getCard() != null) {
-            panel.setToolTipText(buildCardTooltip(panel.getCard(), evt.isShiftDown()));
-        }
         super.mouseOver(panel, evt);
     }
 
