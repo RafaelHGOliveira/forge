@@ -412,7 +412,10 @@ public class PhaseHandler implements java.io.Serializable {
                     game.getEndOfCombat().registerUntilEndCommand(playerTurn);
 
                     for (Player player : game.getPlayers()) {
-                        player.getController().autoPassCancel(); // autopass won't wrap to next turn
+                        // Legacy auto-pass should not wrap to the next turn.
+                        // Experimental modes (UNTIL_YOUR_NEXT_TURN etc.) are intentionally
+                        // left active so they can span multiple turns as intended.
+                        player.getController().autoPassCancelLegacy();
                     }
 
                     nUpkeepsThisTurn = 0;

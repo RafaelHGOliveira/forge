@@ -265,6 +265,11 @@ public interface IGuiGame {
 
     void autoPassCancel(PlayerView player);
 
+    /** Cancel only legacy auto-pass; experimental yield modes manage themselves. */
+    default void autoPassCancelLegacy(PlayerView player) {
+        autoPassCancel(player);
+    }
+
     void updateAutoPassPrompt();
 
     boolean shouldAutoYield(String key);
