@@ -32,6 +32,8 @@ import forge.screens.match.CMatchUI;
 import forge.toolbox.special.CardZoomer;
 import forge.util.Localizer;
 import forge.view.KeyboardShortcutsDialog;
+import forge.view.arcane.CardPanel;
+import forge.view.arcane.CardPanelContainer;
 
 /** 
  * Consolidates keyboard shortcut assembly into one location
@@ -314,7 +316,12 @@ public class KeyboardShortcuts {
                 if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
                 if (matchUI == null) { return; }
                 if (!CardZoomer.SINGLETON_INSTANCE.isZoomerOpen()) {
-                    CardZoomer.SINGLETON_INSTANCE.doMouseWheelZoom();
+                    final CardPanel hovered = CardPanelContainer.lastHoveredPanel;
+                    if (hovered != null && hovered.getCard() != null
+                            && matchUI.mayView(hovered.getCard())) {
+                        CardZoomer.SINGLETON_INSTANCE.setCard(hovered.getCard().getCurrentState(), false);
+                        CardZoomer.SINGLETON_INSTANCE.doMouseWheelZoom();
+                    }
                 } else {
                     CardZoomer.SINGLETON_INSTANCE.closeZoomer();
                 }
