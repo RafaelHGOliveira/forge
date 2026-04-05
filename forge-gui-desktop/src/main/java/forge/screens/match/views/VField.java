@@ -257,10 +257,10 @@ public class VField implements IVDoc<CField> {
             contentRow.add(inlineZonePanel, "hidemode 3, w 0:180:, growy");
             contentRow.add(main, "grow");
 
-            // Phase strip sits above contentRow, offset by sidebar width (gapleft 64)
-            // so it appears right next to the avatar without coupling to card layout.
+            // Phase strip sits above contentRow, left-aligned with the avatar column
+            // so it stays anchored to the player's side regardless of card layout.
             pnl.setLayout(new MigLayout("insets 0, gap 0, flowy, fill"));
-            pnl.add(phaseIndicator, "h 18!, wmin 180, wmax 360, gapleft 64");
+            pnl.add(phaseIndicator, "h 18!, wmin 180, wmax 360, align left");
             pnl.add(contentRow, "grow");
         } else {
             // Opponent: sidebar (avatar on top + zone bar) | inline zone | (hand / battlefield / phase strip)
