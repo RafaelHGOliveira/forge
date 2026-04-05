@@ -159,6 +159,12 @@ public class NetConnectUtil {
 
         view.update(true);
 
+        // Auto-mark the host (slot 0) as ready — they chose to host, no extra click needed.
+        if (lobby.getSlot(0) != null) {
+            lobby.getSlot(0).setIsReady(true);
+            server.updateLobbyState();
+        }
+
         return new ChatMessage(null, Localizer.getInstance().getMessage("lblHostingPortOnN", String.valueOf(port)));
     }
 

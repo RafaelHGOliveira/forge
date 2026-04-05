@@ -187,6 +187,8 @@ public class FDialog extends SkinnedDialog implements ITitleBarOwner, KeyEventDi
                 }
                 openModals.push(this);
             }
+            // Ensure the dialog appears in front of the main window (macOS z-order fix).
+            SwingUtilities.invokeLater(this::toFront);
         }
         else {
             KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(this);

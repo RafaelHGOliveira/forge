@@ -73,8 +73,13 @@ public class CHand implements ICDoc {
             @Override
             public void mouseDragEnd(final CardPanel dragPanel, final MouseEvent evt) {
                 final int index = CHand.this.view.getHandArea().getCardPanels().indexOf(dragPanel);
+                if (index < 0) { return; }
                 synchronized (ordering) {
                     ordering.remove(dragPanel.getCard());
+                    // Guard: if ordering is out of sync with the hand area (e.g. updateHand
+                    // was skipped while layout was not yet realized), skip the reorder rather
+                    // than throwing IndexOutOfBoundsException.
+                    if (index > ordering.size()) { return; }
                     ordering.add(index, dragPanel.getCard());
                     matchUI.getGameController(player).reorderHand(dragPanel.getCard(), index);
                 }

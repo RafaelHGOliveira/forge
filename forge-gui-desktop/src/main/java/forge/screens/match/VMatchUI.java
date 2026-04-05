@@ -1,9 +1,12 @@
 package forge.screens.match;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
@@ -11,6 +14,8 @@ import forge.Singletons;
 import forge.gui.framework.DragCell;
 import forge.gui.framework.EDocID;
 import forge.gui.framework.FScreen;
+import forge.gui.framework.ICDoc;
+import forge.gui.framework.IVDoc;
 import forge.gui.framework.IVTopLevelUI;
 import forge.gui.framework.RectangleOfDouble;
 import forge.gui.framework.SRearrangingUtil;
@@ -40,6 +45,17 @@ public class VMatchUI implements IVTopLevelUI {
     // Fractional height (0–1) reserved for the yield options panel when it is
     // inserted between the stack/log cell and the prompt cell.
     private static final double YIELD_PANEL_HEIGHT_FRACTION = 0.193;
+
+    // Cells containing these docs are kept visible when arena mode hides side panels.
+    private static final Set<EDocID> ARENA_KEEP_DOCS = EnumSet.of(
+            EDocID.BUTTON_DOCK,
+            EDocID.REPORT_YIELD,
+            EDocID.REPORT_LOG,
+            EDocID.REPORT_MESSAGE,
+            EDocID.REPORT_STACK,
+            EDocID.CARD_PICTURE,
+            EDocID.CARD_DETAIL
+    );
 
     private List<VField> lstFields = new ArrayList<>();
     private List<VHand> lstHands = new ArrayList<>();
@@ -442,10 +458,8 @@ public class VMatchUI implements IVTopLevelUI {
             SResizingUtil.resizeWindow();
         }
 
-        // In arena mode, hide all non-field cells so the two field bands
-        // (opponent + local) occupy the full window without side panels.
         if (arenaMode) {
-            final java.util.Set<DragCell> fieldCells = new java.util.HashSet<>();
+            final Set<DragCell> fieldCells = new HashSet<>();
             for (final VField vf : lstFields) {
                 if (vf.getParentCell() != null) {
                     fieldCells.add(vf.getParentCell());
@@ -454,7 +468,15 @@ public class VMatchUI implements IVTopLevelUI {
             fieldCells.addAll(dynamicCells);
             hiddenArenaCells.clear();
             for (final DragCell cell : FView.SINGLETON_INSTANCE.getDragCells()) {
-                if (!fieldCells.contains(cell)) {
+                if (fieldCells.contains(cell)) continue;
+                boolean keep = false;
+                for (final IVDoc<? extends ICDoc> doc : cell.getDocs()) {
+                    if (ARENA_KEEP_DOCS.contains(doc.getDocumentID())) {
+                        keep = true;
+                        break;
+                    }
+                }
+                if (!keep) {
                     cell.setVisible(false);
                     hiddenArenaCells.add(cell);
                 }

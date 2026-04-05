@@ -268,8 +268,8 @@ public class VField implements IVDoc<CField> {
             main.add(zoneBarView, "h 26!, growx");
             main.add(inlineZonePanel, "hidemode 3, growx, h 0:180:");
             main.add(scroller, "grow");
-            main.add(phaseIndicator, "h 14!, growx");
-            main.add(handScroller, "h 150!, growx");
+            main.add(phaseIndicator, "h 18!, growx");
+            main.add(handScroller, "h 160!, growx");
             phaseIndicator.setHorizontal();
 
             pnl.add(sidebar, "w 60!, growy");
@@ -283,9 +283,9 @@ public class VField implements IVDoc<CField> {
             pnl.add(header, "h 28!, growx, wrap");
             pnl.add(zoneBarView, "h 26!, growx, wrap");
             pnl.add(inlineZonePanel, "hidemode 3, growx, h 0:180:, wrap");
-            pnl.add(handScroller, "h 60!, growx, wrap");
+            pnl.add(handScroller, "h 72!, growx, wrap");
             pnl.add(scroller, "grow, wrap");
-            pnl.add(phaseIndicator, "h 14!, growx, wrap");
+            pnl.add(phaseIndicator, "h 18!, growx, wrap");
             phaseIndicator.setHorizontal();
         }
     }
