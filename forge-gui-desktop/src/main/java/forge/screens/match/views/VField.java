@@ -20,20 +20,27 @@ package forge.screens.match.views;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
-
-import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
+
+import java.awt.Dimension;
+
+import forge.ImageKeys;
 
 import forge.game.card.CardView;
 import forge.game.card.CounterEnumType;
@@ -295,12 +302,12 @@ public class VField implements IVDoc<CField> {
 
             JPanel content = new JPanel(new MigLayout("insets 0, gap 0, flowy, fill"));
             content.setOpaque(false);
-            content.add(handScroller, "h 72!, growx");
+            content.add(handScroller, "h 96!, growx");
             content.add(scroller, "grow");
             content.add(phaseIndicator, "h 18!, growx");
             phaseIndicator.setHorizontal();
 
-            pnl.add(sidebarPanel, "w 58!, growy");
+            pnl.add(sidebarPanel, "w 72!, growy");
             pnl.add(inlineZonePanel, "hidemode 3, w 0:180:, growy");
             pnl.add(content, "grow");
         }
@@ -354,6 +361,9 @@ public class VField implements IVDoc<CField> {
         }
     }
 
+    private static final int INLINE_THUMB_W = 48;
+    private static final int INLINE_THUMB_H = 67;
+
     private void populateInlineZone(final ZoneType zone) {
         if (inlineZonePanel == null || zone == null) return;
         inlineZonePanel.removeAll();
@@ -362,16 +372,43 @@ public class VField implements IVDoc<CField> {
         int max = Math.min(cards.size(), 16);
         for (int i = 0; i < max; i++) {
             CardView c = cards.get(i);
-            JLabel thumb = new JLabel();
-            thumb.setPreferredSize(new Dimension(28, 40));
-            thumb.setToolTipText(c.toString());
+            JLabel thumb = new JLabel("…");
+            thumb.setPreferredSize(new Dimension(INLINE_THUMB_W, INLINE_THUMB_H));
+            thumb.setToolTipText(PlayArea.buildCardTooltip(c, false));
             thumb.setOpaque(true);
-            thumb.setBackground(new java.awt.Color(30, 30, 50));
+            thumb.setHorizontalAlignment(SwingConstants.CENTER);
+            thumb.setForeground(new Color(100, 100, 120));
+            thumb.setBackground(new Color(30, 30, 50));
             inlineZonePanel.add(thumb);
+            loadInlineThumbnailAsync(c, thumb);
         }
         inlineZonePanel.setVisible(true);
         inlineZonePanel.revalidate();
         inlineZonePanel.repaint();
+    }
+
+    private void loadInlineThumbnailAsync(final CardView card, final JLabel label) {
+        final String imageKey = card.getCurrentState().getImageKey(null);
+        if (imageKey == null) return;
+        final Thread loader = new Thread(() -> {
+            try {
+                final File f = ImageKeys.getImageFile(imageKey);
+                if (f != null && f.exists()) {
+                    final BufferedImage img = ImageIO.read(f);
+                    if (img != null) {
+                        final Image scaled = img.getScaledInstance(INLINE_THUMB_W, INLINE_THUMB_H, Image.SCALE_SMOOTH);
+                        SwingUtilities.invokeLater(() -> {
+                            label.setIcon(new ImageIcon(scaled));
+                            label.setText(null);
+                            label.revalidate();
+                            label.repaint();
+                        });
+                    }
+                }
+            } catch (final Exception ignored) { }
+        });
+        loader.setDaemon(true);
+        loader.start();
     }
 
     private List<CardView> resolveCards(final ZoneType zone) {

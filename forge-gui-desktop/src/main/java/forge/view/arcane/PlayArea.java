@@ -673,7 +673,7 @@ public class PlayArea extends CardPanelContainer implements CardPanelMouseListen
         super.mouseOver(panel, evt);
     }
 
-    static String buildCardTooltip(final CardView card, final boolean altState) {
+    public static String buildCardTooltip(final CardView card, final boolean altState) {
         final CardStateView state = card.getState(altState);
         if (state == null) return null;
         final boolean mayView = card.canBeShownToAny(null);
