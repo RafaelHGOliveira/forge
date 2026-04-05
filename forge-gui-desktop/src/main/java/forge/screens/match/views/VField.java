@@ -57,6 +57,7 @@ import forge.toolbox.FSkin.SkinnedPanel;
 import forge.toolbox.special.PhaseIndicator;
 import forge.toolbox.special.PlayerDetailsPanel;
 import forge.util.Localizer;
+import forge.view.arcane.CardPanel;
 import forge.view.arcane.HandArea;
 import forge.view.arcane.PlayArea;
 import net.miginfocom.swing.MigLayout;
@@ -237,19 +238,20 @@ public class VField implements IVDoc<CField> {
                 sidebar.add(cmdDamageView, "growx");
             }
 
-            // Main area
+            // Main area: zone bar → inline zone → battlefield → phase strip → hand
             JPanel main = new JPanel(new MigLayout("insets 0, gap 0, flowy, fill"));
             main.setOpaque(false);
             main.add(zoneBarView, "h 26!, growx");
             main.add(inlineZonePanel, "hidemode 3, growx, h 0:180:");
-            main.add(phaseIndicator, "h 16!, growx");
             main.add(scroller, "grow");
+            main.add(phaseIndicator, "h 14!, growx");
             main.add(handScroller, "h 150!, growx");
+            phaseIndicator.setHorizontal();
 
             pnl.add(sidebar, "w 60!, growy");
             pnl.add(main, "grow");
         } else {
-            // Opponent: header + zone bar + inline + phase + scroller
+            // Opponent: header → zone bar → inline zone → hand → battlefield → phase strip
             JPanel header = new JPanel(new MigLayout("insets 0, gap 0, fill"));
             header.setOpaque(false);
             header.add(avatarArea, "grow");
@@ -257,9 +259,10 @@ public class VField implements IVDoc<CField> {
             pnl.add(header, "h 28!, growx, wrap");
             pnl.add(zoneBarView, "h 26!, growx, wrap");
             pnl.add(inlineZonePanel, "hidemode 3, growx, h 0:180:, wrap");
-            pnl.add(phaseIndicator, "h 16!, growx, wrap");
             pnl.add(handScroller, "h 60!, growx, wrap");
-            pnl.add(scroller, "grow");
+            pnl.add(scroller, "grow, wrap");
+            pnl.add(phaseIndicator, "h 14!, growx, wrap");
+            phaseIndicator.setHorizontal();
         }
     }
 
@@ -319,6 +322,28 @@ public class VField implements IVDoc<CField> {
         }
         if (cards != null) for (CardView c : cards) result.add(c);
         return result;
+    }
+
+    /**
+     * Populates the embedded HandArea for an opponent with their current hand
+     * cards (face-down in network games, actual cards in local AI games where
+     * the full game state is accessible). No-ops if this is the local player
+     * or if the HandArea hasn't been created yet.
+     */
+    public void updateOpponentHand() {
+        if (isLocalPlayer() || handArea == null || player == null) return;
+        final Iterable<CardView> hand = player.getHand();
+        final List<CardPanel> panels = new ArrayList<>();
+        if (hand != null) {
+            for (final CardView card : hand) {
+                CardPanel cp = handArea.getCardPanel(card.getId());
+                if (cp == null) {
+                    cp = new CardPanel(matchUI, card);
+                }
+                panels.add(cp);
+            }
+        }
+        handArea.setCardPanels(panels);
     }
 
     public void refreshInlineZone() {
@@ -390,6 +415,9 @@ public class VField implements IVDoc<CField> {
     }
     public void updateZones() {
         detailsPanel.updateZones();
+        if (zoneBarView != null) {
+            zoneBarView.refresh();
+        }
     }
 
     private void addCounterRow(final FLabel counterLbl) {

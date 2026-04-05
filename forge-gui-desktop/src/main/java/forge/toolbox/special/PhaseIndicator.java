@@ -76,6 +76,34 @@ public class PhaseIndicator extends JPanel {
         lblCleanup.setToolTipText(localizer.getMessage("htmlPhaseCleanupTooltip"));
         this.add(lblCleanup, constraints);
     }
+
+    /**
+     * Switches to a compact horizontal layout where all 12 phase labels are laid
+     * out side-by-side. Used in arena mode where vertical space is scarce.
+     * Group separators are expressed as extra left-gap between groups.
+     */
+    public void setHorizontal() {
+        this.removeAll();
+        this.setLayout(new MigLayout("insets 1 0 1 0, gap 0"));
+        // Each label grows equally; small extra gap marks a new phase group.
+        final String lbl = "h 100%!, growx";
+        final String grp = "h 100%!, growx, gapleft 3px";
+
+        this.add(lblUpkeep,           lbl);
+        this.add(lblDraw,             lbl);
+        this.add(lblMain1,            grp);
+        this.add(lblBeginCombat,      grp);
+        this.add(lblDeclareAttackers, lbl);
+        this.add(lblDeclareBlockers,  lbl);
+        this.add(lblFirstStrike,      lbl);
+        this.add(lblCombatDamage,     lbl);
+        this.add(lblEndCombat,        lbl);
+        this.add(lblMain2,            grp);
+        this.add(lblEndTurn,          grp);
+        this.add(lblCleanup,          lbl);
+        this.revalidate();
+        this.repaint();
+    }
     
 
     //========== Custom class handling
