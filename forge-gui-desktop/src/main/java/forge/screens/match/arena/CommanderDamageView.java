@@ -26,6 +26,7 @@ public class CommanderDamageView extends JPanel {
         this.opponents = new ArrayList<>();
         if (opponents != null) for (PlayerView o : opponents) this.opponents.add(o);
         buildRows();
+        setVisible(totalDamage() > 0);
     }
 
     private void buildRows() {
@@ -35,6 +36,12 @@ public class CommanderDamageView extends JPanel {
         title.setForeground(new Color(124, 58, 237));
         add(title, "gapbottom 2");
         for (PlayerView opp : opponents) add(buildRow(opp), "growx");
+    }
+
+    private int totalDamage() {
+        int total = 0;
+        for (PlayerView opp : opponents) total += computeDamageFor(opp);
+        return total;
     }
 
     private JPanel buildRow(final PlayerView opp) {
@@ -82,8 +89,12 @@ public class CommanderDamageView extends JPanel {
     }
 
     public void refresh() {
-        buildRows();
-        revalidate();
-        repaint();
+        final int total = totalDamage();
+        setVisible(total > 0);
+        if (total > 0) {
+            buildRows();
+            revalidate();
+            repaint();
+        }
     }
 }

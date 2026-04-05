@@ -316,6 +316,14 @@ public final class CMatchUI
         registerDocs();
 
         screen.setCloseButtonTooltip(getConcedeCaption() + " Game");
+
+        // In forge-beta arena mode, size the window to 1280x820 (13" MacBook friendly).
+        if (ArenaLayoutPolicy.shouldActivate(
+                sortedPlayers.size(),
+                FModel.getPreferences().getPref(FPref.UI_MULTIPLAYER_FIELD_LAYOUT),
+                FModel.getPreferences().getPrefBoolean(FPref.UI_COMMANDER_ENHANCED))) {
+            Singletons.getView().getFrame().setWindowLayout(80, 40, 1280, 820, false, false);
+        }
     }
 
     private void initHandViews() {

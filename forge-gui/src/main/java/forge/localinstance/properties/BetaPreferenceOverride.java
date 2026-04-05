@@ -29,4 +29,13 @@ public final class BetaPreferenceOverride {
                                  final Properties systemProps) {
         return apply(prefSetter, systemProps, () -> "OFF");
     }
+
+    /**
+     * Resets beta-only preferences so the stable launcher is never contaminated
+     * by a previous forge-beta session that persisted its overrides.
+     */
+    public static void reset(final BiConsumer<String, String> prefSetter) {
+        prefSetter.accept(PREF_KEY, "false");
+        prefSetter.accept(LAYOUT_KEY, "OFF");
+    }
 }

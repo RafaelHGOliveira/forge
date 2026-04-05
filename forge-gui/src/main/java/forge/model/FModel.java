@@ -159,12 +159,19 @@ public final class FModel {
             if (adjustPrefs != null) {
                 adjustPrefs.apply(preferences);
             }
-            // Beta launcher override (in-memory only, never persisted)
-            forge.localinstance.properties.BetaPreferenceOverride.apply(
+            // Beta launcher override: only active when -Dforge.commander.enhanced=true is set.
+            // If the JVM property is absent, always reset the pref so a previously-run
+            // forge-beta cannot contaminate the stable forge.exe launcher.
+            boolean betaActive = forge.localinstance.properties.BetaPreferenceOverride.apply(
                 (k, v) -> preferences.setPref(ForgePreferences.FPref.valueOf(k), v),
                 System.getProperties(),
                 () -> preferences.getPref(FPref.UI_MULTIPLAYER_FIELD_LAYOUT)
             );
+            if (!betaActive) {
+                forge.localinstance.properties.BetaPreferenceOverride.reset(
+                    (k, v) -> preferences.setPref(ForgePreferences.FPref.valueOf(k), v)
+                );
+            }
             GamePlayerUtil.getGuiPlayer().setName(preferences.getPref(FPref.PLAYER_NAME));
         }
         catch (final Exception exn) {
