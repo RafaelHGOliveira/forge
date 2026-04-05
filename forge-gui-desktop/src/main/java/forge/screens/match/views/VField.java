@@ -18,6 +18,7 @@
 package forge.screens.match.views;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -29,6 +30,7 @@ import javax.swing.border.LineBorder;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.JLabel;
@@ -46,8 +48,8 @@ import forge.localinstance.skin.FSkinProp;
 import forge.model.FModel;
 import forge.screens.match.CMatchUI;
 import forge.screens.match.arena.CommanderDamageView;
-import forge.screens.match.arena.ZoneBarView;
 import forge.screens.match.arena.ZoneBarState;
+import forge.screens.match.arena.ZoneSidebarView;
 import forge.screens.match.controllers.CField;
 import forge.toolbox.FLabel;
 import forge.toolbox.FScrollPane;
@@ -82,7 +84,7 @@ public class VField implements IVDoc<CField> {
     private final CMatchUI matchUI;
 
     // Arena mode components
-    private ZoneBarView zoneBarView;
+    private ZoneSidebarView zoneBarView;
     private CommanderDamageView cmdDamageView;
     private JPanel inlineZonePanel;
 
@@ -212,8 +214,8 @@ public class VField implements IVDoc<CField> {
         pnl.removeAll();
         pnl.setLayout(new MigLayout("insets 0, gap 0, fill"));
 
-        // Build zone bar
-        zoneBarView = new ZoneBarView(isLocal);
+        // Build zone sidebar (vertical: CMD, GY, EX, LIB)
+        zoneBarView = new ZoneSidebarView(isLocal);
         zoneBarView.bind(player);
         zoneBarView.setOnToggle(result -> {
             if (result == ZoneBarState.Result.OPENED || result == ZoneBarState.Result.SWITCHED) {
@@ -229,41 +231,75 @@ public class VField implements IVDoc<CField> {
         inlineZonePanel.setVisible(false);
 
         if (isLocal) {
-            // Sidebar: avatar + cmdDamageView (60px wide)
-            JPanel sidebar = new JPanel(new MigLayout("insets 0, gap 2, flowy, fillx"));
+            // Left sidebar: zone sidebar (CMD/GY/EX/LIB) + avatar + cmdDamageView
+            JPanel sidebar = new JPanel(new MigLayout("insets 0, gap 2, flowy, fillx, aligny top"));
             sidebar.setOpaque(false);
-            sidebar.add(avatarArea, "w 60!, growx");
+            sidebar.add(avatarArea, "w 62!, growx, h 60!");
             cmdDamageView = buildCmdDamageView();
             if (cmdDamageView != null) {
                 sidebar.add(cmdDamageView, "growx");
             }
+            sidebar.add(zoneBarView, "growx, growy");
 
-            // Main area: zone bar → inline zone → battlefield → phase strip → hand
+            // Main area: inline zone → battlefield → phase strip → hand bar → hand
             JPanel main = new JPanel(new MigLayout("insets 0, gap 0, flowy, fill"));
             main.setOpaque(false);
-            main.add(zoneBarView, "h 26!, growx");
             main.add(inlineZonePanel, "hidemode 3, growx, h 0:180:");
             main.add(scroller, "grow");
             main.add(phaseIndicator, "h 18!, growx");
-            main.add(handScroller, "h 160!, growx");
+            main.add(buildHandBar(), "h 14!, growx");
+            main.add(handScroller, "h 146!, growx");
             phaseIndicator.setHorizontal();
 
-            pnl.add(sidebar, "w 60!, growy");
+            pnl.add(sidebar, "w 64!, growy");
             pnl.add(main, "grow");
         } else {
-            // Opponent: header → zone bar → inline zone → hand → battlefield → phase strip
+            // Opponent: avatar header + left zone sidebar + (inline zone / hand / battlefield / phase strip)
             JPanel header = new JPanel(new MigLayout("insets 0, gap 0, fill"));
             header.setOpaque(false);
             header.add(avatarArea, "grow");
 
-            pnl.add(header, "h 28!, growx, wrap");
-            pnl.add(zoneBarView, "h 26!, growx, wrap");
-            pnl.add(inlineZonePanel, "hidemode 3, growx, h 0:180:, wrap");
-            pnl.add(handScroller, "h 72!, growx, wrap");
-            pnl.add(scroller, "grow, wrap");
-            pnl.add(phaseIndicator, "h 18!, growx, wrap");
+            JPanel content = new JPanel(new MigLayout("insets 0, gap 0, flowy, fill"));
+            content.setOpaque(false);
+            content.add(header, "h 28!, growx");
+            content.add(inlineZonePanel, "hidemode 3, growx, h 0:120:");
+            content.add(handScroller, "h 72!, growx");
+            content.add(scroller, "grow");
+            content.add(phaseIndicator, "h 18!, growx");
             phaseIndicator.setHorizontal();
+
+            pnl.add(zoneBarView, "w 58!, growy");
+            pnl.add(content, "grow");
         }
+    }
+
+    private JPanel buildHandBar() {
+        JPanel bar = new JPanel(new MigLayout("insets 0 2 0 2, gap 0, aligny center"));
+        bar.setOpaque(false);
+
+        JLabel sortBtn = new JLabel("↑CMC");
+        sortBtn.setFont(new Font("SansSerif", Font.PLAIN, 9));
+        sortBtn.setForeground(new Color(120, 120, 140));
+        sortBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        sortBtn.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) { sortHandByCmc(); }
+            @Override public void mouseEntered(MouseEvent e) { sortBtn.setForeground(new Color(180, 180, 210)); }
+            @Override public void mouseExited(MouseEvent e)  { sortBtn.setForeground(new Color(120, 120, 140)); }
+        });
+
+        bar.add(sortBtn, "");
+        return bar;
+    }
+
+    private void sortHandByCmc() {
+        if (handArea == null) return;
+        List<CardPanel> panels = new ArrayList<>(handArea.getCardPanels());
+        panels.sort(Comparator.comparingInt(p -> {
+            if (p.getCard() == null || p.getCard().getCurrentState() == null) return 0;
+            forge.card.mana.ManaCost mc = p.getCard().getCurrentState().getManaCost();
+            return mc == null ? 0 : mc.getCMC();
+        }));
+        handArea.setCardPanels(panels);
     }
 
     private CommanderDamageView buildCmdDamageView() {

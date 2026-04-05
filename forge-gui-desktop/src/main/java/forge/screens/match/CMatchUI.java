@@ -1069,9 +1069,14 @@ public final class CMatchUI
         }
         // Multiplayer: sort by turn order with local player first
         final String layout = FModel.getPreferences().getPref(FPref.UI_MULTIPLAYER_FIELD_LAYOUT);
-        if (players.size() > 2 && myPlayers != null && myPlayers.size() >= 1
-                && !"OFF".equals(layout)) {
-            players = new FCollection<>(sortPlayersForMultiplayer(players, myPlayers.get(0), "ROWS".equals(layout)));
+        if (players.size() > 2 && myPlayers != null && myPlayers.size() >= 1) {
+            // Arena mode shows all opponents in a single left-to-right strip, so use
+            // the simple rows-mode ordering (strict turn order) instead of the grid
+            // algorithm that interleaves players across two rows.
+            final boolean isArena = ArenaLayoutPolicy.shouldActivate(players.size(), layout,
+                    FModel.getPreferences().getPrefBoolean(FPref.UI_COMMANDER_ENHANCED));
+            players = new FCollection<>(sortPlayersForMultiplayer(players, myPlayers.get(0),
+                    "ROWS".equals(layout) || isArena));
         }
         initMatch(players, myPlayers);
         clearSelectables(); //fix uncleared selection
