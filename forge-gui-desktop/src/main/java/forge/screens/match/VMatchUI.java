@@ -51,9 +51,7 @@ public class VMatchUI implements IVTopLevelUI {
             EDocID.REPORT_YIELD,
             EDocID.REPORT_LOG,
             EDocID.REPORT_MESSAGE,
-            EDocID.REPORT_STACK,
-            EDocID.CARD_PICTURE,
-            EDocID.CARD_DETAIL
+            EDocID.REPORT_STACK
     );
 
 

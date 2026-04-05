@@ -30,6 +30,7 @@ import forge.game.card.CardView.CardStateView;
 import forge.game.player.PlayerView;
 import forge.game.zone.ZoneType;
 import forge.gui.FThreads;
+import forge.gui.card.CardDetailUtil;
 import forge.localinstance.properties.ForgePreferences.FPref;
 import forge.model.FModel;
 import forge.screens.match.CMatchUI;
@@ -646,7 +647,36 @@ public class PlayArea extends CardPanelContainer implements CardPanelMouseListen
     @Override
     public final void mouseOver(final CardPanel panel, final MouseEvent evt) {
         getMatchUI().setCard(panel.getCard(), evt.isShiftDown());
+        if (panel.getCard() != null) {
+            panel.setToolTipText(buildCardTooltip(panel.getCard(), evt.isShiftDown()));
+        }
         super.mouseOver(panel, evt);
+    }
+
+    private static String buildCardTooltip(final CardView card, final boolean altState) {
+        final CardStateView state = card.getState(altState);
+        if (state == null) return null;
+        final boolean mayView = card.canBeShownToAny(null);
+        final StringBuilder sb = new StringBuilder("<html><body style='width:220px;font-size:10px;'>");
+        final String name = CardDetailUtil.formatCardName(card, mayView, altState);
+        final String manaCost = state.getOriginalManaCost() != null ? state.getOriginalManaCost().toString() : "";
+        sb.append("<b>").append(htmlEsc(name));
+        if (!manaCost.isEmpty()) sb.append(" — ").append(htmlEsc(manaCost));
+        sb.append("</b><br/>");
+        final String type = CardDetailUtil.formatCardType(state, mayView);
+        if (!type.isEmpty()) sb.append("<i>").append(htmlEsc(type)).append("</i><br/>");
+        final String pt = CardDetailUtil.formatPrimaryCharacteristic(state, mayView);
+        if (!pt.isEmpty()) sb.append(htmlEsc(pt)).append("<br/>");
+        final String text = CardDetailUtil.composeCardText(state, null, mayView);
+        if (text != null && !text.isEmpty()) {
+            sb.append("<hr/>").append(htmlEsc(text).replace("\n", "<br/>"));
+        }
+        sb.append("</body></html>");
+        return sb.toString();
+    }
+
+    private static String htmlEsc(final String s) {
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
     @Override

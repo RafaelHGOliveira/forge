@@ -231,7 +231,7 @@ public class VField implements IVDoc<CField> {
         inlineZonePanel.setVisible(false);
 
         if (isLocal) {
-            // Left sidebar: zone sidebar (CMD/GY/EX/LIB) + avatar + cmdDamageView
+            // Left sidebar: avatar + cmdDamageView + zone bar
             JPanel sidebar = new JPanel(new MigLayout("insets 0, gap 2, flowy, fillx, aligny top"));
             sidebar.setOpaque(false);
             sidebar.add(avatarArea, "w 62!, growx, h 60!");
@@ -241,20 +241,20 @@ public class VField implements IVDoc<CField> {
             }
             sidebar.add(zoneBarView, "growx, growy");
 
-            // Main area: inline zone → battlefield → phase strip → hand bar → hand
+            // Main area: phase strip → battlefield → hand bar → hand
             JPanel main = new JPanel(new MigLayout("insets 0, gap 0, flowy, fill"));
             main.setOpaque(false);
-            main.add(inlineZonePanel, "hidemode 3, growx, h 0:180:");
-            main.add(scroller, "grow");
             main.add(phaseIndicator, "h 18!, growx");
+            main.add(scroller, "grow");
             main.add(buildHandBar(), "h 14!, growx");
             main.add(handScroller, "h 146!, growx");
             phaseIndicator.setHorizontal();
 
             pnl.add(sidebar, "w 64!, growy");
+            pnl.add(inlineZonePanel, "hidemode 3, w 0:180:, growy");
             pnl.add(main, "grow");
         } else {
-            // Opponent: avatar header + left zone sidebar + (inline zone / hand / battlefield / phase strip)
+            // Opponent: zone sidebar | inline zone | (avatar / hand / battlefield / phase strip)
             JPanel header = new JPanel(new MigLayout("insets 0, gap 0, fill"));
             header.setOpaque(false);
             header.add(avatarArea, "grow");
@@ -262,13 +262,13 @@ public class VField implements IVDoc<CField> {
             JPanel content = new JPanel(new MigLayout("insets 0, gap 0, flowy, fill"));
             content.setOpaque(false);
             content.add(header, "h 28!, growx");
-            content.add(inlineZonePanel, "hidemode 3, growx, h 0:120:");
             content.add(handScroller, "h 72!, growx");
             content.add(scroller, "grow");
             content.add(phaseIndicator, "h 18!, growx");
             phaseIndicator.setHorizontal();
 
             pnl.add(zoneBarView, "w 58!, growy");
+            pnl.add(inlineZonePanel, "hidemode 3, w 0:180:, growy");
             pnl.add(content, "grow");
         }
     }

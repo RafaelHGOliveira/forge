@@ -19,6 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import java.util.Collections;
+
 import forge.game.card.CardView;
 import forge.game.player.PlayerView;
 import forge.game.zone.ZoneType;
@@ -63,10 +65,10 @@ public class ZoneSidebarView extends JPanel {
         this.isLocal = isLocal;
         this.state = new ZoneBarState(isLocal);
 
-        cmdSlot = new ZoneSlot("CMD", ZoneType.Command,   CLR_CMD, false);
-        gySlot  = new ZoneSlot("GY",  ZoneType.Graveyard, CLR_GY,  true);
-        exSlot  = new ZoneSlot("EX",  ZoneType.Exile,     CLR_EX,  true);
-        libSlot = new ZoneSlot("LIB", ZoneType.Library,   CLR_LIB, false);
+        cmdSlot = new ZoneSlot("CMD", ZoneType.Command,   CLR_CMD, true,  false);
+        gySlot  = new ZoneSlot("GY",  ZoneType.Graveyard, CLR_GY,  true,  false);
+        exSlot  = new ZoneSlot("EX",  ZoneType.Exile,     CLR_EX,  true,  false);
+        libSlot = new ZoneSlot("LIB", ZoneType.Library,   CLR_LIB, true,  true);
 
         slots.put(ZoneType.Command,   cmdSlot);
         slots.put(ZoneType.Graveyard, gySlot);
@@ -97,7 +99,7 @@ public class ZoneSidebarView extends JPanel {
         cmdSlot.update(lastCard(player.getCommand()),    player.getZoneSize(ZoneType.Command));
         gySlot .update(lastCard(player.getGraveyard()), player.getZoneSize(ZoneType.Graveyard));
         exSlot .update(lastCard(player.getExile()),      player.getZoneSize(ZoneType.Exile));
-        libSlot.update(null,                             player.getZoneSize(ZoneType.Library));
+        libSlot.update(lastCard(player.getCards(ZoneType.Library)), player.getZoneSize(ZoneType.Library));
     }
 
     private static CardView lastCard(final Iterable<CardView> cards) {
@@ -122,17 +124,19 @@ public class ZoneSidebarView extends JPanel {
         private final ZoneType zone;
         private final Color accent;
         private final boolean showThumbnail;
+        private final boolean faceDown;
         private final JLabel thumbLabel;
         private final JLabel countLabel;
         private CardView currentCard;
         private boolean active;
 
         ZoneSlot(final String name, final ZoneType zone, final Color accent,
-                 final boolean showThumbnail) {
+                 final boolean showThumbnail, final boolean faceDown) {
             super(new MigLayout("insets 1, gap 0, flowy, fillx, aligny center, alignx center"));
             this.zone = zone;
             this.accent = accent;
             this.showThumbnail = showThumbnail;
+            this.faceDown = faceDown;
 
             setOpaque(true);
             setBackground(BG_DEFAULT);
@@ -165,27 +169,55 @@ public class ZoneSidebarView extends JPanel {
 
         void update(final CardView card, final int count) {
             countLabel.setText(String.valueOf(count));
-            if (!showThumbnail || card == null) {
-                if (card != currentCard) {
-                    currentCard = card;
-                    thumbLabel.setIcon(null);
-                    thumbLabel.setText(zone == ZoneType.Library ? "LIB" :
-                                       zone == ZoneType.Command  ? "CMD" : "");
-                }
+
+            if (!showThumbnail) {
                 revalidate();
                 repaint();
                 return;
             }
+
+            if (card == null) {
+                if (currentCard != null || thumbLabel.getIcon() != null) {
+                    currentCard = null;
+                    thumbLabel.setIcon(null);
+                    thumbLabel.setText(zone == ZoneType.Library ? "LIB" :
+                                       zone == ZoneType.Command  ? "CMD" : "");
+                    revalidate();
+                    repaint();
+                }
+                return;
+            }
+
+            // Determine the image key using the zone owner as viewer so that
+            // revealed cards (e.g. top of library via effect) show face-up.
+            final Iterable<PlayerView> viewers = player == null ? null
+                    : Collections.singleton(player);
+            final String imageKey = card.getCurrentState().getImageKey(viewers);
+            final boolean isHidden = imageKey != null
+                    && imageKey.equals(ImageKeys.getTokenKey(ImageKeys.HIDDEN_CARD));
+
+            if (faceDown && isHidden) {
+                // Library card that is NOT revealed: always show card back,
+                // but only reload if something changed.
+                if (card == currentCard && thumbLabel.getIcon() != null) {
+                    return;
+                }
+                currentCard = card;
+                loadCardBackAsync();
+                return;
+            }
+
+            // Face-up (CMD, GY, EX, or a revealed library card)
             if (card == currentCard) {
-                revalidate();
-                repaint();
                 return;
             }
             currentCard = card;
             thumbLabel.setIcon(null);
             thumbLabel.setText("…");
+            loadImageAsync(imageKey, card);
+        }
 
-            final String imageKey = card.getCurrentState().getImageKey(null);
+        private void loadImageAsync(final String imageKey, final CardView forCard) {
             Thread loader = new Thread(() -> {
                 try {
                     File f = ImageKeys.getImageFile(imageKey);
@@ -194,12 +226,35 @@ public class ZoneSidebarView extends JPanel {
                         if (img != null) {
                             Image scaled = img.getScaledInstance(THUMB_W, THUMB_H, Image.SCALE_SMOOTH);
                             SwingUtilities.invokeLater(() -> {
-                                if (card == currentCard) {
+                                if (forCard == currentCard) {
                                     thumbLabel.setIcon(new ImageIcon(scaled));
                                     thumbLabel.setText(null);
                                     revalidate();
                                     repaint();
                                 }
+                            });
+                        }
+                    }
+                } catch (Exception ignored) { }
+            });
+            loader.setDaemon(true);
+            loader.start();
+        }
+
+        private void loadCardBackAsync() {
+            Thread loader = new Thread(() -> {
+                try {
+                    File f = ImageKeys.getImageFile(ImageKeys.getTokenKey(ImageKeys.HIDDEN_CARD));
+                    if (f != null && f.exists()) {
+                        BufferedImage img = ImageIO.read(f);
+                        if (img != null) {
+                            Image scaled = img.getScaledInstance(THUMB_W, THUMB_H, Image.SCALE_SMOOTH);
+                            final ImageIcon icon = new ImageIcon(scaled);
+                            SwingUtilities.invokeLater(() -> {
+                                thumbLabel.setIcon(icon);
+                                thumbLabel.setText(null);
+                                revalidate();
+                                repaint();
                             });
                         }
                     }
