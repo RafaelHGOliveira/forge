@@ -367,9 +367,14 @@ public class PlayArea extends CardPanelContainer implements CardPanelMouseListen
     @Override
     public Dimension getPreferredSize() {
         Dimension d = super.getPreferredSize();
-        if (mirror && getScrollPane() != null) {
+        if (getScrollPane() != null) {
+            int vw = getScrollPane().getViewport().getWidth();
             int vh = getScrollPane().getViewport().getHeight();
-            if (vh > d.height) { d = new Dimension(d.width, vh); }
+            int w = Math.max(d.width, vw);
+            int h = (mirror && vh > d.height) ? vh : d.height;
+            if (w != d.width || h != d.height) {
+                d = new Dimension(w, h);
+            }
         }
         return d;
     }

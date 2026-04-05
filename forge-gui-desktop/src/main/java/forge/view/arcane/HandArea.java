@@ -17,6 +17,7 @@
  */
 package forge.view.arcane;
 
+import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 
 import forge.localinstance.properties.ForgePreferences.FPref;
@@ -58,6 +59,18 @@ public class HandArea extends CardArea {
     @Override
     protected boolean cardPanelDraggable(final CardPanel panel) {
         return panel.getCard() != null;
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        Dimension d = super.getPreferredSize();
+        if (getScrollPane() != null) {
+            int vw = getScrollPane().getViewport().getWidth();
+            if (vw > d.width) {
+                d = new Dimension(vw, d.height);
+            }
+        }
+        return d;
     }
 
     /** {@inheritDoc} */
