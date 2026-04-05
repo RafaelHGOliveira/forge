@@ -365,6 +365,16 @@ public class PlayArea extends CardPanelContainer implements CardPanelMouseListen
     }
 
     @Override
+    public Dimension getPreferredSize() {
+        Dimension d = super.getPreferredSize();
+        if (mirror && getScrollPane() != null) {
+            int vh = getScrollPane().getViewport().getHeight();
+            if (vh > d.height) { d = new Dimension(d.width, vh); }
+        }
+        return d;
+    }
+
+    @Override
     public final void doLayout() {
         final Rectangle rect = this.getScrollPane().getVisibleRect();
 
@@ -653,7 +663,7 @@ public class PlayArea extends CardPanelContainer implements CardPanelMouseListen
         super.mouseOver(panel, evt);
     }
 
-    private static String buildCardTooltip(final CardView card, final boolean altState) {
+    static String buildCardTooltip(final CardView card, final boolean altState) {
         final CardStateView state = card.getState(altState);
         if (state == null) return null;
         final boolean mayView = card.canBeShownToAny(null);
@@ -675,7 +685,7 @@ public class PlayArea extends CardPanelContainer implements CardPanelMouseListen
         return sb.toString();
     }
 
-    private static String htmlEsc(final String s) {
+    static String htmlEsc(final String s) {
         return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
