@@ -47,6 +47,9 @@ public class VMatchUI implements IVTopLevelUI {
     // Tracking for dynamic split-mode cells so they can be cleaned up on relayout.
     private final List<DragCell> dynamicCells = new ArrayList<>();
 
+    // Non-field cells hidden while arena mode is active; restored on cleanup.
+    private final List<DragCell> hiddenArenaCells = new ArrayList<>();
+
     // Other instantiations
     private final CMatchUI control;
 
@@ -127,6 +130,12 @@ public class VMatchUI implements IVTopLevelUI {
             FView.SINGLETON_INSTANCE.removeDragCell(cell);
         }
         dynamicCells.clear();
+
+        // Restore non-field cells that were hidden while arena mode was active.
+        for (final DragCell cell : hiddenArenaCells) {
+            cell.setVisible(true);
+        }
+        hiddenArenaCells.clear();
 
         // Sync rough bounds with actual pixel positions before computing
         // field regions. This ensures boundary detection works with accurate
@@ -372,14 +381,15 @@ public class VMatchUI implements IVTopLevelUI {
             final DragCell c0 = lstFields.get(0).getParentCell();
             final DragCell c1 = lstFields.get(1).getParentCell();
             if (c0 != null && c1 != null) {
+                // Use the horizontal span of the existing field cells but force the
+                // vertical span to [0, 1] so opponents always anchor to the very top
+                // of the center column, regardless of the user's saved layout.
                 final RectangleOfDouble rb0 = c0.getRoughBounds();
                 final RectangleOfDouble rb1 = c1.getRoughBounds();
                 final double left  = Math.min(rb0.getX(), rb1.getX());
                 final double right = Math.max(rb0.getX() + rb0.getW(), rb1.getX() + rb1.getW());
-                final double top   = Math.min(rb0.getY(), rb1.getY());
-                final double bot   = Math.max(rb0.getY() + rb0.getH(), rb1.getY() + rb1.getH());
                 final ArenaLayoutPolicy.Bounds ab = ArenaLayoutPolicy.computeBounds(
-                        left, top, right - left, bot - top);
+                        left, 0.0, right - left, 1.0);
                 c1.setRoughBounds(new RectangleOfDouble(ab.x, ab.opponentY, ab.w, ab.opponentH));
                 c0.setRoughBounds(new RectangleOfDouble(ab.x, ab.localY, ab.w, ab.localH));
             }
@@ -430,6 +440,25 @@ public class VMatchUI implements IVTopLevelUI {
         // Apply rough bounds to pixel positions via the resize system.
         if (splitMode || rearrangedRows) {
             SResizingUtil.resizeWindow();
+        }
+
+        // In arena mode, hide all non-field cells so the two field bands
+        // (opponent + local) occupy the full window without side panels.
+        if (arenaMode) {
+            final java.util.Set<DragCell> fieldCells = new java.util.HashSet<>();
+            for (final VField vf : lstFields) {
+                if (vf.getParentCell() != null) {
+                    fieldCells.add(vf.getParentCell());
+                }
+            }
+            fieldCells.addAll(dynamicCells);
+            hiddenArenaCells.clear();
+            for (final DragCell cell : FView.SINGLETON_INSTANCE.getDragCells()) {
+                if (!fieldCells.contains(cell)) {
+                    cell.setVisible(false);
+                    hiddenArenaCells.add(cell);
+                }
+            }
         }
     }
 

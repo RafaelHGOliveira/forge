@@ -487,6 +487,10 @@ public final class CMatchUI
                 final VHand vHand = getHandFor(owner);
                 if (vHand != null) {
                     vHand.getLayoutControl().updateHand();
+                } else {
+                    // Opponent in arena mode: populate the embedded HandArea with
+                    // face-down card panels so hand size is visually represented.
+                    vField.updateOpponentHand();
                 }
                 // update Cards in Hand
                 vField.updateDetails();
