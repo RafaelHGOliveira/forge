@@ -84,6 +84,19 @@ public class YieldController {
     }
 
     /**
+     * Cancel only the legacy auto-pass for the given player.
+     * Experimental yield modes (UNTIL_YOUR_NEXT_TURN etc.) are NOT cleared here;
+     * they handle interruption via shouldInterruptYield / shouldAutoYieldForPlayer.
+     * Called by engine events (spell on stack, phase transitions) to avoid wiping
+     * persistent yield modes that should survive across turns.
+     */
+    public void autoPassCancelLegacyOnly(PlayerView player) {
+        player = TrackableTypes.PlayerViewType.lookup(player);
+        autoPassUntilEndOfTurn.remove(player);
+        // yieldStates intentionally not touched — modes manage their own lifecycle
+    }
+
+    /**
      * Cancel auto-pass for the given player (legacy and experimental).
      */
     public void autoPassCancel(PlayerView player) {

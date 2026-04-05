@@ -3465,6 +3465,14 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
     }
 
     @Override
+    public void autoPassCancelLegacy() {
+        if (getGui() == null) {
+            return;
+        }
+        getGui().autoPassCancelLegacy(getLocalPlayerView());
+    }
+
+    @Override
     public void awaitNextInput() {
         getGui().awaitNextInput();
     }

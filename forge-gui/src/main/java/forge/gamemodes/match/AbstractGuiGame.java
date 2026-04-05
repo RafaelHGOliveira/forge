@@ -454,6 +454,11 @@ public abstract class AbstractGuiGame implements IGuiGame, IMayViewCards {
     }
 
     @Override
+    public final void autoPassCancelLegacy(final PlayerView player) {
+        getYieldController().autoPassCancelLegacyOnly(player);
+    }
+
+    @Override
     public final boolean mayAutoPass(final PlayerView player) {
         return getYieldController().mayAutoPass(player);
     }
