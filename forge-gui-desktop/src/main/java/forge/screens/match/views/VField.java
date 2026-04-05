@@ -255,6 +255,8 @@ public class VField implements IVDoc<CField> {
         inlineZonePanel.setVisible(false);
 
         if (isLocal) {
+            phaseIndicator.setHorizontal();
+
             // Left sidebar: avatar + cmdDamageView + zone bar
             JPanel sidebar = new JPanel(new MigLayout("insets 0, gap 2, flowy, fillx, aligny top"));
             sidebar.setOpaque(false);
@@ -265,33 +267,40 @@ public class VField implements IVDoc<CField> {
             }
             sidebar.add(zoneBarView, "growx, growy");
 
-            // Main area: phase strip → battlefield → hand bar → hand
+            // Main area: battlefield → hand bar → hand (no phase strip)
             JPanel main = new JPanel(new MigLayout("insets 0, gap 0, flowy, fill"));
             main.setOpaque(false);
-            main.add(phaseIndicator, "h 18!, growx");
             main.add(scroller, "grow");
             main.add(buildHandBar(), "h 14!, growx");
             main.add(handScroller, "h 146!, growx");
-            phaseIndicator.setHorizontal();
 
-            pnl.add(sidebar, "w 64!, growy");
-            pnl.add(inlineZonePanel, "hidemode 3, w 0:180:, growy");
-            pnl.add(main, "grow");
+            // Content row: sidebar | inline zone | main
+            JPanel contentRow = new JPanel(new MigLayout("insets 0, gap 0, fill"));
+            contentRow.setOpaque(false);
+            contentRow.add(sidebar, "w 64!, growy");
+            contentRow.add(inlineZonePanel, "hidemode 3, w 0:180:, growy");
+            contentRow.add(main, "grow");
+
+            // Phase strip sits above contentRow, offset by sidebar width (gapleft 64)
+            // so it appears right next to the avatar without coupling to card layout.
+            pnl.setLayout(new MigLayout("insets 0, gap 0, flowy, fill"));
+            pnl.add(phaseIndicator, "h 18!, wmin 180, wmax 360, gapleft 64");
+            pnl.add(contentRow, "grow");
         } else {
-            // Opponent: zone sidebar | inline zone | (avatar / hand / battlefield / phase strip)
-            JPanel header = new JPanel(new MigLayout("insets 0, gap 0, fill"));
-            header.setOpaque(false);
-            header.add(avatarArea, "grow");
+            // Opponent: sidebar (avatar on top + zone bar) | inline zone | (hand / battlefield / phase strip)
+            JPanel sidebarPanel = new JPanel(new MigLayout("insets 0, gap 2, flowy, fillx, aligny top"));
+            sidebarPanel.setOpaque(false);
+            sidebarPanel.add(avatarArea, "growx, h 72!");
+            sidebarPanel.add(zoneBarView, "growx, growy");
 
             JPanel content = new JPanel(new MigLayout("insets 0, gap 0, flowy, fill"));
             content.setOpaque(false);
-            content.add(header, "h 28!, growx");
             content.add(handScroller, "h 72!, growx");
             content.add(scroller, "grow");
             content.add(phaseIndicator, "h 18!, growx");
             phaseIndicator.setHorizontal();
 
-            pnl.add(zoneBarView, "w 58!, growy");
+            pnl.add(sidebarPanel, "w 58!, growy");
             pnl.add(inlineZonePanel, "hidemode 3, w 0:180:, growy");
             pnl.add(content, "grow");
         }

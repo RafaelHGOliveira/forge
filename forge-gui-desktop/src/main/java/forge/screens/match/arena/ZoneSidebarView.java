@@ -188,10 +188,11 @@ public class ZoneSidebarView extends JPanel {
                 return;
             }
 
-            // Determine the image key using the zone owner as viewer so that
-            // revealed cards (e.g. top of library via effect) show face-up.
-            final Iterable<PlayerView> viewers = player == null ? null
-                    : Collections.singleton(player);
+            // For face-down zones (library) use zone owner as viewer so revealed
+            // cards show face-up. For public zones (CMD/GY/EX) pass null to bypass
+            // the visibility check and always get the real image key.
+            final Iterable<PlayerView> viewers = (faceDown && player != null)
+                    ? Collections.singleton(player) : null;
             final String imageKey = card.getCurrentState().getImageKey(viewers);
             final boolean isHidden = imageKey != null
                     && imageKey.equals(ImageKeys.getTokenKey(ImageKeys.HIDDEN_CARD));

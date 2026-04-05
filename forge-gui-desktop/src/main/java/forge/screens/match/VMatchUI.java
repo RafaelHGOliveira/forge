@@ -64,6 +64,10 @@ public class VMatchUI implements IVTopLevelUI {
     // Non-field cells hidden while arena mode is active; restored on cleanup.
     private final List<DragCell> hiddenArenaCells = new ArrayList<>();
 
+    // Card Detail and Picture doc cells removed in arena mode; restored on cleanup.
+    private DragCell removedDetailCell = null;
+    private DragCell removedPictureCell = null;
+
     // Other instantiations
     private final CMatchUI control;
 
@@ -150,6 +154,16 @@ public class VMatchUI implements IVTopLevelUI {
             cell.setVisible(true);
         }
         hiddenArenaCells.clear();
+
+        // Restore Card Detail and Picture docs removed during arena mode.
+        if (removedDetailCell != null) {
+            removedDetailCell.addDoc(EDocID.CARD_DETAIL.getDoc());
+            removedDetailCell = null;
+        }
+        if (removedPictureCell != null) {
+            removedPictureCell.addDoc(EDocID.CARD_PICTURE.getDoc());
+            removedPictureCell = null;
+        }
 
         // Sync rough bounds with actual pixel positions before computing
         // field regions. This ensures boundary detection works with accurate
@@ -478,6 +492,23 @@ public class VMatchUI implements IVTopLevelUI {
                     cell.setVisible(false);
                     hiddenArenaCells.add(cell);
                 }
+            }
+
+            // Belt-and-suspenders: explicitly remove Card Detail and Card Picture
+            // from their cells. Hover tooltips replace their function in arena mode.
+            // Tracked in removedDetailCell/removedPictureCell for restoration when
+            // arena mode ends (cleanupDynamicCells).
+            final IVDoc<? extends ICDoc> detailDoc = EDocID.CARD_DETAIL.getDoc();
+            if (detailDoc != null && detailDoc.getParentCell() != null) {
+                removedDetailCell = detailDoc.getParentCell();
+                removedDetailCell.removeDoc(detailDoc);
+                detailDoc.setParentCell(null);
+            }
+            final IVDoc<? extends ICDoc> pictureDoc = EDocID.CARD_PICTURE.getDoc();
+            if (pictureDoc != null && pictureDoc.getParentCell() != null) {
+                removedPictureCell = pictureDoc.getParentCell();
+                removedPictureCell.removeDoc(pictureDoc);
+                pictureDoc.setParentCell(null);
             }
         }
     }

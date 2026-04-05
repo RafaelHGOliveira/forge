@@ -382,9 +382,6 @@ public class KeyboardShortcuts {
                 prefs.save();
                 if (matchUI != null) {
                     matchUI.refreshYieldPanel();
-                    if (newState && matchUI.getGameController() != null) {
-                        matchUI.getGameController().selectButtonOk();
-                    }
                 }
             }
         };

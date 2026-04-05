@@ -149,10 +149,6 @@ public class CYield implements ICDoc {
         prefs.setPref(FPref.YIELD_AUTO_PASS_NO_ACTIONS, newState);
         prefs.save();
         updateYieldButtons();
-        // If toggled on, pass priority immediately so it takes effect now
-        if (newState && matchUI != null && matchUI.getGameController() != null) {
-            matchUI.getGameController().selectButtonOk();
-        }
     }
 
     /**
