@@ -1002,7 +1002,7 @@ public final class CMatchUI
                 SDisplayUtil.showTab(getCPrompt().getView());
             } else {
                 final ZoneType zone = hostCard.getZone();
-                if (ImmutableList.of(ZoneType.Command, ZoneType.Exile, ZoneType.Graveyard, ZoneType.Library).contains(zone)) {
+                if (!isArenaMode() && ImmutableList.of(ZoneType.Command, ZoneType.Exile, ZoneType.Graveyard, ZoneType.Library).contains(zone)) {
                     FloatingZone.show(this, hostCard.getController(), zone);
                 }
                 menuParent = panel.getParent();

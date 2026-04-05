@@ -126,7 +126,11 @@ public class FloatingZone extends FloatingCardArea {
                 // Docked and visible — remove tab but keep dockedZones entry
                 cell.removeDoc(docked);
                 if (cell.getDocs().isEmpty()) {
-                    SRearrangingUtil.fillGap(cell);
+                    try {
+                        SRearrangingUtil.fillGap(cell);
+                    } catch (final UnsupportedOperationException ignored) {
+                        // Arena layout cells have no natural gap-fill neighbor; just remove.
+                    }
                     FView.SINGLETON_INSTANCE.removeDragCell(cell);
                 }
                 docked.setParentCell(null);
