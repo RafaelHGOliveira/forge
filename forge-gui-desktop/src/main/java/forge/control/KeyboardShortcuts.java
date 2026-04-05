@@ -246,6 +246,43 @@ public class KeyboardShortcuts {
             }
         };
 
+        /** Toggle yield options. */
+        final Action actYieldOptions = new AbstractAction() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
+                final ForgePreferences prefs = FModel.getPreferences();
+                final boolean newState = !prefs.getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS);
+                prefs.setPref(FPref.YIELD_EXPERIMENTAL_OPTIONS, newState);
+                prefs.save();
+                if (matchUI != null) {
+                    matchUI.refreshYieldPanel();
+                }
+                final FServerManager server = FServerManager.getInstance();
+                if (server != null && server.isHosting()) {
+                    server.broadcast(new MessageEvent(Localizer.getInstance().getMessage(
+                        newState ? "lblYieldHostEnabled" : "lblYieldHostToggleDisabled")));
+                    server.broadcastHostYieldEnabled(newState);
+                }
+            }
+        };
+
+        /** Toggle auto-pass when no actions. */
+        final Action actAutoPassNoActions = new AbstractAction() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
+                if (!FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS)) { return; }
+                final ForgePreferences prefs = FModel.getPreferences();
+                final boolean newState = !prefs.getPrefBoolean(FPref.YIELD_AUTO_PASS_NO_ACTIONS);
+                prefs.setPref(FPref.YIELD_AUTO_PASS_NO_ACTIONS, newState);
+                prefs.save();
+                if (matchUI != null) {
+                    matchUI.refreshYieldPanel();
+                }
+            }
+        };
+
         /** Show keyboard shortcuts dialog. */
         final Action actShowHotkeys = new AbstractAction() {
             @Override
