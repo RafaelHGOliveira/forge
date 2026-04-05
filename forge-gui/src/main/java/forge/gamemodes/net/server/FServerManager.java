@@ -193,7 +193,11 @@ public final class FServerManager {
             upnpService = null;
         }
         if (removeShutdownHook) {
-            Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            try {
+                Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            } catch (final IllegalStateException ignored) {
+                // JVM shutdown already in progress; hook will not run again
+            }
         }
         isHosting = false;
         UPnPMapped = false;
