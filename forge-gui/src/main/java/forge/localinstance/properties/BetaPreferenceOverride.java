@@ -11,23 +11,37 @@ public final class BetaPreferenceOverride {
 
     private BetaPreferenceOverride() {}
 
-    public static boolean apply(final BiConsumer<String, String> prefSetter,
-                                 final Properties systemProps,
-                                 final java.util.function.Supplier<String> currentLayoutGetter) {
-        String v = systemProps.getProperty(SYSTEM_PROPERTY);
-        if (!"true".equals(v)) return false;
+    /** Returns true if the JVM was launched with {@code -Dforge.commander.enhanced=true}. */
+    public static boolean isBetaLaunch() {
+        return "true".equals(System.getProperty(SYSTEM_PROPERTY));
+    }
+
+    /**
+     * Unconditionally applies beta arena preferences.
+     * Callers are responsible for deciding when to call this vs {@link #reset}.
+     */
+    public static void apply(final BiConsumer<String, String> prefSetter,
+                             final java.util.function.Supplier<String> currentLayoutGetter) {
         prefSetter.accept(PREF_KEY, "true");
         // Default layout to ARENA only when the user hasn't changed it from "OFF"
         if ("OFF".equals(currentLayoutGetter.get())) {
             prefSetter.accept(LAYOUT_KEY, ARENA_VALUE);
         }
-        return true;
     }
 
     /** Convenience overload: always defaults layout to ARENA when layout pref is "OFF". */
+    public static void apply(final BiConsumer<String, String> prefSetter) {
+        apply(prefSetter, () -> "OFF");
+    }
+
+    /** @deprecated Use {@link #isBetaLaunch()} + {@link #apply}/{@link #reset} separately. */
+    @Deprecated
     public static boolean apply(final BiConsumer<String, String> prefSetter,
-                                 final Properties systemProps) {
-        return apply(prefSetter, systemProps, () -> "OFF");
+                                 final Properties systemProps,
+                                 final java.util.function.Supplier<String> currentLayoutGetter) {
+        if (!isBetaLaunch()) return false;
+        apply(prefSetter, currentLayoutGetter);
+        return true;
     }
 
     /**
