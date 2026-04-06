@@ -159,18 +159,17 @@ public final class FModel {
             if (adjustPrefs != null) {
                 adjustPrefs.apply(preferences);
             }
-            // Beta launcher override: only active when -Dforge.commander.enhanced=true is set.
-            // If the JVM property is absent, always reset the pref so a previously-run
-            // forge-beta cannot contaminate the stable forge.exe launcher.
-            boolean betaActive = forge.localinstance.properties.BetaPreferenceOverride.apply(
-                (k, v) -> preferences.setPref(ForgePreferences.FPref.valueOf(k), v),
-                System.getProperties(),
-                () -> preferences.getPref(FPref.UI_MULTIPLAYER_FIELD_LAYOUT)
-            );
-            if (!betaActive) {
-                forge.localinstance.properties.BetaPreferenceOverride.reset(
-                    (k, v) -> preferences.setPref(ForgePreferences.FPref.valueOf(k), v)
+            // Beta launcher: forge-beta always activates arena Commander mode.
+            // Stable launcher: reset arena prefs so a prior forge-beta run cannot contaminate it.
+            java.util.function.BiConsumer<String, String> prefSetter =
+                (k, v) -> preferences.setPref(ForgePreferences.FPref.valueOf(k), v);
+            if (forge.localinstance.properties.BetaPreferenceOverride.isBetaLaunch()) {
+                forge.localinstance.properties.BetaPreferenceOverride.apply(
+                    prefSetter,
+                    () -> preferences.getPref(FPref.UI_MULTIPLAYER_FIELD_LAYOUT)
                 );
+            } else {
+                forge.localinstance.properties.BetaPreferenceOverride.reset(prefSetter);
             }
             GamePlayerUtil.getGuiPlayer().setName(preferences.getPref(FPref.PLAYER_NAME));
         }
