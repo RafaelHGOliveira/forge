@@ -31,11 +31,9 @@ import forge.gui.framework.ICDoc;
 import forge.gui.util.SOptionPane;
 import forge.localinstance.properties.ForgeConstants;
 import forge.localinstance.properties.ForgeNetPreferences;
-import forge.localinstance.properties.ForgePreferences.FPref;
 import forge.menus.IMenuProvider;
 import forge.menus.MenuUtil;
 import forge.model.FModel;
-import forge.player.GamePlayerUtil;
 import forge.screens.home.CHomeUI;
 import forge.screens.home.CLobby;
 import forge.screens.home.VLobby;
@@ -49,7 +47,6 @@ import forge.util.Localizer;
 
 import com.google.common.collect.ImmutableList;
 import net.miginfocom.swing.MigLayout;
-import org.apache.commons.lang3.StringUtils;
 
 public enum CSubmenuOnlineLobby implements ICDoc, IMenuProvider {
     SINGLETON_INSTANCE;
@@ -61,49 +58,43 @@ public enum CSubmenuOnlineLobby implements ICDoc, IMenuProvider {
         initialize();
     }
 
-    void connectToServer() {
-        final String url = showConnectDialog();
-        if (url == null) { return; }
-
+    void hostGame() {
+        NetConnectUtil.ensurePlayerName();
         FThreads.invokeInBackgroundThread(() -> {
-            if (!url.isEmpty()) {
-                join(url);
-            }
-            else {
-                try {
-                    host();
-                } catch (Exception ex) {
-                    // IntelliJ swears that BindException isn't thrown in this try block, but it is!
-                    if (ex.getClass() == BindException.class) {
-                        SOptionPane.showErrorDialog(Localizer.getInstance().getMessage("lblUnableStartServerPortAlreadyUse"));
-                        SOverlayUtils.hideOverlay();
-                    } else {
-                        BugReporter.reportException(ex);
-                    }
+            try {
+                host();
+            } catch (Exception ex) {
+                if (ex.getClass() == BindException.class) {
+                    SOptionPane.showErrorDialog(Localizer.getInstance().getMessage("lblUnableStartServerPortAlreadyUse"));
+                    SOverlayUtils.hideOverlay();
+                } else {
+                    BugReporter.reportException(ex);
                 }
             }
         });
     }
 
+    void joinGame() {
+        final String url = showConnectDialog();
+        if (url == null) { return; }
+        FThreads.invokeInBackgroundThread(() -> join(url));
+    }
+
     private static String showConnectDialog() {
-        if (StringUtils.isBlank(FModel.getPreferences().getPref(FPref.PLAYER_NAME))) {
-            GamePlayerUtil.setPlayerName();
-        }
+        NetConnectUtil.ensurePlayerName();
 
         final Callable<String> task = () -> {
             final String[] resultUrl = {null};
             final boolean[] accepted = {false};
             final FOptionPane[] paneHolder = {null};
 
-            // Top row: IP field + Connect + Host buttons
-            final JPanel topRow = new JPanel(new MigLayout("insets 0, gap 4", "[grow][pref][pref]"));
+            // Top row: IP field + Connect button
+            final JPanel topRow = new JPanel(new MigLayout("insets 0, gap 4", "[grow][pref]"));
             topRow.setOpaque(false);
             final FTextField txtIP = new FTextField.Builder().build();
             final FButton btnConnect = new FButton("Connect");
-            final FButton btnHost = new FButton("Host");
             topRow.add(txtIP, "growx");
             topRow.add(btnConnect, "w 100!, h 26!");
-            topRow.add(btnHost, "w 100!, h 26!");
 
             // Server list panel (rebuilt on star toggles)
             final JPanel serversPanel = new JPanel(new MigLayout("insets 0, gap 2 2, wrap 1", "[grow]"));
@@ -162,11 +153,6 @@ public enum CSubmenuOnlineLobby implements ICDoc, IMenuProvider {
                 if (paneHolder[0] != null) { paneHolder[0].setResult(0); }
             };
             btnConnect.addActionListener(e -> doConnect.run());
-            btnHost.addActionListener(e -> {
-                resultUrl[0] = "";
-                accepted[0] = true;
-                if (paneHolder[0] != null) { paneHolder[0].setResult(0); }
-            });
             txtIP.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(final KeyEvent e) {
@@ -174,7 +160,8 @@ public enum CSubmenuOnlineLobby implements ICDoc, IMenuProvider {
                 }
             });
 
-            final FOptionPane pane = new FOptionPane(null, "Connect to Server", null, outer,
+            final FOptionPane pane = new FOptionPane(null,
+                    Localizer.getInstance().getMessage("lblJoinGame"), null, outer,
                     ImmutableList.of("Cancel"), -1);
             paneHolder[0] = pane;
             pane.setDefaultFocus(txtIP);

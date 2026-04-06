@@ -87,14 +87,29 @@ public class NetConnectUtil {
         return String.join(URL_SEPARATOR, urls);
     }
 
+    /** Ensure the player name is set before connecting. */
+    public static void ensurePlayerName() {
+        if (StringUtils.isBlank(FModel.getPreferences().getPref(FPref.PLAYER_NAME))) {
+            GamePlayerUtil.setPlayerName();
+        }
+    }
+
+    /** Prompt for the server address to join (used by mobile path). Returns null if cancelled. */
+    public static String getJoinServerUrl() {
+        final String url = SOptionPane.showInputDialog(
+                Localizer.getInstance().getMessage("lblEnterServerAddress"),
+                Localizer.getInstance().getMessage("lblJoinGame"));
+        if (url == null || url.isEmpty()) { return null; }
+        ensurePlayerName();
+        return url;
+    }
+
     public static String getServerUrl() {
         final String url = SOptionPane.showInputDialog(Localizer.getInstance().getMessage("lblOnlineMultiplayerDest"), Localizer.getInstance().getMessage("lblConnectToServer"));
         if (url == null) { return null; }
 
         //prompt user for player one name if needed
-        if (StringUtils.isBlank(FModel.getPreferences().getPref(FPref.PLAYER_NAME))) {
-            GamePlayerUtil.setPlayerName();
-        }
+        ensurePlayerName();
         return url;
     }
 
