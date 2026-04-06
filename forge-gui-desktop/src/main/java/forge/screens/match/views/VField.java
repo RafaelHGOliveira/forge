@@ -79,6 +79,7 @@ import net.miginfocom.swing.MigLayout;
 public class VField implements IVDoc<CField> {
     private final static int LIFE_CRITICAL = 5;
     private final static int LIFE_WARNING  = 10; // orange warning below this
+    private final static int LIFE_HIGH     = 30; // green when life is comfortable
     private final static int POISON_CRITICAL = 8;
 
     // MigLayout constraints for lblAvatar height: leaves room for stat rows below.
@@ -128,8 +129,9 @@ public class VField implements IVDoc<CField> {
 
     private final PhaseIndicator phaseIndicator = new PhaseIndicator();
 
+    private static final Color COLOR_ACTIVE_TURN = new Color(212, 175, 55); // gold — active player's turn
     private final Border borderAvatarSimple = new LineBorder(new Color(0, 0, 0, 0), 1);
-    private final Border borderAvatarHighlighted = new LineBorder(Color.red, 2);
+    private final Border borderAvatarHighlighted = new LineBorder(COLOR_ACTIVE_TURN, 2);
 
 
     //========= Constructor
@@ -318,13 +320,13 @@ public class VField implements IVDoc<CField> {
         bar.setOpaque(false);
 
         JLabel sortBtn = new JLabel("↑CMC");
-        sortBtn.setFont(new Font("SansSerif", Font.PLAIN, 9));
-        sortBtn.setForeground(new Color(120, 120, 140));
+        sortBtn.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        sortBtn.setForeground(new Color(160, 160, 180));
         sortBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         sortBtn.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) { sortHandByCmc(); }
-            @Override public void mouseEntered(MouseEvent e) { sortBtn.setForeground(new Color(180, 180, 210)); }
-            @Override public void mouseExited(MouseEvent e)  { sortBtn.setForeground(new Color(120, 120, 140)); }
+            @Override public void mouseEntered(MouseEvent e) { sortBtn.setForeground(new Color(210, 210, 240)); }
+            @Override public void mouseExited(MouseEvent e)  { sortBtn.setForeground(new Color(160, 160, 180)); }
         });
 
         bar.add(sortBtn, "");
@@ -641,7 +643,9 @@ public class VField implements IVDoc<CField> {
         // Update life total
         final int life = player.getLife();
         lblLife.setText(String.valueOf(life));
-        if (life > LIFE_WARNING) {
+        if (life > LIFE_HIGH) {
+            lblLife.setForeground(new Color(70, 160, 70)); // green — healthy life total
+        } else if (life > LIFE_WARNING) {
             lblLife.setForeground(FSkin.getColor(FSkin.Colors.CLR_TEXT));
         } else if (life > LIFE_CRITICAL) {
             lblLife.setForeground(Color.ORANGE);

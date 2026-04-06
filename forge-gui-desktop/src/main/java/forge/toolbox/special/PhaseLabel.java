@@ -5,6 +5,8 @@ import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import java.awt.Font;
+
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
@@ -83,6 +85,7 @@ public class PhaseLabel extends JLabel {
      */
     public void setActive(final boolean b) {
         this.active = b;
+        setFont(getFont().deriveFont(b ? Font.BOLD : Font.PLAIN));
         this.repaintOnlyThisLabel();
     }
 
