@@ -64,4 +64,12 @@ public interface IGameController {
      * @param choice 1 = always accept, -1 = always decline, 0 = ask
      */
     default void notifyTriggerChoiceChanged(int triggerId, int choice) { }
+
+    /**
+     * Request a full state resync from the server.
+     * Called automatically when checksum validation fails to recover from desynchronization.
+     */
+    default void requestResync() { }
+
+
 }
