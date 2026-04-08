@@ -10,11 +10,13 @@ import forge.game.event.GameEvent;
 import forge.game.event.GameEventSpellAbilityCast;
 import forge.game.event.GameEventSpellRemovedFromStack;
 import forge.game.phase.PhaseType;
+import forge.gamemodes.match.YieldMode;
 import forge.game.player.DelayedReveal;
 import forge.game.player.IHasIcon;
 import forge.game.player.PlayerView;
 import forge.game.spellability.SpellAbilityView;
 import forge.game.zone.ZoneType;
+import forge.gamemodes.net.DeltaPacket;
 import forge.gui.control.PlaybackSpeed;
 import forge.interfaces.IGameController;
 import forge.item.PaperCard;
@@ -32,6 +34,14 @@ import java.util.Map;
 public interface IGuiGame {
     void setGameView(GameView gameView);
 
+    /**
+     * Set the game view with a sequence number for delta sync baseline.
+     * Local games ignore the sequence number.
+     */
+    default void setGameView(GameView gameView, long sequenceNumber) {
+        setGameView(gameView);
+    }
+
     GameView getGameView();
 
     void setOriginalGameController(PlayerView view, IGameController gameController);
@@ -40,7 +50,7 @@ public interface IGuiGame {
 
     void setSpectator(IGameController spectator);
 
-    void openView(TrackableCollection<PlayerView> myPlayers);
+    boolean openView(TrackableCollection<PlayerView> myPlayers);
 
     void afterGameEnd();
 
@@ -263,6 +273,9 @@ public interface IGuiGame {
 
     boolean mayAutoPass(PlayerView player);
 
+    /** Returns true if this GUI is a server-side proxy for a remote player. */
+    default boolean isRemoteGuiProxy() { return false; }
+
     void autoPassCancel(PlayerView player);
 
     /** Cancel only legacy auto-pass; experimental yield modes manage themselves. */
@@ -271,6 +284,33 @@ public interface IGuiGame {
     }
 
     void updateAutoPassPrompt();
+
+    // Extended yield mode methods (experimental feature)
+    boolean setYieldMode(PlayerView player, YieldMode mode);
+
+    /**
+     * Update yield mode from remote client without triggering notification.
+     * Used by server to receive yield state from network clients.
+     */
+    void setYieldModeFromRemote(PlayerView player, YieldMode mode);
+
+    /**
+     * Sync yield mode from server to client.
+     * Used when server clears yield (end condition met) and needs to update client UI.
+     */
+    void syncYieldMode(PlayerView player, YieldMode mode);
+
+    /**
+     * Sync whether the host has advanced yield options enabled.
+     * Used in network play to disable client yield buttons when host lacks the setting.
+     */
+    void setHostYieldEnabled(boolean enabled);
+
+    void clearYieldMode(PlayerView player);
+
+    boolean shouldAutoYieldForPlayer(PlayerView player);
+
+    YieldMode getYieldMode(PlayerView player);
 
     boolean shouldAutoYield(String key);
 
@@ -290,8 +330,25 @@ public interface IGuiGame {
 
     void setCurrentPlayer(PlayerView player);
 
+    /**
+     * Look up a PlayerView by ID from the current GameView's player list.
+     * Used for network play where deserialized PlayerViews have different trackers.
+     * @param player the PlayerView to look up (uses its ID for matching)
+     * @return the matching PlayerView from GameView, or the input player if not found
+     */
+    PlayerView lookupPlayerViewById(PlayerView player);
+
+    /**
+     * Apply a delta update packet to the local game state.
+     * @param packet the delta packet containing changes
+     */
+    void applyDelta(DeltaPacket packet);
+
     /** Signal to start a client-side elapsed timer for waiting display. */
     void showWaitingTimer(PlayerView forPlayer, String waitingForPlayerName);
+
+    /** Show or hide a visual disconnect indicator for a remote player. */
+    default void showPlayerDisconnected(PlayerView player, boolean disconnected) { }
 
     /** Returns true if this game instance is a network game. */
     boolean isNetGame();

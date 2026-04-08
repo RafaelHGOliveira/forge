@@ -3,6 +3,7 @@ package forge.player;
 import com.google.common.collect.*;
 import forge.LobbyPlayer;
 import forge.StaticData;
+import forge.ai.ComputerUtilMana;
 import forge.ai.GameState;
 import forge.ai.PlayerControllerAi;
 import forge.card.*;
@@ -48,6 +49,9 @@ import forge.game.zone.Zone;
 import forge.game.zone.ZoneType;
 import forge.gamemodes.match.NextGameDecision;
 import forge.gamemodes.match.input.*;
+import forge.gamemodes.net.IHasNetLog;
+import forge.gamemodes.net.event.MessageEvent;
+import forge.gamemodes.net.server.FServerManager;
 import forge.gui.FThreads;
 import forge.gui.GuiBase;
 import forge.gui.control.FControlGamePlayback;
@@ -87,13 +91,13 @@ import java.util.stream.Collectors;
  * <p>
  * Handles phase skips for now.
  */
-public class PlayerControllerHuman extends PlayerController implements IGameController {
+public class PlayerControllerHuman extends PlayerController implements IGameController, IHasNetLog {
+
     /**
      * Cards this player may look at right now, for example when searching a
      * library.
      */
     private boolean mayLookAtAllCards = false;
-    private boolean disableAutoYields = false;
 
     private IGuiGame gui;
 
@@ -137,16 +141,14 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         return player == null ? null : player.getView();
     }
 
-    public boolean getDisableAutoYields() {
-        return disableAutoYields;
-    }
-    public void setDisableAutoYields(final boolean disableAutoYields0) {
-        disableAutoYields = disableAutoYields0;
-    }
-
     @Override
     public boolean mayLookAtAllCards() {
         return mayLookAtAllCards;
+    }
+
+    @Override
+    public boolean shouldTrackAvailableActions() {
+        return FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS);
     }
 
     private final ArrayList<Card> tempShownCards = new ArrayList<>();
@@ -925,6 +927,21 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
     }
 
     protected void reveal(final CardCollectionView cards, final ZoneType zone, final PlayerView owner, String message, boolean addSuffix) {
+        // Skip reveal dialog during active yield if "Interrupt on Reveal" is disabled
+        forge.gamemodes.match.YieldMode yieldMode = getGui().getYieldMode(getLocalPlayerView());
+        if (yieldMode != null && yieldMode != forge.gamemodes.match.YieldMode.NONE) {
+            if (!FModel.getPreferences().getPrefBoolean(FPref.YIELD_INTERRUPT_ON_REVEAL)) {
+                // Still show the cards temporarily but skip the dialog that requires user input
+                if (!cards.isEmpty()) {
+                    tempShowCards(cards);
+                    TrackableCollection<CardView> collection = CardView.getCollection(cards);
+                    getGui().updateRevealedCards(collection);
+                    endTempShowCards();
+                }
+                return;
+            }
+        }
+
         if (StringUtils.isBlank(message)) {
             message = localizer.getMessage("lblLookCardInPlayerZone", "{player's}", zone.getTranslatedName().toLowerCase());
         } else if (addSuffix) {
@@ -972,7 +989,7 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
 
         tempShowCards(topN);
         if (FModel.getPreferences().getPrefBoolean(FPref.UI_SELECT_FROM_CARD_DISPLAYS) &&
-                (!GuiBase.getInterface().isLibgdxPort()) && (!GuiBase.isNetworkplay(getGui()))) { //prevent crash for desktop vs mobile port it will crash the netplay since mobile doesnt have manipulatecardlist, send the alternate below
+                (!GuiBase.getInterface().isLibgdxPort()) && (!GuiBase.isNetPlay(getGui()))) { //prevent crash for desktop vs mobile port it will crash the netplay since mobile doesnt have manipulatecardlist, send the alternate below
             CardCollectionView cardList = player.getCardsIn(ZoneType.Library);
             ImmutablePair<CardCollection, CardCollection> result =
                     arrangeForMove(localizer.getMessage("lblMoveCardstoToporBbottomofLibrary"), cardList, topN, true, true);
@@ -1474,12 +1491,16 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
     @Override
     public void declareAttackers(final Player attackingPlayer, final Combat combat) {
         if (mayAutoPass()) {
-            if (CombatUtil.validateAttackers(combat)) {
+            if (CombatUtil.canAttack(attackingPlayer)) {
+                // player has creatures that can attack (e.g. haste creatures) — cancel auto pass
+                autoPassCancel();
+            } else if (CombatUtil.validateAttackers(combat)) {
                 return; // don't prompt to declare attackers if user chose to
                 // end the turn and not attacking is legal
+            } else {
+                // otherwise: cancel auto pass because of this unexpected attack
+                autoPassCancel();
             }
-            // otherwise: cancel auto pass because of this unexpected attack
-            autoPassCancel();
         }
 
         // This input should not modify combat object itself, but should return user choice
@@ -1497,9 +1518,21 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
 
     @Override
     public List<SpellAbility> chooseSpellAbilityToPlay() {
+        netLog.trace("ENTRY for player {}, phase={}, isGameOver={}",
+                player.getName(), getGame().getPhaseHandler().getPhase(), getGame().isGameOver());
         final MagicStack stack = getGame().getStack();
 
+        if (FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS)
+                && FModel.getPreferences().getPrefBoolean(FPref.YIELD_AUTO_PASS_NO_ACTIONS)) {
+            final Player player = getPlayer();
+            getPlayer().getView().updateHasAvailableActions(player,
+                sa -> ComputerUtilMana.canPayManaCost(sa, player, 0, false));
+        }
+
         if (mayAutoPass()) {
+            // Update prompt so it doesn't stay stuck on the previous message
+            // (e.g. a trigger prompt that was already resolved)
+            getGui().updateAutoPassPrompt();
             // avoid prompting for input if current phase is set to be
             // auto-passed instead posing a short delay if needed to
             // prevent the game jumping ahead too quick
@@ -1521,12 +1554,19 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
                     e.printStackTrace();
                 }
             }
-            return null;
+            // Re-check after delay: player may have cancelled yield during the sleep
+            if (!mayAutoPass()) {
+                // Yield was cancelled — fall through to show normal input prompt
+            } else {
+                netLog.trace("Returning null (mayAutoPass) for player {}", player.getName());
+                return null;
+            }
         }
 
         if (stack.isEmpty()) {
             if (getGui().isUiSetToSkipPhase(getGame().getPhaseHandler().getPlayerTurn().getView(),
                     getGame().getPhaseHandler().getPhase())) {
+                netLog.trace("Returning null (skipPhase) for player {}", player.getName());
                 return null; // avoid prompt for input if stack is empty and
                 // player is set to skip the current phase
             }
@@ -1539,12 +1579,15 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
                 } catch (final InterruptedException e) {
                     e.printStackTrace();
                 }
+                netLog.trace("Returning null (autoYield) for player {}", player.getName());
                 return null;
             }
         }
 
+        netLog.trace("Creating InputPassPriority for player {}", player.getName());
         final InputPassPriority defaultInput = new InputPassPriority(this);
         defaultInput.showAndWait();
+        netLog.trace("InputPassPriority returned for player {}, chosenSa={}", player.getName(), defaultInput.getChosenSa());
         return defaultInput.getChosenSa();
     }
 
@@ -1649,6 +1692,9 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         final List<String> labels;
         switch (kindOfChoice) {
             case HeadsOrTails:
+                if (FModel.getPreferences().getPrefBoolean(FPref.YIELD_AUTO_CALL_COIN_FLIP)) {
+                    return true; // Auto-call Heads — result is 50/50 regardless of call
+                }
                 labels = ImmutableList.of(localizer.getMessage("lblHeads"), localizer.getMessage("lblTails"));
                 break;
             case TapOrUntap:
@@ -1682,6 +1728,11 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
 
     @Override
     public boolean chooseFlipResult(final SpellAbility sa, final Player flipper, final boolean call) {
+        // For called flips (win/lose), auto-select the result matching our call to guarantee a win.
+        // For NoCall flips (heads/tails matters), always prompt the player.
+        if (call && FModel.getPreferences().getPrefBoolean(FPref.YIELD_AUTO_CALL_COIN_FLIP)) {
+            return true;
+        }
         final List<String> labelsSrc = call ? List.of(localizer.getMessage("lblHeads"), localizer.getMessage("lblTails"))
                 : List.of(localizer.getMessage("lblWinTheFlip"), localizer.getMessage("lblLoseTheFlip"));
         return getGui().one(sa.getHostCard().getDisplayName() + " - " + localizer.getMessage("lblChooseAResult"), labelsSrc).equals(labelsSrc.get(0));
@@ -1705,6 +1756,16 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         if (sa != null && sa.isManaAbility()) {
             getGame().fireEvent(new GameEventAddLog(GameLogEntryType.LAND, message));
         } else {
+            // Skip notification dialog during active yield if "Interrupt on Reveal/Choices" is disabled
+            forge.gamemodes.match.YieldMode yieldMode = getGui().getYieldMode(getLocalPlayerView());
+            if (yieldMode != null && yieldMode != forge.gamemodes.match.YieldMode.NONE) {
+                if (!FModel.getPreferences().getPrefBoolean(FPref.YIELD_INTERRUPT_ON_REVEAL)) {
+                    // Log the message but don't show a dialog
+                    getGame().getGameLog().add(GameLogEntryType.INFORMATION, message);
+                    return;
+                }
+            }
+
             if (sa != null && sa.getHostCard() != null && GuiBase.getInterface().isLibgdxPort()) {
                 CardView cardView;
                 IPaperCard iPaperCard = sa.getHostCard().getPaperCard();
@@ -1897,7 +1958,7 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         for (int i = 1; i < res.size(); i++) {
             // prompt user if there are multiple different options
             if (!res.get(i).equals(firstStr)) {
-                if (!GuiBase.isNetworkplay(getGui())) //non network game don't need serialization
+                if (!GuiBase.isNetPlay(getGui())) //non network game don't need serialization
                     return getGui().one(prompt, possibleReplacers);
                 ReplacementEffectView rev = getGui().one(prompt, possibleReplacers.stream().map(ReplacementEffect::getView).collect(Collectors.toList()));
                 return possibleReplacers.stream().filter(re -> re.getId() == rev.getId()).findAny().orElse(first);
@@ -1917,7 +1978,7 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
             return first;
         }
         String prompt = Localizer.getInstance().getMessage(isCostReduction ? "lblChooseCostReduction" : "lblChooseAbilityToPlay");
-        if (!GuiBase.isNetworkplay(getGui())) //non network game don't need serialization
+        if (!GuiBase.isNetPlay(getGui())) //non network game don't need serialization
             return getGui().one(prompt, possibleStatics);
         StaticAbilityView stv = getGui().one(prompt, possibleStatics.stream().map(StaticAbility::getView).collect(Collectors.toList()));
         return possibleStatics.stream().filter(st -> st.getId() == stv.getId()).findAny().orElse(first);
@@ -2364,6 +2425,12 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
             if (currentInput instanceof InputPassPriority) {
                 // ensure prompt updated if needed
                 currentInput.showMessageInitial();
+            }
+            if (gui.isNetGame()) {
+                // Flush events to remote clients — the undo modifies game state
+                // (untaps lands, etc.) after the prompt is shown, and without this
+                // the updated state sits in the forwarder buffer until the next action.
+                inputQueue.updateObservers();
             }
             return true;
         }
@@ -3332,8 +3399,62 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         }
     }
 
+    // Yield-just-ended detection via mayAutoPass transition (true→false)
+    private boolean wasAutoPassingLastPriority;
+    private boolean yieldJustEndedFlag;
+
+    // Suggestion decline tracking (reset each turn or on stack transition)
+    private final Map<String, Integer> declinedSuggestionTurn = Maps.newHashMap();
+    private boolean lastSeenStackNonEmpty;
+
     public boolean mayAutoPass() {
-        return getGui().mayAutoPass(getLocalPlayerView());
+        boolean result = getGui().mayAutoPass(getLocalPlayerView());
+        // Detect yield ending: was auto-passing last priority, not any more
+        yieldJustEndedFlag = wasAutoPassingLastPriority && !result;
+        wasAutoPassingLastPriority = result;
+        return result;
+    }
+
+    public boolean didYieldJustEnd() {
+        boolean flag = yieldJustEndedFlag;
+        yieldJustEndedFlag = false;
+        return flag;
+    }
+
+    public void onPriorityReceived(boolean stackNonEmpty) {
+        // On stack non-empty → empty transition, clear STACK_YIELD decline if scope is "stack"
+        if (lastSeenStackNonEmpty && !stackNonEmpty) {
+            String scope = FModel.getPreferences().getPref(FPref.YIELD_DECLINE_SCOPE_STACK_YIELD);
+            if ("stack".equals(scope)) {
+                declinedSuggestionTurn.remove("STACK_YIELD");
+            }
+        }
+        lastSeenStackNonEmpty = stackNonEmpty;
+    }
+
+    public void declineSuggestion(String suggestionType) {
+        GameView gv = getGui().getGameView();
+        if (gv == null) return;
+        declinedSuggestionTurn.put(suggestionType, gv.getTurn());
+    }
+
+    public boolean isSuggestionDeclined(String suggestionType) {
+        // Look up the per-type scope pref
+        FPref scopePref = "STACK_YIELD".equals(suggestionType)
+            ? FPref.YIELD_DECLINE_SCOPE_STACK_YIELD
+            : FPref.YIELD_DECLINE_SCOPE_NO_ACTIONS;
+        String scope = FModel.getPreferences().getPref(scopePref);
+        if ("never".equals(scope)) {
+            return true; // Suggestion disabled entirely
+        }
+        if ("always".equals(scope)) {
+            return false; // "Always" means never suppress
+        }
+        // "stack" and "turn" both use turn-number tracking (stack also clears on transition)
+        GameView gv = getGui().getGameView();
+        if (gv == null) return false;
+        Integer turnDeclined = declinedSuggestionTurn.get(suggestionType);
+        return turnDeclined != null && turnDeclined == gv.getTurn();
     }
 
     public void autoPassUntilEndOfTurn() {
@@ -3390,6 +3511,56 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         final PlayerZone hand = player.getZone(ZoneType.Hand);
         hand.reorder(getCard(card), index);
         player.updateZoneForView(hand);
+    }
+
+    @Override
+    public void notifyYieldModeChanged(final PlayerView playerView, final forge.gamemodes.match.YieldMode mode) {
+        // Update the server's GUI with the client's yield mode
+        // This syncs yield state from network client to server
+        // Uses FromRemote methods to avoid triggering another notification and to handle
+        // PlayerView tracker mismatch (network PlayerViews have different trackers than server's)
+
+        // If clearing yield, always pass through
+        if (mode != null && mode != forge.gamemodes.match.YieldMode.NONE && !isYieldExperimentalEnabled()) {
+            // Host doesn't have experimental yield enabled — warn the client
+            final FServerManager server = FServerManager.getInstance();
+            if (server != null && server.isHosting()) {
+                server.broadcast(new MessageEvent(
+                    localizer.getMessage("lblYieldHostDisabled", playerView.getName())));
+            }
+
+            // Tell client to disable yield buttons
+            getGui().setHostYieldEnabled(false);
+
+            // UNTIL_END_OF_TURN works via legacy auto-pass, so allow it through
+            if (mode != forge.gamemodes.match.YieldMode.UNTIL_END_OF_TURN) {
+                // Reject experimental-only modes — clear the client's stuck yield state
+                getGui().syncYieldMode(playerView, forge.gamemodes.match.YieldMode.NONE);
+                return;
+            }
+        }
+
+        getGui().setYieldModeFromRemote(playerView, mode);
+    }
+
+    private boolean isYieldExperimentalEnabled() {
+        return FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS);
+    }
+
+    @Override
+    public void notifyAutoYieldChanged(String key, boolean autoYield) {
+        getGui().setShouldAutoYield(key, autoYield);
+    }
+
+    @Override
+    public void notifyTriggerChoiceChanged(int triggerId, int choice) {
+        if (choice > 0) {
+            getGui().setShouldAlwaysAcceptTrigger(triggerId);
+        } else if (choice < 0) {
+            getGui().setShouldAlwaysDeclineTrigger(triggerId);
+        } else {
+            getGui().setShouldAlwaysAskTrigger(triggerId);
+        }
     }
 
     @Override
@@ -3476,6 +3647,11 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
     @Override
     public boolean isOrderedZone() {
         return FModel.getPreferences().getPrefBoolean(FPref.UI_ORDER_HAND);
+    }
+
+    @Override
+    public void requestResync() {
+        // No-op for local games - resync is only used for network play
     }
 
 }
