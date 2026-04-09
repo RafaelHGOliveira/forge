@@ -1,0 +1,173 @@
+/*
+ * Forge: Play Magic: the Gathering.
+ * Copyright (C) 2011  Forge Team
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package forge.screens.match.views;
+
+import javax.swing.JPanel;
+
+import forge.gui.framework.DragCell;
+import forge.gui.framework.DragTab;
+import forge.gui.framework.EDocID;
+import forge.gui.framework.IVDoc;
+import forge.localinstance.properties.ForgePreferences.FPref;
+import forge.model.FModel;
+import forge.screens.match.controllers.CYield;
+import forge.toolbox.FButton;
+import forge.toolbox.FSkin;
+import forge.util.Localizer;
+import net.miginfocom.swing.MigLayout;
+
+/**
+ * Assembles Swing components of the yield controls panel.
+ *
+ * <br><br><i>(V at beginning of class name denotes a view class.)</i>
+ */
+public class VYield implements IVDoc<CYield> {
+
+    // Fields used with interface IVDoc
+    private DragCell parentCell;
+    private final Localizer localizer = Localizer.getInstance();
+    private final DragTab tab = new DragTab(localizer.getMessage("lblYieldOptions"));
+
+    // Yield control buttons
+    private final FButton btnNextPhase = new FButton(localizer.getMessage("lblYieldBtnNextPhase"));
+    private final FButton btnClearStack = new FButton(localizer.getMessage("lblYieldBtnClearStack"));
+    private final FButton btnCombat = new FButton(localizer.getMessage("lblYieldBtnCombat"));
+    private final FButton btnEndStep = new FButton(localizer.getMessage("lblYieldBtnEndStep"));
+    private final FButton btnEndStepBeforeYourTurn = new FButton(localizer.getMessage("lblYieldBtnEndStepBeforeYourTurn"));
+    private final FButton btnEndTurn = new FButton(localizer.getMessage("lblYieldBtnEndTurn"));
+    private final FButton btnYourTurn = new FButton(localizer.getMessage("lblYieldBtnYourTurn"));
+    private final FButton btnAutoPass = new FButton(localizer.getMessage("lblYieldBtnAutoPass"));
+    private final FButton btnSettings = new FButton(localizer.getMessage("lblSettings"));
+
+    private final CYield controller;
+
+    public VYield(final CYield controller) {
+        this.controller = controller;
+
+        // Use smaller font to fit button text
+        java.awt.Font smallFont = FSkin.getBoldFont(11).getBaseFont();
+        btnNextPhase.setFont(smallFont);
+        btnClearStack.setFont(smallFont);
+        btnCombat.setFont(smallFont);
+        btnEndStep.setFont(smallFont);
+        btnEndStepBeforeYourTurn.setFont(smallFont);
+        btnEndTurn.setFont(smallFont);
+        btnYourTurn.setFont(smallFont);
+        btnAutoPass.setFont(smallFont);
+        btnSettings.setFont(smallFont);
+
+        // Enable highlight mode: blue by default, red when active yield
+        btnNextPhase.setUseHighlightMode(true);
+        btnClearStack.setUseHighlightMode(true);
+        btnCombat.setUseHighlightMode(true);
+        btnEndStep.setUseHighlightMode(true);
+        btnEndStepBeforeYourTurn.setUseHighlightMode(true);
+        btnEndTurn.setUseHighlightMode(true);
+        btnYourTurn.setUseHighlightMode(true);
+        btnAutoPass.setUseHighlightMode(true);
+
+        // Set tooltips on yield buttons
+        btnNextPhase.setToolTipText(localizer.getMessage("lblYieldBtnNextPhaseTooltip"));
+        btnClearStack.setToolTipText(localizer.getMessage("lblYieldBtnClearStackTooltip"));
+        btnCombat.setToolTipText(localizer.getMessage("lblYieldBtnCombatTooltip"));
+        btnEndStep.setToolTipText(localizer.getMessage("lblYieldBtnEndStepTooltip"));
+        btnEndStepBeforeYourTurn.setToolTipText(localizer.getMessage("lblYieldBtnEndStepBeforeYourTurnTooltip"));
+        btnEndTurn.setToolTipText(localizer.getMessage("lblYieldBtnEndTurnTooltip"));
+        btnYourTurn.setToolTipText(localizer.getMessage("lblYieldBtnYourTurnTooltip"));
+        btnAutoPass.setToolTipText(localizer.getMessage("lblYieldBtnAutoPassTooltip"));
+        btnSettings.setToolTipText(localizer.getMessage("lblInterruptSettingsTooltip"));
+        btnSettings.setFocusable(false); // Settings opens a dialog; no keyboard focus needed
+        btnSettings.setUseHighlightMode(true); // Use FOCUS (blue) as default, matching other yield buttons
+    }
+
+    @Override
+    public void populate() {
+        JPanel container = parentCell.getBody();
+
+        boolean largerButtons = FModel.getPreferences().getPrefBoolean(FPref.UI_FOR_TOUCHSCREN);
+        String buttonConstraints = largerButtons
+            ? "w 10:33%, h 40px:40px:60px"
+            : "w 10:33%, hmin 24px";
+
+        // Layout: 4 columns to accommodate all yield options
+        container.setLayout(new MigLayout("wrap 4, gap 2px!, insets 3px"));
+
+        String span2Constraints = largerButtons
+            ? "span 2, w 10:66%, h 40px:40px:60px"
+            : "span 2, w 10:66%, hmin 24px";
+        String fullWidthConstraints = largerButtons
+            ? "span 4, w 10:100%, h 40px:40px:60px"
+            : "span 4, w 10:100%, hmin 24px";
+        String settingsConstraints = largerButtons
+            ? "span 4, gaptop 3px, w 10:100%, h 40px:40px:60px"
+            : "span 4, gaptop 3px, w 10:100%, hmin 24px";
+
+        // Row 1: longest skips — Your Turn | End Turn | End Step Before Your Turn (span 2)
+        container.add(btnYourTurn, buttonConstraints);
+        container.add(btnEndTurn, buttonConstraints);
+        container.add(btnEndStepBeforeYourTurn, span2Constraints);
+
+        // Row 2: phase-level skips in game-phase order: Next Phase → Combat → End Step → Clear Stack
+        container.add(btnNextPhase, buttonConstraints);
+        container.add(btnCombat, buttonConstraints);
+        container.add(btnEndStep, buttonConstraints);
+        container.add(btnClearStack, buttonConstraints);
+
+        // Row 3: Auto-pass toggle (full width)
+        container.add(btnAutoPass, fullWidthConstraints);
+
+        // Row 4: Settings (full width)
+        container.add(btnSettings, settingsConstraints);
+    }
+
+    @Override
+    public void setParentCell(final DragCell cell0) {
+        this.parentCell = cell0;
+    }
+
+    @Override
+    public DragCell getParentCell() {
+        return this.parentCell;
+    }
+
+    @Override
+    public EDocID getDocumentID() {
+        return EDocID.REPORT_YIELD;
+    }
+
+    @Override
+    public DragTab getTabLabel() {
+        return tab;
+    }
+
+    @Override
+    public CYield getLayoutControl() {
+        return controller;
+    }
+
+    // Button getters
+    public FButton getBtnNextPhase() { return btnNextPhase; }
+    public FButton getBtnClearStack() { return btnClearStack; }
+    public FButton getBtnCombat() { return btnCombat; }
+    public FButton getBtnEndStep() { return btnEndStep; }
+    public FButton getBtnEndStepBeforeYourTurn() { return btnEndStepBeforeYourTurn; }
+    public FButton getBtnEndTurn() { return btnEndTurn; }
+    public FButton getBtnYourTurn() { return btnYourTurn; }
+    public FButton getBtnAutoPass() { return btnAutoPass; }
+    public FButton getBtnSettings() { return btnSettings; }
+}

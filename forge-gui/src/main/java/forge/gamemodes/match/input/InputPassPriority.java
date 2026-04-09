@@ -17,11 +17,18 @@
  */
 package forge.gamemodes.match.input;
 
+import forge.ai.ComputerUtilMana;
 import forge.game.Game;
+import forge.game.GameView;
 import forge.game.card.Card;
+import forge.game.mana.ManaPool;
 import forge.game.player.Player;
+import forge.game.player.PlayerView;
 import forge.game.player.actions.PassPriorityAction;
 import forge.game.spellability.SpellAbility;
+import forge.game.spellability.StackItemView;
+import forge.gamemodes.match.YieldMode;
+import forge.gui.GuiBase;
 import forge.localinstance.properties.ForgePreferences.FPref;
 import forge.model.FModel;
 import forge.player.GamePlayerUtil;
@@ -29,6 +36,7 @@ import forge.player.PlayerControllerHuman;
 import forge.util.ITriggerEvent;
 import forge.util.Localizer;
 import forge.util.ThreadUtil;
+import forge.util.collect.FCollectionView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +55,11 @@ public class InputPassPriority extends InputSyncronizedBase {
 
     private List<SpellAbility> chosenSa;
 
+    // Pending yield suggestion state for prompt integration
+    private YieldMode pendingSuggestion = null;
+    private String pendingSuggestionType = null; // "STACK_YIELD", "NO_ACTIONS"
+    private String pendingSuggestionMessage = null;
+
     public InputPassPriority(final PlayerControllerHuman controller) {
         super(controller);
     }
@@ -54,6 +67,60 @@ public class InputPassPriority extends InputSyncronizedBase {
     /** {@inheritDoc} */
     @Override
     public final void showMessage() {
+        // Check if experimental yield features are enabled and show smart suggestions
+        // Only show suggestions if not already yielding
+        // Check if yield just ended and suppression is enabled
+        boolean suppressDueToYieldEnd = FModel.getPreferences().getPrefBoolean(FPref.YIELD_SUPPRESS_AFTER_END)
+            && getController().didYieldJustEnd();
+
+        if (isExperimentalYieldEnabled() && !isAlreadyYielding() && !suppressDueToYieldEnd) {
+            // Track stack transitions for per-stack decline scope
+            GameView gvForStack = getGameView();
+            boolean stackNonEmpty = gvForStack != null && gvForStack.getStack() != null
+                && !gvForStack.getStack().isEmpty();
+            getController().onPriorityReceived(stackNonEmpty);
+        }
+
+        showNormalPrompt();
+    }
+
+    private void showYieldSuggestionPrompt() {
+        // Double-check yield state right before showing - it may have been set
+        // between the initial check and now (e.g., async button click in multiplayer)
+        if (isAlreadyYielding()) {
+            pendingSuggestion = null;
+            pendingSuggestionType = null;
+            pendingSuggestionMessage = null;
+            showNormalPrompt();
+            return;
+        }
+
+        Localizer loc = Localizer.getInstance();
+        String fullMessage = pendingSuggestionMessage;
+        // Append decline hint based on per-type scope setting
+        FPref scopePref = "STACK_YIELD".equals(pendingSuggestionType)
+            ? FPref.YIELD_DECLINE_SCOPE_STACK_YIELD
+            : FPref.YIELD_DECLINE_SCOPE_NO_ACTIONS;
+        String scope = FModel.getPreferences().getPref(scopePref);
+        if ("stack".equals(scope)) {
+            fullMessage += "\n" + loc.getMessage("lblYieldSuggestionDeclineHintStack");
+        } else if ("turn".equals(scope)) {
+            fullMessage += "\n" + loc.getMessage("lblYieldSuggestionDeclineHint");
+        }
+        showMessage(fullMessage);
+        chosenSa = null;
+        getController().getGui().updateButtons(getOwner(),
+            loc.getMessage("lblAccept"),
+            loc.getMessage("lblDecline"),
+            true, true, true);
+        getController().getGui().alertUser();
+    }
+
+    private void showNormalPrompt() {
+        pendingSuggestion = null;
+        pendingSuggestionType = null;
+        pendingSuggestionMessage = null;
+
         showMessage(getTurnPhasePriorityMessage(getController().getGame()));
         chosenSa = null;
         Localizer localizer = Localizer.getInstance();
@@ -67,9 +134,49 @@ public class InputPassPriority extends InputSyncronizedBase {
         getController().getGui().alertUser();
     }
 
+    private boolean isAlreadyYielding() {
+        YieldMode currentMode = getController().getGui().getYieldMode(getOwner());
+        return currentMode != null && currentMode != YieldMode.NONE;
+    }
+
     /** {@inheritDoc} */
     @Override
     protected final void onOk() {
+        // If accepting a yield suggestion (but not if a yield was already set externally)
+        if (pendingSuggestion != null) {
+            // Check if a yield mode was already set (e.g., by clicking a yield button)
+            YieldMode currentMode = getController().getGui().getYieldMode(getOwner());
+            if (currentMode != null && currentMode != YieldMode.NONE) {
+                // A yield mode is already active - clear suggestion and pass through
+                pendingSuggestion = null;
+                pendingSuggestionType = null;
+                pendingSuggestionMessage = null;
+                stop();
+                return;
+            }
+            // Check if the auto-pass toggle was just enabled (user clicked the button,
+            // which called selectButtonOk() — don't also activate the suggestion mode)
+            if (FModel.getPreferences().getPrefBoolean(FPref.YIELD_AUTO_PASS_NO_ACTIONS)) {
+                pendingSuggestion = null;
+                pendingSuggestionType = null;
+                pendingSuggestionMessage = null;
+                stop();
+                return;
+            }
+
+            YieldMode mode = pendingSuggestion;
+            pendingSuggestion = null;
+            pendingSuggestionType = null;
+            pendingSuggestionMessage = null;
+            boolean activated = getController().getGui().setYieldMode(getOwner(), mode);
+            if (activated) {
+                stop();
+            } else {
+                showNormalPrompt();
+            }
+            return;
+        }
+
         passPriority(() -> {
             getController().macros().addRememberedAction(new PassPriorityAction());
             stop();
@@ -79,10 +186,29 @@ public class InputPassPriority extends InputSyncronizedBase {
     /** {@inheritDoc} */
     @Override
     protected final void onCancel() {
+        // If declining a yield suggestion, track the decline and show normal prompt
+        if (pendingSuggestion != null) {
+            // Track that this suggestion was declined for this turn
+            if (pendingSuggestionType != null) {
+                getController().declineSuggestion(pendingSuggestionType);
+            }
+            pendingSuggestion = null;
+            pendingSuggestionType = null;
+            pendingSuggestionMessage = null;
+            showNormalPrompt();
+            return;
+        }
+
         if (!getController().tryUndoLastAction()) { //undo if possible
             //otherwise end turn
             passPriority(() -> {
-                getController().autoPassUntilEndOfTurn();
+                if (isExperimentalYieldEnabled()) {
+                    // Use experimental yield system with smart interrupts
+                    getController().getGui().setYieldMode(getOwner(), YieldMode.UNTIL_END_OF_TURN);
+                } else {
+                    // Legacy behavior - cancels on any opponent spell
+                    getController().autoPassUntilEndOfTurn();
+                }
                 stop();
             });
         }
@@ -97,14 +223,21 @@ public class InputPassPriority extends InputSyncronizedBase {
         if (FModel.getPreferences().getPrefBoolean(FPref.UI_MANA_LOST_PROMPT)) {
             //if gui player has mana floating that will be lost if phase ended right now, prompt before passing priority
             final Game game = getController().getGame();
-            if (game.getStack().isEmpty()) { //phase can't end right now if stack isn't empty
-                Player player = game.getPhaseHandler().getPriorityPlayer();
-                if (player != null && player.getManaPool().willManaBeLostAtEndOfPhase() && player.getLobbyPlayer() == GamePlayerUtil.getGuiPlayer()) {
+            PlayerView pv = getPlayerView();
+            if (game != null && pv != null && pv.isLobbyPlayer(GamePlayerUtil.getGuiPlayer())) {
+                GameView gv = getGameView();
+                FCollectionView<StackItemView> stack = gv != null ? gv.getStack() : null;
+                // Use live mana pool check (not cached PlayerView) to avoid stale state after spending mana
+                Player livePlayer = game.getPhaseHandler().getPriorityPlayer();
+                if ((stack == null || stack.isEmpty()) &&
+                    livePlayer != null && livePlayer.getManaPool().willManaBeLostAtEndOfPhase()) {
                     //must invoke in game thread so dialog can be shown on mobile game
                     ThreadUtil.invokeInGameThread(() -> {
                         Localizer localizer = Localizer.getInstance();
-                        String message = localizer.getMessage("lblYouHaveManaFloatingInYourManaPoolCouldBeLostIfPassPriority");
-                        if (player.getManaPool().hasBurn()) {
+                        String manaDesc = buildManaDescription(livePlayer.getManaPool());
+                        String phaseName = game.getPhaseHandler().getPhase().nameForUi;
+                        String message = localizer.getMessage("lblManaFloatingWithAmount", manaDesc, phaseName);
+                        if (livePlayer.getManaPool().hasBurn()) {
                             message += " " + localizer.getMessage("lblYouWillTakeManaBurnDamageEqualAmountFloatingManaLostThisWay");
                         }
                         if (getController().getGui().showConfirmDialog(message, localizer.getMessage("lblManaFloating"), localizer.getMessage("lblOK"), localizer.getMessage("lblCancel"))) {
@@ -116,6 +249,26 @@ public class InputPassPriority extends InputSyncronizedBase {
             }
         }
         runnable.run(); //just pass priority immediately if no mana floating that would be lost
+    }
+
+    private static String buildManaDescription(ManaPool pool) {
+        StringBuilder sb = new StringBuilder();
+        byte[] types = forge.card.mana.ManaAtom.MANATYPES;
+        String[] symbols = {"{W}", "{U}", "{B}", "{R}", "{G}", "{C}"};
+        for (int i = 0; i < types.length; i++) {
+            int amount = pool.getAmountOfColor(types[i]);
+            if (amount == 0) {
+                continue;
+            }
+            if (amount <= 3) {
+                for (int j = 0; j < amount; j++) {
+                    sb.append(symbols[i]);
+                }
+            } else {
+                sb.append(symbols[i]).append("x").append(amount);
+            }
+        }
+        return sb.toString();
     }
 
     public List<SpellAbility> getChosenSa() { return chosenSa; }
@@ -175,5 +328,88 @@ public class InputPassPriority extends InputSyncronizedBase {
             return true;
         }
     	return false;
+    }
+
+    // Smart yield suggestion helper methods
+
+    private boolean isExperimentalYieldEnabled() {
+        // Smart suggestions are desktop-only (mobile GUI doesn't support yield panel)
+        if (GuiBase.getInterface().isLibgdxPort()) {
+            return false;
+        }
+        return FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS);
+    }
+
+    private GameView getGameView() {
+        return getController().getGui().getGameView();
+    }
+
+    private PlayerView getPlayerView() {
+        return getController().getGui().lookupPlayerViewById(getOwner());
+    }
+
+    private YieldMode getDefaultYieldMode() {
+        GameView gv = getGameView();
+        return gv != null && gv.getPlayers().size() >= 3
+            ? YieldMode.UNTIL_YOUR_NEXT_TURN
+            : YieldMode.UNTIL_END_OF_TURN;
+    }
+
+    private boolean checkHasAvailableActions() {
+        Player player = getController().getPlayer();
+        if (player == null) return false;
+        player.getView().updateHasAvailableActions(player,
+            sa -> ComputerUtilMana.canPayManaCost(sa, player, 0, false));
+        return player.getView().hasAvailableActions();
+    }
+
+    private boolean shouldShowStackYieldPrompt() {
+        GameView gv = getGameView();
+        if (gv == null) return false;
+
+        FCollectionView<StackItemView> stack = gv.getStack();
+        if (stack == null || stack.isEmpty()) {
+            return false;
+        }
+
+        return !checkHasAvailableActions();
+    }
+
+    /**
+     * Check if current game state is valid for showing yield suggestions.
+     * Returns false if stack is non-empty or if own-turn suppression applies.
+     */
+    private boolean isValidSuggestionContext(GameView gv, PlayerView pv) {
+        FCollectionView<StackItemView> stack = gv.getStack();
+        if (stack != null && !stack.isEmpty()) {
+            return false;
+        }
+        // Check if it's the player's own turn
+        PlayerView currentTurn = gv.getPlayerTurn();
+        if (currentTurn != null && currentTurn.equals(pv)) {
+            // Always suppress on player's first turn (no lands/mana yet)
+            // First round = turn number <= player count
+            int numPlayers = gv.getPlayers().size();
+            if (gv.getTurn() <= numPlayers) {
+                return false;
+            }
+            // Otherwise check the preference
+            if (FModel.getPreferences().getPrefBoolean(FPref.YIELD_SUPPRESS_ON_OWN_TURN)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean shouldShowNoActionsPrompt() {
+        GameView gv = getGameView();
+        PlayerView pv = getPlayerView();
+        if (gv == null || pv == null) return false;
+
+        if (!isValidSuggestionContext(gv, pv)) {
+            return false;
+        }
+
+        return !checkHasAvailableActions();
     }
 }

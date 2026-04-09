@@ -19,6 +19,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import forge.Singletons;
 import forge.game.spellability.StackItemView;
+import forge.gamemodes.match.YieldMode;
+import forge.gamemodes.net.event.MessageEvent;
+import forge.gamemodes.net.server.FServerManager;
 import forge.gui.framework.EDocID;
 import forge.gui.framework.SDisplayUtil;
 import forge.localinstance.properties.ForgePreferences;
@@ -29,6 +32,8 @@ import forge.screens.match.CMatchUI;
 import forge.toolbox.special.CardZoomer;
 import forge.util.Localizer;
 import forge.view.KeyboardShortcutsDialog;
+import forge.view.arcane.CardPanel;
+import forge.view.arcane.CardPanelContainer;
 
 /** 
  * Consolidates keyboard shortcut assembly into one location
@@ -131,6 +136,106 @@ public class KeyboardShortcuts {
             }
         };
 
+        /** Yield until next phase (experimental). */
+        final Action actYieldUntilNextPhase = new AbstractAction() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
+                if (matchUI == null || matchUI.getCurrentPlayer() == null) { return; }
+                if (!FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS)) { return; }
+                matchUI.setYieldMode(matchUI.getCurrentPlayer(), YieldMode.UNTIL_NEXT_PHASE);
+                if (matchUI.getGameController() != null) {
+                    matchUI.getGameController().passPriority();
+                }
+            }
+        };
+
+        /** Yield until stack clears (experimental). */
+        final Action actYieldUntilStackClears = new AbstractAction() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
+                if (matchUI == null || matchUI.getCurrentPlayer() == null) { return; }
+                if (!FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS)) { return; }
+                boolean activated = matchUI.setYieldMode(matchUI.getCurrentPlayer(), YieldMode.UNTIL_STACK_CLEARS);
+                if (activated && matchUI.getGameController() != null) {
+                    matchUI.getGameController().passPriority();
+                }
+            }
+        };
+
+        /** Yield until your next turn (experimental, 3+ players only). */
+        final Action actYieldUntilYourNextTurn = new AbstractAction() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
+                if (matchUI == null || matchUI.getCurrentPlayer() == null) { return; }
+                if (!FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS)) { return; }
+                if (matchUI.getGameView() != null && matchUI.getGameView().getPlayers().size() >= 3) {
+                    matchUI.setYieldMode(matchUI.getCurrentPlayer(), YieldMode.UNTIL_YOUR_NEXT_TURN);
+                    if (matchUI.getGameController() != null) {
+                        matchUI.getGameController().passPriority();
+                    }
+                }
+            }
+        };
+
+        /** Yield until end of turn (experimental). */
+        final Action actYieldUntilEndOfTurn = new AbstractAction() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
+                if (matchUI == null || matchUI.getCurrentPlayer() == null) { return; }
+                if (!FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS)) { return; }
+                matchUI.setYieldMode(matchUI.getCurrentPlayer(), YieldMode.UNTIL_END_OF_TURN);
+                if (matchUI.getGameController() != null) {
+                    matchUI.getGameController().passPriority();
+                }
+            }
+        };
+
+        /** Yield until before combat (experimental). */
+        final Action actYieldUntilBeforeCombat = new AbstractAction() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
+                if (matchUI == null || matchUI.getCurrentPlayer() == null) { return; }
+                if (!FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS)) { return; }
+                matchUI.setYieldMode(matchUI.getCurrentPlayer(), YieldMode.UNTIL_BEFORE_COMBAT);
+                if (matchUI.getGameController() != null) {
+                    matchUI.getGameController().passPriority();
+                }
+            }
+        };
+
+        /** Yield until end step (experimental). */
+        final Action actYieldUntilEndStep = new AbstractAction() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
+                if (matchUI == null || matchUI.getCurrentPlayer() == null) { return; }
+                if (!FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS)) { return; }
+                matchUI.setYieldMode(matchUI.getCurrentPlayer(), YieldMode.UNTIL_END_STEP);
+                if (matchUI.getGameController() != null) {
+                    matchUI.getGameController().passPriority();
+                }
+            }
+        };
+
+        /** Cancel current yield mode (experimental). */
+        final Action actCancelYield = new AbstractAction() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
+                if (matchUI == null || matchUI.getCurrentPlayer() == null) { return; }
+                if (!FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS)) { return; }
+                YieldMode currentYield = matchUI.getYieldMode(matchUI.getCurrentPlayer());
+                if (currentYield != null && currentYield != YieldMode.NONE) {
+                    matchUI.clearYieldMode(matchUI.getCurrentPlayer());
+                }
+            }
+        };
+
         /** Alpha Strike. */
         final Action actAllAttack = new AbstractAction() {
             @Override
@@ -211,7 +316,12 @@ public class KeyboardShortcuts {
                 if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
                 if (matchUI == null) { return; }
                 if (!CardZoomer.SINGLETON_INSTANCE.isZoomerOpen()) {
-                    CardZoomer.SINGLETON_INSTANCE.doMouseWheelZoom();
+                    final CardPanel hovered = CardPanelContainer.lastHoveredPanel;
+                    if (hovered != null && hovered.getCard() != null
+                            && matchUI.mayView(hovered.getCard())) {
+                        CardZoomer.SINGLETON_INSTANCE.setCard(hovered.getCard().getCurrentState(), false);
+                        CardZoomer.SINGLETON_INSTANCE.doMouseWheelZoom();
+                    }
                 } else {
                     CardZoomer.SINGLETON_INSTANCE.closeZoomer();
                 }
@@ -303,6 +413,15 @@ public class KeyboardShortcuts {
         list.add(new Shortcut(FPref.SHORTCUT_UNDO, localizer.getMessage("lblSHORTCUT_UNDO"), actUndo, am, im));
         list.add(new Shortcut(FPref.SHORTCUT_CONCEDE, localizer.getMessage("lblSHORTCUT_CONCEDE"), actConcede, am, im));
         list.add(new Shortcut(FPref.SHORTCUT_ENDTURN, localizer.getMessage("lblSHORTCUT_ENDTURN"), actEndTurn, am, im));
+        list.add(new Shortcut(FPref.SHORTCUT_YIELD_OPTIONS, localizer.getMessage("lblSHORTCUT_YIELD_OPTIONS"), actYieldOptions, am, im));
+        list.add(new Shortcut(FPref.SHORTCUT_YIELD_UNTIL_YOUR_NEXT_TURN, localizer.getMessage("lblSHORTCUT_YIELD_UNTIL_YOUR_NEXT_TURN"), actYieldUntilYourNextTurn, am, im));
+        list.add(new Shortcut(FPref.SHORTCUT_YIELD_UNTIL_END_OF_TURN, localizer.getMessage("lblSHORTCUT_YIELD_UNTIL_END_OF_TURN"), actYieldUntilEndOfTurn, am, im));
+        list.add(new Shortcut(FPref.SHORTCUT_YIELD_UNTIL_NEXT_PHASE, localizer.getMessage("lblSHORTCUT_YIELD_UNTIL_NEXT_PHASE"), actYieldUntilNextPhase, am, im));
+        list.add(new Shortcut(FPref.SHORTCUT_YIELD_UNTIL_BEFORE_COMBAT, localizer.getMessage("lblSHORTCUT_YIELD_UNTIL_BEFORE_COMBAT"), actYieldUntilBeforeCombat, am, im));
+        list.add(new Shortcut(FPref.SHORTCUT_YIELD_UNTIL_END_STEP, localizer.getMessage("lblSHORTCUT_YIELD_UNTIL_END_STEP"), actYieldUntilEndStep, am, im));
+        list.add(new Shortcut(FPref.SHORTCUT_YIELD_UNTIL_STACK_CLEARS, localizer.getMessage("lblSHORTCUT_YIELD_UNTIL_STACK_CLEARS"), actYieldUntilStackClears, am, im));
+        list.add(new Shortcut(FPref.SHORTCUT_YIELD_AUTO_PASS, localizer.getMessage("lblSHORTCUT_YIELD_AUTO_PASS"), actAutoPassNoActions, am, im));
+        list.add(new Shortcut(FPref.SHORTCUT_YIELD_CANCEL, localizer.getMessage("lblSHORTCUT_YIELD_CANCEL"), actCancelYield, am, im));
         list.add(new Shortcut(FPref.SHORTCUT_ALPHASTRIKE, localizer.getMessage("lblSHORTCUT_ALPHASTRIKE"), actAllAttack, am, im));
         list.add(new Shortcut(FPref.SHORTCUT_SHOWTARGETING, localizer.getMessage("lblSHORTCUT_SHOWTARGETING"), actTgtOverlay, am, im));
         list.add(new Shortcut(FPref.SHORTCUT_AUTOYIELD_ALWAYS_YES, localizer.getMessage("lblSHORTCUT_AUTOYIELD_ALWAYS_YES"), actAutoYieldAndYes, am, im));
