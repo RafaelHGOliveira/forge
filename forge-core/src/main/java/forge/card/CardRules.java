@@ -51,6 +51,7 @@ public final class CardRules implements ICardCharacteristics {
     private String meldWith;
     private String partnerWith;
     private String partnerType;
+    private boolean addsWildCardColor;
     private int setColorID;
     private boolean custom;
     private boolean unsupported;
@@ -76,6 +77,7 @@ public final class CardRules implements ICardCharacteristics {
         meldWith = "";
         partnerWith = "";
         partnerType = "";
+        addsWildCardColor = false;
         setColorID = 0;
 
 
@@ -101,6 +103,7 @@ public final class CardRules implements ICardCharacteristics {
         colorIdentity = newRules.colorIdentity;
         meldWith = newRules.meldWith;
         partnerWith = newRules.partnerWith;
+        addsWildCardColor = newRules.addsWildCardColor;
         setColorID = newRules.setColorID;
         tokens = newRules.tokens;
     }
@@ -292,6 +295,9 @@ public final class CardRules implements ICardCharacteristics {
     }
 
     public boolean canBeCommander() {
+        if (mainPart.getOracleText().contains(" is your commander, choose a color before the game begins.")) {
+            addsWildCardColor = true;
+        }
         if (mainPart.getOracleText().contains("can be your commander") || canBeBackground()) {
             return true;
         }
@@ -416,7 +422,7 @@ public final class CardRules implements ICardCharacteristics {
     }
 
     public boolean getAddsWildCardColor() {
-        return mainPart.getOracleText().contains(" is your commander, choose a color before the game begins.");
+        return addsWildCardColor;
     }
 
     public int getSetColorID() {
@@ -522,6 +528,7 @@ public final class CardRules implements ICardCharacteristics {
         private String meldWith = "";
         private String partnerWith = "";
         private String partnerType = "";
+        private boolean addsWildCardColor = false;
         private int setColorID = 0;
         private String handLife = null;
         private String normalizedName = "";
@@ -563,6 +570,7 @@ public final class CardRules implements ICardCharacteristics {
             this.meldWith = "";
             this.partnerWith = "";
             this.partnerType = "";
+            this.addsWildCardColor = false;
             this.normalizedName = "";
             this.supportedFunctionalVariants = null;
             this.tokens = Lists.newArrayList();
@@ -588,6 +596,7 @@ public final class CardRules implements ICardCharacteristics {
             result.meldWith = this.meldWith;
             result.partnerWith = this.partnerWith;
             result.partnerType = this.partnerType;
+            result.addsWildCardColor = this.addsWildCardColor;
             result.setColorID = this.setColorID;
             if (!tokens.isEmpty()) {
                 result.tokens = tokens;

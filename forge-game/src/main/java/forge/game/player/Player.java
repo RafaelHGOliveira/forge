@@ -1760,6 +1760,9 @@ public class Player extends GameEntity implements Comparable<Player> {
     }
     public void updateManaForView() {
         view.updateMana(this);
+        if (getController().shouldTrackAvailableActions()) {
+            view.updateWillLoseManaAtEndOfPhase(this);
+        }
     }
 
     public final int getNumPowerSurgeLands() {
@@ -3057,7 +3060,8 @@ public class Player extends GameEntity implements Comparable<Player> {
     }
 
     public void initCommanderColor(Card cmd) {
-        if (cmd.getRules().getAddsWildCardColor()) {
+        if (cmd.getStaticAbilities().stream().anyMatch(stAb -> stAb.hasParam("Description") && stAb.getParam("Description")
+                .contains("If CARDNAME is your commander, choose a color before the game begins."))) {
             Player p = cmd.getController();
             String prompt = Localizer.getInstance().getMessage("lblChooseAColorFor", cmd.getName());
             SpellAbility cmdColorsa = new SpellAbility.EmptySa(ApiType.ChooseColor, cmd, p);

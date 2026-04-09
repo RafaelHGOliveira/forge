@@ -12,6 +12,7 @@ import forge.game.GameEntityView;
 import forge.game.card.Card;
 import forge.game.card.CardView;
 import forge.game.card.CounterType;
+import forge.game.spellability.SpellAbility;
 import forge.game.zone.PlayerZone;
 import forge.game.zone.ZoneType;
 import forge.trackable.TrackableCollection;
@@ -529,6 +530,123 @@ public class PlayerView extends GameEntityView {
             mana.put(b, p.getManaPool().getAmountOfColor(b));
         }
         set(TrackableProperty.Mana, mana);
+    }
+
+    public boolean hasAvailableActions() {
+        Boolean val = get(TrackableProperty.HasAvailableActions);
+        return val != null && val;
+    }
+
+    // Cache version: skip expensive scan when game state hasn't changed
+    private long lastAvailableActionsTimestamp = -1;
+
+    /**
+     * Check if this player has any available actions (playable spells/abilities).
+     * Used by the yield system to auto-pass when the player has nothing to do.
+     *
+     * getAllPossibleAbilities(p, true) already filters by canPlay(), which checks
+     * non-mana costs (tap/summoning sickness, sacrifice, discard, life, etc.)
+     * via CostPayment.canPayAdditionalCosts(). The canAffordMana predicate handles
+     * mana affordability including cost reductions (Goblin Electromancer) and
+     * increases (Thalia, Guardian of Thraben).
+     *
+     * Uses Game.getTimestamp() as a version counter — the timestamp increments on
+     * every game state change (zone changes, ability resolutions, etc.), so if it
+     * hasn't changed since the last scan, the cached result is still valid.
+     *
+     * @param p the player to check
+     * @param canAffordMana predicate that checks if a spell/ability's mana cost can be paid
+     *                      (should account for cost reductions/increases)
+     */
+    public void updateHasAvailableActions(Player p, java.util.function.Predicate<SpellAbility> canAffordMana) {
+        long currentTimestamp = p.getGame().getTimestamp();
+        if (currentTimestamp == lastAvailableActionsTimestamp) {
+            return; // game state unchanged, cached result is valid
+        }
+        lastAvailableActionsTimestamp = currentTimestamp;
+        // Check hand for playable spells that we can afford
+        for (Card card : p.getCardsIn(ZoneType.Hand)) {
+            for (SpellAbility sa : card.getAllPossibleAbilities(p, true)) {
+                if (sa.isSpell()) {
+                    if (canAffordMana.test(sa) && hasValidTargets(sa)) {
+                        set(TrackableProperty.HasAvailableActions, true);
+                        return;
+                    }
+                } else if (sa.isLandAbility()) {
+                    set(TrackableProperty.HasAvailableActions, true);
+                    return;
+                }
+            }
+        }
+
+        // Check battlefield for non-mana activated abilities we can afford
+        for (Card card : p.getCardsIn(ZoneType.Battlefield)) {
+            for (SpellAbility sa : card.getAllPossibleAbilities(p, true)) {
+                if (!sa.isManaAbility()) {
+                    if (canAffordMana.test(sa) && hasValidTargets(sa)) {
+                        set(TrackableProperty.HasAvailableActions, true);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Check graveyard, exile, command zone for playable abilities
+        for (ZoneType zone : new ZoneType[]{ZoneType.Graveyard, ZoneType.Exile, ZoneType.Command}) {
+            for (Card card : p.getCardsIn(zone)) {
+                for (SpellAbility sa : card.getAllPossibleAbilities(p, true)) {
+                    if (!sa.isManaAbility()) {
+                        if (canAffordMana.test(sa) && hasValidTargets(sa)) {
+                            set(TrackableProperty.HasAvailableActions, true);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        set(TrackableProperty.HasAvailableActions, false);
+    }
+
+    /**
+     * Check if a spell/ability has at least one valid target (or doesn't need targets).
+     */
+    private boolean hasValidTargets(SpellAbility sa) {
+        if (!sa.usesTargeting()) {
+            return true;
+        }
+        return sa.getTargetRestrictions().hasCandidates(sa);
+    }
+
+    /**
+     * Check if player has any mana available (floating or from untapped mana sources).
+     * Used by yield suggestion system to determine if player can cast spells.
+     */
+    public boolean hasManaAvailable() {
+        // Check floating mana
+        for (byte manaType : ManaAtom.MANATYPES) {
+            if (getMana(manaType) > 0) return true;
+        }
+
+        // Check for untapped mana sources (lands, rocks, dorks)
+        FCollectionView<CardView> battlefield = getBattlefield();
+        if (battlefield != null) {
+            for (CardView cv : battlefield) {
+                if (!cv.isTapped() && cv.getCurrentState().origProduceMana() != null) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public boolean willLoseManaAtEndOfPhase() {
+        Boolean val = get(TrackableProperty.WillLoseManaAtEndOfPhase);
+        return val != null && val;
+    }
+    void updateWillLoseManaAtEndOfPhase(Player p) {
+        set(TrackableProperty.WillLoseManaAtEndOfPhase, p.getManaPool().willManaBeLostAtEndOfPhase());
     }
 
     private List<String> getDetailsList() {
