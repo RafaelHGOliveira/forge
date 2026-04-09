@@ -29,13 +29,11 @@ import forge.trackable.TrackableCollection;
 import forge.util.FSerializableFunction;
 import forge.util.ITriggerEvent;
 
-<<<<<<< HEAD:forge-gui/src/main/java/forge/gamemodes/net/server/NetGuiGame.java
-=======
 import net.jpountz.lz4.LZ4BlockOutputStream;
 
 import java.util.ArrayList;
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync)):forge-gui/src/main/java/forge/gamemodes/net/server/RemoteClientGuiGame.java
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,7 +53,7 @@ public class RemoteClientGuiGame extends NetworkGuiGame {
     private volatile boolean resyncPending;
 
     private GameEventForwarder forwarder;
-    private boolean flushing;
+    private volatile boolean flushing;
 
     public RemoteClientGuiGame(final RemoteClient client) {
         sender = new GameProtocolSender(client);
@@ -66,6 +64,11 @@ public class RemoteClientGuiGame extends NetworkGuiGame {
     /** Alias for reconnection code that references slot index. */
     public int getSlotIndex() {
         return clientIndex;
+    }
+
+    @Override
+    public boolean isRemoteGuiProxy() {
+        return true;
     }
 
     public void pause() {
@@ -260,15 +263,15 @@ public class RemoteClientGuiGame extends NetworkGuiGame {
     }
 
     @Override
-    public void openView(final TrackableCollection<PlayerView> myPlayers) {
-        send(ProtocolMethod.openView, myPlayers);
+    public boolean openView(final TrackableCollection<PlayerView> myPlayers) {
+        // sendAndWait ensures the client has fully processed openView
+        // (registered game controllers, set up input handlers) before
+        // the game thread proceeds to chooseStartingPlayer or other prompts.
+        Boolean result = sendAndWait(ProtocolMethod.openView, myPlayers);
         updateGameView();
-<<<<<<< HEAD:forge-gui/src/main/java/forge/gamemodes/net/server/NetGuiGame.java
-=======
         // Initialize delta sync by sending the initial full state
         sendFullState();
         return Boolean.TRUE.equals(result);
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync)):forge-gui/src/main/java/forge/gamemodes/net/server/RemoteClientGuiGame.java
     }
 
     @Override
@@ -284,14 +287,14 @@ public class RemoteClientGuiGame extends NetworkGuiGame {
 
     @Override
     public void showPromptMessage(final PlayerView playerView, final String message) {
-        updateGameView();
-        send(ProtocolMethod.showPromptMessage, playerView, message);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        sender.send(ProtocolMethod.showPromptMessage, playerView, message);
     }
 
     @Override
     public void showCardPromptMessage(final PlayerView playerView, final String message, final CardView card) {
-        updateGameView();
-        send(ProtocolMethod.showCardPromptMessage, playerView, message, card);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        sender.send(ProtocolMethod.showCardPromptMessage, playerView, message, card);
     }
 
     @Override
@@ -334,14 +337,15 @@ public class RemoteClientGuiGame extends NetworkGuiGame {
 
     @Override
     public Iterable<PlayerZoneUpdate> tempShowZones(final PlayerView controller, final Iterable<PlayerZoneUpdate> zonesToUpdate) {
-        updateGameView();
-        return sendAndWait(ProtocolMethod.tempShowZones, controller, zonesToUpdate);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        final Iterable<PlayerZoneUpdate> result = sendAndWait(ProtocolMethod.tempShowZones, controller, zonesToUpdate);
+        return result != null ? result : Collections.emptyList();
     }
 
     @Override
     public void hideZones(final PlayerView controller, final Iterable<PlayerZoneUpdate> zonesToUpdate) {
-        updateGameView();
-        send(ProtocolMethod.hideZones, controller, zonesToUpdate);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        sender.send(ProtocolMethod.hideZones, controller, zonesToUpdate);
     }
 
     @Override
@@ -351,8 +355,8 @@ public class RemoteClientGuiGame extends NetworkGuiGame {
 
     @Override
     public void setPanelSelection(final CardView hostCard) {
-        updateGameView();
-        send(ProtocolMethod.setPanelSelection, hostCard);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        sender.send(ProtocolMethod.setPanelSelection, hostCard);
     }
 
     @Override
@@ -372,7 +376,8 @@ public class RemoteClientGuiGame extends NetworkGuiGame {
 
     @Override
     public Map<Object, Integer> assignGenericAmount(final CardView effectSource, final Map<Object, Integer> targets, final int amount, final boolean atLeastOne, final String amountLabel) {
-        return sendAndWait(ProtocolMethod.assignGenericAmount, effectSource, targets, amount, atLeastOne, amountLabel);
+        final Map<Object, Integer> result = sendAndWait(ProtocolMethod.assignGenericAmount, effectSource, targets, amount, atLeastOne, amountLabel);
+        return result != null ? result : Collections.emptyMap();
     }
 
     @Override
@@ -400,13 +405,9 @@ public class RemoteClientGuiGame extends NetworkGuiGame {
 
     @Override
     public String showInputDialog(final String message, final String title, final FSkinProp icon, final String initialInput, final List<String> inputOptions, final boolean isNumeric) {
-<<<<<<< HEAD:forge-gui/src/main/java/forge/gamemodes/net/server/NetGuiGame.java
-        return sendAndWait(ProtocolMethod.showInputDialog, message, title, icon, initialInput, inputOptions, isNumeric);
-=======
         updateGameView(); // Ensure game state is synced before asking for input
         final String result = sendAndWait(ProtocolMethod.showInputDialog, message, title, icon, initialInput, inputOptions, isNumeric);
         return result != null ? result : initialInput;
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync)):forge-gui/src/main/java/forge/gamemodes/net/server/RemoteClientGuiGame.java
     }
 
     @Override
@@ -418,35 +419,23 @@ public class RemoteClientGuiGame extends NetworkGuiGame {
 
     @Override
     public <T> List<T> getChoices(final String message, final int min, final int max, final List<T> choices, final List<T> selected, final FSerializableFunction<T, String> display) {
-<<<<<<< HEAD:forge-gui/src/main/java/forge/gamemodes/net/server/NetGuiGame.java
-        return sendAndWait(ProtocolMethod.getChoices, message, min, max, choices, selected, display);
-=======
         updateGameView(); // Ensure game state is synced before asking for input
         final List<T> result = sendAndWait(ProtocolMethod.getChoices, message, min, max, choices, selected, display);
         return result != null ? result : Collections.emptyList();
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync)):forge-gui/src/main/java/forge/gamemodes/net/server/RemoteClientGuiGame.java
     }
 
     @Override
     public <T> List<T> order(final String title, final String top, final int remainingObjectsMin, final int remainingObjectsMax, final List<T> sourceChoices, final List<T> destChoices, final CardView referenceCard, final boolean sideboardingMode) {
-<<<<<<< HEAD:forge-gui/src/main/java/forge/gamemodes/net/server/NetGuiGame.java
-        return sendAndWait(ProtocolMethod.order, title, top, remainingObjectsMin, remainingObjectsMax, sourceChoices, destChoices, referenceCard, sideboardingMode);
-=======
         updateGameView(); // Ensure game state is synced before asking for input
         final List<T> result = sendAndWait(ProtocolMethod.order, title, top, remainingObjectsMin, remainingObjectsMax, sourceChoices, destChoices, referenceCard, sideboardingMode);
         return result != null ? result : new ArrayList<>();
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync)):forge-gui/src/main/java/forge/gamemodes/net/server/RemoteClientGuiGame.java
     }
 
     @Override
     public List<PaperCard> sideboard(final CardPool sideboard, final CardPool main, final String message) {
-<<<<<<< HEAD:forge-gui/src/main/java/forge/gamemodes/net/server/NetGuiGame.java
-        return sendAndWait(ProtocolMethod.sideboard, sideboard, main, message);
-=======
         updateGameView(); // Ensure game state is synced before asking for input
         final List<PaperCard> result = sendAndWait(ProtocolMethod.sideboard, sideboard, main, message);
         return result != null ? result : main.toFlatList();
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync)):forge-gui/src/main/java/forge/gamemodes/net/server/RemoteClientGuiGame.java
     }
 
     @Override
@@ -457,18 +446,15 @@ public class RemoteClientGuiGame extends NetworkGuiGame {
 
     @Override
     public List<GameEntityView> chooseEntitiesForEffect(final String title, final List<? extends GameEntityView> optionList, final int min, final int max, final DelayedReveal delayedReveal) {
-<<<<<<< HEAD:forge-gui/src/main/java/forge/gamemodes/net/server/NetGuiGame.java
-        return sendAndWait(ProtocolMethod.chooseEntitiesForEffect, title, optionList, min, max, delayedReveal);
-=======
         updateGameView(); // Ensure game state is synced before asking for input
         final List<GameEntityView> result = sendAndWait(ProtocolMethod.chooseEntitiesForEffect, title, optionList, min, max, delayedReveal);
         return result != null ? result : Collections.emptyList();
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync)):forge-gui/src/main/java/forge/gamemodes/net/server/RemoteClientGuiGame.java
     }
 
     @Override
     public List<CardView> manipulateCardList(final String title, final Iterable<CardView> cards, final Iterable<CardView> manipulable, final boolean toTop, final boolean toBottom, final boolean toAnywhere) {
-        return sendAndWait(ProtocolMethod.manipulateCardList, title, cards, manipulable, toTop, toBottom, toAnywhere);
+        final List<CardView> result = sendAndWait(ProtocolMethod.manipulateCardList, title, cards, manipulable, toTop, toBottom, toAnywhere);
+        return result != null ? result : new ArrayList<>();
     }
 
     @Override
@@ -479,20 +465,20 @@ public class RemoteClientGuiGame extends NetworkGuiGame {
 
     @Override
     public void setCard(final CardView card) {
-        updateGameView();
-        send(ProtocolMethod.setCard, card);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        sender.send(ProtocolMethod.setCard, card);
     }
 
     @Override
     public void setSelectables(final Iterable<CardView> cards) {
-        updateGameView();
-        send(ProtocolMethod.setSelectables, cards);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        sender.send(ProtocolMethod.setSelectables, cards);
     }
 
     @Override
     public void clearSelectables() {
-        updateGameView();
-        send(ProtocolMethod.clearSelectables);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        sender.send(ProtocolMethod.clearSelectables);
     }
 
     @Override
@@ -502,8 +488,9 @@ public class RemoteClientGuiGame extends NetworkGuiGame {
 
     @Override
     public PlayerZoneUpdates openZones(PlayerView controller, final Collection<ZoneType> zones, final Map<PlayerView, Object> players, boolean backupLastZones) {
-        updateGameView();
-        return sendAndWait(ProtocolMethod.openZones, controller, zones, players, backupLastZones);
+        sender.write(ProtocolMethod.setGameView, getGameView());
+        final PlayerZoneUpdates result = sendAndWait(ProtocolMethod.openZones, controller, zones, players, backupLastZones);
+        return result != null ? result : new PlayerZoneUpdates();
     }
 
     @Override
@@ -518,8 +505,24 @@ public class RemoteClientGuiGame extends NetworkGuiGame {
     }
 
     @Override
+    public void syncYieldMode(final PlayerView player, final forge.gamemodes.match.YieldMode mode) {
+        // Send yield state to client (when server clears yield due to end condition)
+        send(ProtocolMethod.syncYieldMode, player, mode);
+    }
+
+    @Override
+    public void setHostYieldEnabled(final boolean enabled) {
+        send(ProtocolMethod.setHostYieldEnabled, enabled);
+    }
+
+    @Override
     public void showWaitingTimer(final PlayerView forPlayer, final String waitingForPlayerName) {
         send(ProtocolMethod.showWaitingTimer, forPlayer, waitingForPlayerName);
+    }
+
+    @Override
+    public void showPlayerDisconnected(final PlayerView player, final boolean disconnected) {
+        send(ProtocolMethod.showPlayerDisconnected, player, disconnected);
     }
 
     @Override

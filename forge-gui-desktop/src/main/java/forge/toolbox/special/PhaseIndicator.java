@@ -37,44 +37,52 @@ public class PhaseIndicator extends JPanel {
     /** Adds phase indicator labels to phase area JPanel container. */
     private void populatePhase() {
         final Localizer localizer = Localizer.getInstance();
-        // Constraints string, set once
-        final String constraints = "w 94%!, h 7.2%, gaptop 1%, gapleft 3%";
+        // Each label: 6.5% height. Normal gap 1%, group separator gap 3%.
+        // 12 * 6.5% + (8 * 1% + 4 * 3%) = 78% + 20% = 98% — fits in 100%.
+        // Groups: Beginning (UP, DR) | Main1 | Combat (BC–EC) | Main2 | Ending (ET, CL)
+        final String lbl  = "w 94%!, h 6.5%, gaptop 1%, gapleft 3%";
+        final String grp  = "w 94%!, h 6.5%, gaptop 3%, gapleft 3%"; // first label of a new group
 
+        // — Beginning phase —
         lblUpkeep.setToolTipText(localizer.getMessage("htmlPhaseUpkeepTooltip"));
-        this.add(lblUpkeep, constraints);
+        this.add(lblUpkeep, lbl);
 
         lblDraw.setToolTipText(localizer.getMessage("htmlPhaseDrawTooltip"));
-        this.add(lblDraw, constraints);
+        this.add(lblDraw, lbl);
 
+        // — Main Phase 1 —
         lblMain1.setToolTipText(localizer.getMessage("htmlPhaseMain1Tooltip"));
-        this.add(lblMain1, constraints);
+        this.add(lblMain1, grp);
 
+        // — Combat phase —
         lblBeginCombat.setToolTipText(localizer.getMessage("htmlPhaseBeginCombatTooltip"));
-        this.add(lblBeginCombat, constraints);
+        this.add(lblBeginCombat, grp);
 
         lblDeclareAttackers.setToolTipText(localizer.getMessage("htmlPhaseDeclareAttackersTooltip"));
-        this.add(lblDeclareAttackers, constraints);
+        this.add(lblDeclareAttackers, lbl);
 
         lblDeclareBlockers.setToolTipText(localizer.getMessage("htmlPhaseDeclareBlockersTooltip"));
-        this.add(lblDeclareBlockers, constraints);
+        this.add(lblDeclareBlockers, lbl);
 
         lblFirstStrike.setToolTipText(localizer.getMessage("htmlPhaseFirstStrikeDamageTooltip"));
-        this.add(lblFirstStrike, constraints);
+        this.add(lblFirstStrike, lbl);
 
         lblCombatDamage.setToolTipText(localizer.getMessage("htmlPhaseCombatDamageTooltip"));
-        this.add(lblCombatDamage, constraints);
+        this.add(lblCombatDamage, lbl);
 
         lblEndCombat.setToolTipText(localizer.getMessage("htmlPhaseEndCombatTooltip"));
-        this.add(lblEndCombat, constraints);
+        this.add(lblEndCombat, lbl);
 
+        // — Main Phase 2 —
         lblMain2.setToolTipText(localizer.getMessage("htmlPhaseMain2Tooltip"));
-        this.add(lblMain2, constraints);
+        this.add(lblMain2, grp);
 
+        // — Ending phase —
         lblEndTurn.setToolTipText(localizer.getMessage("htmlPhaseEndTurnTooltip"));
-        this.add(lblEndTurn, constraints);
+        this.add(lblEndTurn, grp);
 
         lblCleanup.setToolTipText(localizer.getMessage("htmlPhaseCleanupTooltip"));
-        this.add(lblCleanup, constraints);
+        this.add(lblCleanup, lbl);
     }
 
     /**

@@ -82,6 +82,11 @@ public class VField implements IVDoc<CField> {
     private final static int LIFE_HIGH     = 30; // green when life is comfortable
     private final static int POISON_CRITICAL = 8;
 
+    // MigLayout constraints for lblAvatar height: leaves room for stat rows below.
+    // 20px life row + 3px gap = 23px; + 20px counter row = 43px.
+    private static final String AVATAR_CONSTRAINT        = "w 100%-6px!, h 100%-23px!, wrap, gap 3 3 3 0";
+    private static final String AVATAR_CONSTRAINT_COUNTER = "w 100%-6px!, h 100%-43px!, wrap, gap 3 3 3 0";
+
     // Fields used with interface IVDoc
     private final CField control;
     private DragCell parentCell;
@@ -114,6 +119,13 @@ public class VField implements IVDoc<CField> {
     private final FLabel lblExperience = new FLabel.Builder().fontAlign(SwingConstants.CENTER).fontStyle(Font.BOLD).icon(FSkin.getImage(FSkinProp.IMG_EXPERIENCE)).iconInBackground().build();
     private final FLabel lblTicket     = new FLabel.Builder().fontAlign(SwingConstants.CENTER).fontStyle(Font.BOLD).icon(FSkin.getImage(FSkinProp.IMG_TICKET)).iconInBackground().build();
     private final FLabel lblRad        = new FLabel.Builder().fontAlign(SwingConstants.CENTER).fontStyle(Font.BOLD).icon(FSkin.getImage(FSkinProp.IMG_RAD)).iconInBackground().build();
+
+    private final FLabel lblDisconnected = new FLabel.Builder()
+            .fontAlign(SwingConstants.CENTER).fontStyle(Font.BOLD).fontSize(11)
+            .opaque(true).build();
+    private final FLabel btnReplaceAI = new FLabel.ButtonBuilder()
+            .text("Replace AI").fontStyle(Font.BOLD).fontSize(10)
+            .hoverable().selectable().build();
 
     private final PhaseIndicator phaseIndicator = new PhaseIndicator();
 
@@ -153,10 +165,21 @@ public class VField implements IVDoc<CField> {
         lblTicket.setFocusable(false);
         lblRad.setFocusable(false);
 
+        lblDisconnected.setText("DISCONNECTED");
+        lblDisconnected.setForeground(Color.WHITE);
+        lblDisconnected.setBackground(new Color(180, 40, 40, 220));
+        lblDisconnected.setVisible(false);
+        lblDisconnected.setFocusable(false);
+
+        btnReplaceAI.setVisible(false);
+        btnReplaceAI.setFocusable(true);
+
         avatarArea.setOpaque(false);
         avatarArea.setBackground(FSkin.getColor(FSkin.Colors.CLR_HOVER));
         avatarArea.setLayout(new MigLayout("insets 0, gap 0"));
-        avatarArea.add(lblAvatar, "w 100%-6px!, h 100%-23px!, wrap, gap 3 3 3 0");
+        avatarArea.add(lblDisconnected, "w 100%!, h 16px!, hidemode 3, wrap");
+        avatarArea.add(btnReplaceAI, "w 100%!, h 18px!, hidemode 3, wrap");
+        avatarArea.add(lblAvatar, AVATAR_CONSTRAINT);
         avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
 
         // Player area hover effect
@@ -490,6 +513,29 @@ public class VField implements IVDoc<CField> {
         return control.getMatchUI().isHighlighted(player);
     }
 
+    public void setDisconnected(final boolean disconnected, final Runnable replaceAction) {
+        lblDisconnected.setVisible(disconnected);
+        if (disconnected && replaceAction != null) {
+            // Remove old listeners to avoid duplicates
+            for (final java.awt.event.MouseListener ml : btnReplaceAI.getMouseListeners()) {
+                if (ml instanceof java.awt.event.MouseAdapter) {
+                    btnReplaceAI.removeMouseListener(ml);
+                }
+            }
+            btnReplaceAI.setCommand(replaceAction);
+            btnReplaceAI.setVisible(true);
+        } else {
+            btnReplaceAI.setVisible(false);
+        }
+        if (disconnected) {
+            avatarArea.setBorder(new LineBorder(new Color(180, 40, 40), 2));
+        } else {
+            avatarArea.setBorder(isHighlighted() ? borderAvatarHighlighted : borderAvatarSimple);
+        }
+        avatarArea.revalidate();
+        avatarArea.repaint();
+    }
+
     public void setAvatar(final SkinImage avatar) {
         lblAvatar.setIcon(avatar);
         lblAvatar.getResizeTimer().start();
@@ -527,94 +573,70 @@ public class VField implements IVDoc<CField> {
         if (lblTicket.isShowing() || lblExperience.isShowing() || lblEnergy.isShowing() || lblPoison.isShowing()) {
             return; // experience, energy, poison take precedence
         }
-        avatarArea.remove(lblLife);
-        lblLife.setIcon(FSkin.getImage(FSkinProp.ICO_QUEST_LIFE));
-        avatarArea.add(lblLife, "w 50%!, h 20px!, split 2");
-        avatarArea.add(lblTicket, "w 50%!, h 20px!, wrap");
+        addCounterRow(lblTicket);
     }
 
     private void removeLblTicket() {
         if (!lblTicket.isShowing()) {
             return;
         }
-        avatarArea.remove(lblTicket);
-        avatarArea.remove(lblLife);
-        avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
+        removeCounterRow(lblTicket);
     }
 
     private void addLblRad() {
         if (lblRad.isShowing() || lblExperience.isShowing() || lblEnergy.isShowing() || lblPoison.isShowing()) {
             return;
         }
-        avatarArea.remove(lblLife);
-        lblLife.setIcon(FSkin.getImage(FSkinProp.ICO_QUEST_LIFE));
-        avatarArea.add(lblLife, "w 50%!, h 20px!, split 2");
-        avatarArea.add(lblRad, "w 50%!, h 20px!, wrap");
+        addCounterRow(lblRad);
     }
 
     private void removeLblRad() {
         if (!lblRad.isShowing()) {
             return;
         }
-        avatarArea.remove(lblRad);
-        avatarArea.remove(lblLife);
-        avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
+        removeCounterRow(lblRad);
     }
 
     private void addLblExperience() {
         if (lblExperience.isShowing() || lblEnergy.isShowing() || lblPoison.isShowing()) {
             return; // energy and poison take precedence
         }
-        avatarArea.remove(lblLife);
-        lblLife.setIcon(FSkin.getImage(FSkinProp.ICO_QUEST_LIFE));
-        avatarArea.add(lblLife, "w 50%!, h 20px!, split 2");
-        avatarArea.add(lblExperience, "w 50%!, h 20px!, wrap");
+        addCounterRow(lblExperience);
     }
 
     private void removeLblExperience() {
         if (!lblExperience.isShowing()) {
             return;
         }
-        avatarArea.remove(lblExperience);
-        avatarArea.remove(lblLife);
-        avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
+        removeCounterRow(lblExperience);
     }
 
     private void addLblEnergy() {
         if (lblEnergy.isShowing() || lblPoison.isShowing()) {
             return; // poison takes precedence
         }
-        avatarArea.remove(lblLife);
-        lblLife.setIcon(FSkin.getImage(FSkinProp.ICO_QUEST_LIFE));
-        avatarArea.add(lblLife, "w 50%!, h 20px!, split 2");
-        avatarArea.add(lblEnergy, "w 50%!, h 20px!, wrap");
+        addCounterRow(lblEnergy);
     }
-    
+
     private void removeLblEnergy() {
         if (!lblEnergy.isShowing()) {
             return;
         }
-        avatarArea.remove(lblEnergy);
-        avatarArea.remove(lblLife);
-        avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
+        removeCounterRow(lblEnergy);
     }
 
     private void addLblPoison() {
         if (lblPoison.isShowing()) {
             return;
         }
-        avatarArea.remove(lblLife);
-        lblLife.setIcon(FSkin.getImage(FSkinProp.ICO_QUEST_LIFE));
-        avatarArea.add(lblLife, "w 50%!, h 20px!, split 2");
-        avatarArea.add(lblPoison, "w 50%!, h 20px!, wrap");
+        addCounterRow(lblPoison);
     }
+
     private void removeLblPoison() {
         if (!lblPoison.isShowing()) {
             return;
         }
-        avatarArea.remove(lblPoison);
-        avatarArea.remove(lblLife);
-        avatarArea.add(lblLife, "w 100%!, h 20px!, wrap");
+        removeCounterRow(lblPoison);
     }
 
     public void updateDetails() {
@@ -626,6 +648,7 @@ public class VField implements IVDoc<CField> {
         } else if (life > LIFE_WARNING) {
             lblLife.setForeground(FSkin.getColor(FSkin.Colors.CLR_TEXT));
         } else if (life > LIFE_CRITICAL) {
+            lblLife.setForeground(Color.ORANGE);
         } else {
             lblLife.setForeground(Color.RED);
         }

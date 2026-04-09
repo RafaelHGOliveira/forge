@@ -5,6 +5,7 @@ import forge.ai.LobbyPlayerAi;
 import forge.ai.PlayerControllerAi;
 import forge.game.Game;
 import forge.game.player.Player;
+import forge.game.player.PlayerView;
 import forge.gamemodes.match.HostedMatch;
 import forge.gamemodes.match.LobbySlot;
 import forge.gamemodes.match.LobbySlotType;
@@ -294,8 +295,6 @@ public final class FServerManager implements IHasNetLog {
         this.lobbyListener = listener;
     }
 
-<<<<<<< HEAD
-=======
     /**
      * Tell all remote clients whether the host has advanced yield options enabled.
      */
@@ -312,7 +311,6 @@ public final class FServerManager implements IHasNetLog {
         }
     }
 
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync))
     public void updateLobbyState() {
         final LobbyUpdateEvent event = new LobbyUpdateEvent(localLobby.getData());
         broadcast(event);
@@ -410,6 +408,134 @@ public final class FServerManager implements IHasNetLog {
             netLog.error(e, "Failed to get local address");
             return "localhost";
         }
+    }
+
+    /**
+     * Returns all usable IPv4 addresses from all network interfaces.
+     * Each entry maps a friendly display name to its IPv4 address.
+     * Results are ordered: routable address first, then others alphabetically.
+     */
+    public static LinkedHashMap<String, String> getAllLocalAddresses() {
+        final LinkedHashMap<String, String> result = new LinkedHashMap<>();
+        final String routableAddress = getLocalAddress();
+
+        try {
+            final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            final TreeMap<String, String> sorted = new TreeMap<>();
+
+            while (interfaces.hasMoreElements()) {
+                final NetworkInterface iface = interfaces.nextElement();
+                if (!iface.isUp() || iface.isLoopback()) {
+                    continue;
+                }
+                final Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    final InetAddress addr = addresses.nextElement();
+                    if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
+                        final String ip = addr.getHostAddress();
+                        final String name = getFriendlyInterfaceName(iface.getName(), iface.getDisplayName(), ip);
+                        if (ip.equals(routableAddress)) {
+                            result.put(name, ip);
+                        } else {
+                            sorted.put(name, ip);
+                        }
+                    }
+                }
+            }
+            result.putAll(sorted);
+        } catch (final SocketException e) {
+            Logger.error(e, "Failed to enumerate network interfaces");
+            if (result.isEmpty()) {
+                result.put("Default", routableAddress);
+            }
+        }
+
+        if (result.isEmpty()) {
+            result.put("Default", routableAddress);
+        }
+        return result;
+    }
+
+    private static String getFriendlyInterfaceName(final String ifName, final String displayName, final String ip) {
+        final String lower = ifName.toLowerCase();
+        final String lowerDisplay = displayName.toLowerCase();
+
+        // Hamachi: interface name "ham0", "ham1", etc. or display name contains "hamachi"
+        if (lower.startsWith("ham") || lowerDisplay.contains("hamachi")) {
+            return "Hamachi";
+        }
+
+        // ZeroTier: "zt*" on Linux, display name contains "zerotier" on macOS/Windows
+        if (lower.startsWith("zt") || lowerDisplay.contains("zerotier")) {
+            return "ZeroTier";
+        }
+
+        // Tailscale: uses 100.64.0.0/10 CGNAT range (100.64.x.x - 100.127.x.x)
+        if (isTailscaleAddress(ip)) {
+            return "Tailscale";
+        }
+
+        // WireGuard: interface name "wg0", "wg1", etc.
+        if (lower.startsWith("wg")) {
+            return "WireGuard";
+        }
+
+        // OpenVPN: common names "tun0", "tap0" (but not utun which is macOS system)
+        if ((lower.startsWith("tun") && !lower.startsWith("utun")) || lower.startsWith("tap")) {
+            return "VPN (" + ifName + ")";
+        }
+
+        // macOS: utun* = generic tunnel (VPN clients, iCloud Private Relay, etc.)
+        if (lower.startsWith("utun")) {
+            return "VPN Tunnel";
+        }
+
+        // macOS: feth* = fake/virtual ethernet (Docker, virtualization, dev tools)
+        if (lower.startsWith("feth")) {
+            return "Virtual Network";
+        }
+
+        // macOS: en0 = Wi-Fi or Ethernet, en1, etc.
+        if (lower.startsWith("en")) {
+            if (lowerDisplay.contains("wi-fi") || lowerDisplay.contains("wifi") || lowerDisplay.contains("airport")) {
+                return "Wi-Fi";
+            }
+            if (lowerDisplay.contains("thunderbolt") || lowerDisplay.contains("ethernet")) {
+                return "Ethernet";
+            }
+            return "LAN (" + ifName + ")";
+        }
+
+        // Linux: eth0, ens33, enp0s3, etc.
+        if (lower.startsWith("eth") || lower.startsWith("ens") || lower.startsWith("enp")) {
+            return "Ethernet";
+        }
+
+        // Linux: wlan0, wlp2s0, etc.
+        if (lower.startsWith("wl")) {
+            return "Wi-Fi";
+        }
+
+        // Radmin VPN
+        if (lowerDisplay.contains("radmin")) {
+            return "Radmin VPN";
+        }
+
+        // Fallback: use display name
+        return displayName;
+    }
+
+    private static boolean isTailscaleAddress(final String ip) {
+        try {
+            final String[] parts = ip.split("\\.");
+            if (parts.length == 4) {
+                final int first = Integer.parseInt(parts[0]);
+                final int second = Integer.parseInt(parts[1]);
+                // Tailscale CGNAT: 100.64.0.0/10 → first octet 100, second 64-127
+                return first == 100 && second >= 64 && second <= 127;
+            }
+        } catch (final NumberFormatException ignored) { }
+        return false;
     }
 
     public static String getExternalAddress() {
@@ -572,6 +698,25 @@ public final class FServerManager implements IHasNetLog {
         return arg;
     }
 
+    /**
+     * Replace a disconnected player with AI. Called from the host UI button.
+     * @param username the name of the disconnected player
+     * @return true if the player was found and replaced
+     */
+    public boolean replaceDisconnectedWithAI(final String username) {
+        final RemoteClient client = disconnectedClients.remove(username);
+        if (client == null) { return false; }
+        final Timer timer = reconnectTimers.remove(username);
+        if (timer != null) { timer.cancel(); }
+        if (isMatchActive()) {
+            broadcastPlayerDisconnected(client.getIndex(), false);
+            convertToAI(client.getIndex(), username);
+        }
+        localLobby.disconnectPlayer(client.getIndex());
+        broadcast(new MessageEvent(String.format("Host replaced %s with AI.", username)));
+        return true;
+    }
+
     private static String formatTime(final int totalSeconds) {
         return String.format("%d:%02d", totalSeconds / 60, totalSeconds % 60);
     }
@@ -584,9 +729,6 @@ public final class FServerManager implements IHasNetLog {
         return null;
     }
 
-<<<<<<< HEAD
-    private void pauseNetGuiGame(final int slotIndex) {
-=======
     /**
      * Notify all game GUIs that a player has disconnected or reconnected.
      * The visual indicator is shown on each client's match screen.
@@ -634,7 +776,6 @@ public final class FServerManager implements IHasNetLog {
     }
 
     private void pauseRemoteClientGuiGame(final int slotIndex) {
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync))
         final HostedMatch hostedMatch = localLobby.getHostedMatch();
         if (hostedMatch == null) { return; }
         final Game game = hostedMatch.getGame();
@@ -653,24 +794,22 @@ public final class FServerManager implements IHasNetLog {
     private void resumeAndResync(final RemoteClient client) {
         final int slotIndex = client.getIndex();
         final HostedMatch hostedMatch = localLobby.getHostedMatch();
-        if (hostedMatch == null) { return; }
+        if (hostedMatch == null) {
+            Logger.error("Cannot resume slot {} — hostedMatch is null. Force-resuming NetGuiGame.", slotIndex);
+            forceResumeNetGuiGame(slotIndex);
+            return;
+        }
         final Game game = hostedMatch.getGame();
-        if (game == null) { return; }
+        if (game == null) {
+            Logger.error("Cannot resume slot {} — game is null. Force-resuming NetGuiGame.", slotIndex);
+            forceResumeNetGuiGame(slotIndex);
+            return;
+        }
 
         // Match by slot index — player names may be deduped by the game engine
         // so name matching is unreliable
         for (final Player p : game.getPlayers()) {
             final IGuiGame gui = hostedMatch.getGuiForPlayer(p);
-<<<<<<< HEAD
-            if (gui instanceof NetGuiGame netGui && netGui.getSlotIndex() == slotIndex) {
-                netGui.resume();
-
-                // Send current GameView before openView (matches HostedMatch.startGame() ordering)
-                netGui.updateGameView();
-
-                // Send full game state to the reconnected client
-                netGui.openView(new forge.trackable.TrackableCollection<>(netGui.getLocalPlayers()));
-=======
             if (gui instanceof RemoteClientGuiGame netGui && netGui.getSlotIndex() == slotIndex) {
                 netLog.info("[Reconnect] Resuming RemoteClientGuiGame for slot {} ({})", slotIndex, p.getName());
                 netGui.resume();
@@ -683,16 +822,12 @@ public final class FServerManager implements IHasNetLog {
                 netGui.updateGameView();
                 netGui.openView(new forge.trackable.TrackableCollection<>(netGui.getLocalPlayers()));
                 netLog.info("[Reconnect] Sent game state and openView to slot {}", slotIndex);
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync))
 
                 // Replay current prompt
                 final PlayerControllerHuman pch = findRemoteController(slotIndex);
                 if (pch != null) {
                     pch.getInputQueue().updateObservers();
-<<<<<<< HEAD
-=======
                     netLog.info("[Reconnect] Replayed current prompt for slot {}", slotIndex);
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync))
                 }
 
                 // Clear disconnect indicator on all other GUIs
@@ -700,6 +835,10 @@ public final class FServerManager implements IHasNetLog {
                 return;
             }
         }
+
+        // No matching NetGuiGame found — should not happen, but don't leave paused state
+        Logger.error("No NetGuiGame found for slot {} during reconnect. Force-resuming.", slotIndex);
+        forceResumeNetGuiGame(slotIndex);
     }
 
     private void handleReconnectTimeout(final String username) {
@@ -713,12 +852,8 @@ public final class FServerManager implements IHasNetLog {
             return;
         }
 
-<<<<<<< HEAD
-        Logger.info("Reconnect timeout for {}. Converting to AI.", username);
-=======
         netLog.info("[Reconnect] Timeout for {}. Converting to AI.", username);
         broadcastPlayerDisconnected(client.getIndex(), false);
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync))
         convertToAI(client.getIndex(), username);
 
         // Reset lobby slot
@@ -735,14 +870,10 @@ public final class FServerManager implements IHasNetLog {
 
         for (final Player p : game.getPlayers()) {
             final IGuiGame gui = hostedMatch.getGuiForPlayer(p);
-<<<<<<< HEAD
-            if (gui instanceof NetGuiGame && ((NetGuiGame) gui).getSlotIndex() == slotIndex) {
-=======
             if (gui instanceof RemoteClientGuiGame ngg && ngg.getSlotIndex() == slotIndex) {
                 // Resume paused RemoteClientGuiGame before replacing controller
                 ngg.resume();
 
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync))
                 final LobbyPlayerAi aiLobbyPlayer = new LobbyPlayerAi(p.getName(), null);
                 final PlayerControllerAi aiCtrl = new PlayerControllerAi(game, p, aiLobbyPlayer);
                 p.dangerouslySetController(aiCtrl);
@@ -948,6 +1079,7 @@ public final class FServerManager implements IHasNetLog {
                     }
                 }, 30_000L, 30_000L);
 
+                broadcastPlayerDisconnected(client.getIndex(), true);
                 broadcast(new MessageEvent(
                     String.format("%s disconnected. Waiting %s for reconnect...", username, formatTime(RECONNECT_TIMEOUT_SECONDS))));
                 lobbyListener.message(null, "(Host can use /skipreconnect to replace disconnected player with AI, or /skiptimeout to wait indefinitely.)");

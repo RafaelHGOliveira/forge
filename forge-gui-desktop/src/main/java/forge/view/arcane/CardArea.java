@@ -72,6 +72,14 @@ public class CardArea extends CardPanelContainer implements CardPanelMouseListen
     public CardArea(final CMatchUI matchUI, final FScrollPane scrollPane) {
         super(matchUI, scrollPane);
         this.setBackground(Color.white);
+        scrollPane.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(final java.awt.event.ComponentEvent e) {
+                if (!getCardPanels().isEmpty()) {
+                    revalidate();
+                }
+            }
+        });
     }
 
     @Override
@@ -124,6 +132,11 @@ public class CardArea extends CardPanelContainer implements CardPanelMouseListen
 
         int maxWidth = 0, maxHeight = 0;
         if (this.isVertical && this.maxCardsPerRow <= 0) {
+            // Cap card width to the available panel width so cards never overflow horizontally
+            final int maxCardWidthForPanel = cardAreaWidth - (CardArea.GUTTER_X * 2);
+            if (maxCardWidthForPanel > 0) {
+                cardWidth = Math.min(cardWidth, maxCardWidthForPanel);
+            }
             while (true) {
                 cardHeight = Math.round(cardWidth * CardPanel.ASPECT_RATIO);
                 this.cardSpacingX = Math.round(cardWidth * CardArea.VERT_CARD_SPACING_X);

@@ -106,9 +106,6 @@ public abstract class GameProtocolHandler<T> extends ChannelInboundHandlerAdapte
 
     @Override
     public final void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) {
-<<<<<<< HEAD
-        cause.printStackTrace();
-=======
         netLog.info("Connection exception: {}", cause.getClass().getName());
         netLog.info("Message: {}", cause.getMessage());
         if (cause.getCause() != null) {
@@ -121,7 +118,6 @@ public abstract class GameProtocolHandler<T> extends ChannelInboundHandlerAdapte
             netLog.info("  at {}", stack[i].toString());
         }
         netLog.error(cause, "Network error on channel {} — closing connection", ctx.channel().remoteAddress());
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync))
         ctx.close();
     }
 

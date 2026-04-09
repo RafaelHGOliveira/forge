@@ -66,12 +66,8 @@ import forge.game.player.PlayerView;
 import forge.game.spellability.SpellAbilityView;
 import forge.game.spellability.StackItemView;
 import forge.game.zone.ZoneType;
-<<<<<<< HEAD
-import forge.gamemodes.match.AbstractGuiGame;
-=======
 import forge.gamemodes.net.NetworkGuiGame;
 import forge.gamemodes.net.server.FServerManager;
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync))
 import forge.gui.FNetOverlay;
 import forge.gui.FThreads;
 import forge.gui.GuiBase;
@@ -177,6 +173,7 @@ public final class CMatchUI
     private final CLog cLog = new CLog(this);
     private final CPrompt cPrompt = new CPrompt(this);
     private final CStack cStack = new CStack(this);
+    private final CYield cYield = new CYield(this);
     private int nextNotifiableStackIndex = 0;
 
     public CMatchUI() {
@@ -196,6 +193,7 @@ public final class CMatchUI
         this.myDocs.put(EDocID.REPORT_COMBAT, cCombat.getView());
         this.myDocs.put(EDocID.REPORT_DEPENDENCIES, cDependencies.getView());
         this.myDocs.put(EDocID.REPORT_LOG, cLog.getView());
+        this.myDocs.put(EDocID.REPORT_YIELD, getCYield().getView());
         this.myDocs.put(EDocID.DEV_MODE, getCDev().getView());
         this.myDocs.put(EDocID.BUTTON_DOCK, getCDock().getView());
     }
@@ -274,6 +272,9 @@ public final class CMatchUI
     }
     public CStack getCStack() {
         return cStack;
+    }
+    public CYield getCYield() {
+        return cYield;
     }
     public TargetingOverlay getTargetingOverlay() {
         return targetingOverlay;
@@ -454,6 +455,10 @@ public final class CMatchUI
         }
         cCombat.setModel(combat);
         cCombat.update();
+        // Combat pairings changed — rebuild layout so grouping reflects them
+        for (final VField f : getFieldViews()) {
+            f.getTabletop().doLayout();
+        }
     } // showCombat(CombatView)
 
     @Override
@@ -592,6 +597,23 @@ public final class CMatchUI
         for (final PlayerView p : manaPoolUpdate) {
             getFieldViewFor(p).updateManaPool();
         }
+    }
+
+    @Override
+    public void showPlayerDisconnected(final PlayerView player, final boolean disconnected) {
+        final VField field = getFieldViewFor(player);
+        if (field == null) { return; }
+
+        Runnable replaceAction = null;
+        if (disconnected) {
+            final FServerManager server = FServerManager.getInstance();
+            if (server != null && server.isHosting()) {
+                final String playerName = player.getName();
+                replaceAction = () -> server.replaceDisconnectedWithAI(playerName);
+            }
+        }
+        final Runnable action = replaceAction;
+        FThreads.invokeInEdtNowOrLater(() -> field.setDisconnected(disconnected, action));
     }
 
     // Player's lives and poison counters
@@ -734,6 +756,24 @@ public final class CMatchUI
         cLog.getView().refreshDisplay();
     }
 
+    public void refreshYieldPanel() {
+        view.populate();
+    }
+
+    // Whether the host has advanced yield options enabled (network play).
+    // Defaults to true so local games are unaffected.
+    private volatile boolean hostYieldEnabled = true;
+
+    public boolean isHostYieldEnabled() {
+        return hostYieldEnabled;
+    }
+
+    @Override
+    public void setHostYieldEnabled(boolean enabled) {
+        this.hostYieldEnabled = enabled;
+        FThreads.invokeInEdtNowOrLater(() -> getCYield().updateYieldButtons());
+    }
+
     public void repaintCardOverlays() {
         final List<CardPanel> panels = getVisibleCardPanels();
         for (final CardPanel panel : panels) {
@@ -791,6 +831,9 @@ public final class CMatchUI
         final FButton btn1 = view.getBtnOK(), btn2 = view.getBtnCancel();
         btn1.setText(label1);
         btn2.setText(label2);
+
+        // Update yield buttons state when prompt changes (e.g., entering/exiting mulligan)
+        getCYield().updateYieldButtons();
 
         final FButton toFocus = enable1 && focus1 ? btn1 : (enable2 ? btn2 : null);
 
@@ -904,7 +947,10 @@ public final class CMatchUI
 
     @Override
     public void updateStack() {
-        FThreads.invokeInEdtNowOrLater(() -> getCStack().update());
+        FThreads.invokeInEdtNowOrLater(() -> {
+            getCStack().update();
+            getCYield().updateYieldButtons();  // Update yield button states
+        });
     }
 
     /**
@@ -1103,11 +1149,12 @@ public final class CMatchUI
     }
 
     @Override
-    public void openView(final TrackableCollection<PlayerView> myPlayers) {
+    public boolean openView(final TrackableCollection<PlayerView> myPlayers) {
         final GameView gameView = getGameView();
         gameView.getGameLog().addObserver(cLog);
 
-        // Sort players
+        // Sort players — always put local player at index 0 so their field
+        // and hand occupy a consistent screen position across games.
         FCollectionView<PlayerView> players = gameView.getPlayers();
 
         if (isNetGame()) {
@@ -1153,6 +1200,7 @@ public final class CMatchUI
             FView.SINGLETON_INSTANCE.getPnlInsets().setForegroundImage(FSkin.getIcon(FSkinProp.BG_MATCH), true);
         else
             FView.SINGLETON_INSTANCE.getPnlInsets().setForegroundImage((Image)null);
+        return true;
     }
 
     /**

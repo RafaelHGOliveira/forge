@@ -10,6 +10,7 @@ import forge.game.ability.ApiType;
 import forge.game.card.Card;
 import forge.game.card.CardView;
 import forge.game.player.Player;
+import forge.game.player.PlayerView;
 import forge.game.spellability.SpellAbility;
 import forge.game.spellability.TargetRestrictions;
 import forge.gui.FThreads;
@@ -32,6 +33,7 @@ public final class InputSelectTargets extends InputSyncronizedBase {
     private final List<Card> choices;
     // some cards can be targeted several times (eg: distribute damage as you choose)
     private final Set<GameEntity> targets = Sets.newHashSet();
+    private final Set<Player> validPlayerCandidates = Sets.newHashSet();
     private final TargetRestrictions tgt;
     private final SpellAbility sa;
     private final Integer numTargets;
@@ -64,6 +66,18 @@ public final class InputSelectTargets extends InputSyncronizedBase {
         }
 
         controller.getGui().setSelectables(CardView.getCollection(choices));
+
+        // When choices are cards-only but this SA targets players, highlight valid player targets
+        // so the player knows to click an opponent avatar (no card highlight in player-only target cases)
+        if (choices.isEmpty() && tgt.canTgtPlayer()) {
+            for (GameEntity ge : tgt.getAllCandidates(sa, true, true)) {
+                if (ge instanceof Player p) {
+                    validPlayerCandidates.add(p);
+                    controller.getGui().setHighlighted(PlayerView.get(p), true);
+                }
+            }
+        }
+
         final PlayerZoneUpdates zonesToUpdate = new PlayerZoneUpdates();
         for (final Card c : choices) {
             zonesToUpdate.add(new PlayerZoneUpdate(c.getZone().getPlayer().getView(), c.getZone().getZoneType()));
@@ -420,6 +434,12 @@ public final class InputSelectTargets extends InputSyncronizedBase {
         for (final GameEntity ge : targets) {
             //getController().macros().addRememberedAction(new TargetEntityAction(c.getView()));
             getController().getGui().setHighlighted(GameEntityView.get(ge), false);
+        }
+        // Clear pre-highlighted player candidates that were not ultimately targeted
+        for (Player p : validPlayerCandidates) {
+            if (!targets.contains(p)) {
+                getController().getGui().setHighlighted(PlayerView.get(p), false);
+            }
         }
 
         this.stop();

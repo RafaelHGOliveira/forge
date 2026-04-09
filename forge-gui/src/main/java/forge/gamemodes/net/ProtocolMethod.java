@@ -10,6 +10,7 @@ import forge.game.player.DelayedReveal;
 import forge.game.player.PlayerView;
 import forge.game.spellability.SpellAbilityView;
 import forge.gamemodes.match.NextGameDecision;
+import forge.gamemodes.match.YieldMode;
 import forge.gui.GuiBase;
 import forge.gui.interfaces.IGuiGame;
 import forge.interfaces.IGameController;
@@ -30,13 +31,8 @@ import java.util.Map;
  */
 public enum ProtocolMethod implements IHasNetLog {
     // Server -> Client
-<<<<<<< HEAD
-    setGameView         (Mode.SERVER, Void.TYPE, GameView.class),
-    openView            (Mode.SERVER, Void.TYPE, TrackableCollection/*PlayerView*/.class),
-=======
     setGameView         (Mode.SERVER, Void.TYPE, GameView.class, Long.TYPE),
     openView            (Mode.SERVER, Boolean.TYPE, TrackableCollection/*PlayerView*/.class),
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync))
     afterGameEnd        (Mode.SERVER, Void.TYPE),
     showCombat          (Mode.SERVER, Void.TYPE),
     showPromptMessage   (Mode.SERVER, Void.TYPE, PlayerView.class, String.class),
@@ -76,7 +72,11 @@ public enum ProtocolMethod implements IHasNetLog {
     isUiSetToSkipPhase  (Mode.SERVER, Boolean.TYPE, PlayerView.class, PhaseType.class),
     setRememberedActions(Mode.SERVER, Void.TYPE),
     nextRememberedAction(Mode.SERVER, Void.TYPE),
+    // Server->Client yield state sync (when server clears yield due to end condition)
+    syncYieldMode       (Mode.SERVER, Void.TYPE, PlayerView.class, YieldMode.class),
+    setHostYieldEnabled (Mode.SERVER, Void.TYPE, Boolean.TYPE),
     showWaitingTimer    (Mode.SERVER, Void.TYPE, PlayerView.class, String.class),
+    showPlayerDisconnected(Mode.SERVER, Void.TYPE, PlayerView.class, Boolean.TYPE),
     setHighlighted      (Mode.SERVER, Void.TYPE, GameEntityView.class, Boolean.TYPE),
     applyDelta          (Mode.SERVER, Void.TYPE, DeltaPacket.class),
 
@@ -97,16 +97,12 @@ public enum ProtocolMethod implements IHasNetLog {
     getActivateDescription    (Mode.CLIENT, String.class, CardView.class),
     concede                   (Mode.CLIENT, Void.TYPE),
     alphaStrike               (Mode.CLIENT, Void.TYPE),
-<<<<<<< HEAD
-    reorderHand               (Mode.CLIENT, Void.TYPE, CardView.class, Integer.TYPE);
-=======
     reorderHand               (Mode.CLIENT, Void.TYPE, CardView.class, Integer.TYPE),
     notifyYieldModeChanged    (Mode.CLIENT, Void.TYPE, PlayerView.class, YieldMode.class),
     notifyAutoYieldChanged    (Mode.CLIENT, Void.TYPE, String.class, Boolean.TYPE),
     notifyTriggerChoiceChanged(Mode.CLIENT, Void.TYPE, Integer.TYPE, Integer.TYPE),
     requestResync             (Mode.CLIENT, Void.TYPE),
     ;
->>>>>>> 108fa3f2b4d (Merge PR #9642: Network multiplayer optimization (delta sync))
 
     private enum Mode {
         SERVER(IGuiGame.class),

@@ -27,6 +27,7 @@ import forge.model.FModel;
 import forge.screens.match.arena.ArenaLayoutPolicy;
 import forge.screens.match.views.VDev;
 import forge.screens.match.views.VField;
+import forge.screens.match.views.VYield;
 import forge.screens.match.views.VHand;
 import forge.sound.MusicPlaylist;
 import forge.sound.SoundSystem;
@@ -53,7 +54,6 @@ public class VMatchUI implements IVTopLevelUI {
             EDocID.REPORT_MESSAGE,
             EDocID.REPORT_STACK
     );
-
 
     private List<VField> lstFields = new ArrayList<>();
     private List<VHand> lstHands = new ArrayList<>();
@@ -199,6 +199,50 @@ public class VMatchUI implements IVTopLevelUI {
         } else if (vDev.getParentCell() == null) {
             // Dev mode enabled? May already by added, or put in message cell by default.
             getControl().getCPrompt().getView().getParentCell().addDoc(vDev);
+        }
+
+        // Yield panel - only show when experimental yield options are enabled
+        final VYield vYield = getControl().getCYield().getView();
+        final boolean yieldEnabled = FModel.getPreferences().getPrefBoolean(ForgePreferences.FPref.YIELD_EXPERIMENTAL_OPTIONS);
+        if (!yieldEnabled) {
+            if (vYield.getParentCell() != null) {
+                final DragCell parent = vYield.getParentCell();
+                parent.removeDoc(vYield);
+                vYield.setParentCell(null);
+
+                if (parent.getDocs().size() > 0) {
+                    parent.setSelected(parent.getDocs().get(0));
+                }
+            }
+        } else if (vYield.getParentCell() == null ||
+                   !FView.SINGLETON_INSTANCE.getDragCells().contains(vYield.getParentCell())) {
+            // Yield enabled but not in any cell or has stale reference - create its own cell
+            // between the stack/log cell and the prompt cell
+            DragCell promptCell = EDocID.REPORT_MESSAGE.getDoc().getParentCell();
+            DragCell stackCell = EDocID.REPORT_STACK.getDoc().getParentCell();
+            if (stackCell == null) {
+                stackCell = EDocID.REPORT_LOG.getDoc().getParentCell();
+            }
+            if (stackCell != null && promptCell != null) {
+                final RectangleOfDouble stackBounds = stackCell.getRoughBounds();
+                final RectangleOfDouble promptBounds = promptCell.getRoughBounds();
+                // Shrink stack cell and insert yield cell between stack and prompt
+                final double yieldH = YIELD_PANEL_HEIGHT_FRACTION;
+                final double newStackH = promptBounds.getY() - stackBounds.getY() - yieldH;
+                stackCell.setRoughBounds(new RectangleOfDouble(
+                        stackBounds.getX(), stackBounds.getY(),
+                        stackBounds.getW(), newStackH));
+                final DragCell yieldCell = new DragCell();
+                yieldCell.setRoughBounds(new RectangleOfDouble(
+                        stackBounds.getX(), stackBounds.getY() + newStackH,
+                        stackBounds.getW(), yieldH));
+                FView.SINGLETON_INSTANCE.addDragCell(yieldCell);
+                yieldCell.addDoc(vYield);
+                dynamicCells.add(yieldCell);
+                SResizingUtil.resizeWindow();
+            } else if (promptCell != null) {
+                promptCell.addDoc(vYield);
+            }
         }
 
         //focus first enabled Prompt button if returning to match screen

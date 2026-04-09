@@ -103,6 +103,7 @@ public class ForgePreferences extends PreferencesStore<ForgePreferences.FPref> {
         UI_SR_OPTIMIZE ("false"),
         UI_OPEN_PACKS_INDIV ("false"),
         UI_STACK_CREATURES ("false"),
+        UI_GROUP_PERMANENTS ("default"),
         UI_TOKENS_IN_SEPARATE_ROW("false"),
         UI_UPLOAD_DRAFT ("false"),
         UI_SCALE_LARGER ("true"),
@@ -143,7 +144,25 @@ public class ForgePreferences extends PreferencesStore<ForgePreferences.FPref> {
         UI_COMMANDER_ENHANCED ("false"),
         UI_MULTIPLAYER_FIELD_PANELS ("SPLIT"),
         UI_CLOSE_ACTION ("NONE"),
-        UI_MANA_LOST_PROMPT ("false"), // Prompt on losing mana when passing priority
+        UI_MANA_LOST_PROMPT ("true"), // Prompt on losing mana when passing priority
+
+        // Experimental yield options (feature-gated)
+        YIELD_EXPERIMENTAL_OPTIONS("true"),
+        YIELD_INTERRUPT_ON_ATTACKERS("true"),
+        YIELD_INTERRUPT_ON_BLOCKERS("true"),
+        YIELD_INTERRUPT_ON_TARGETING("true"),
+        YIELD_INTERRUPT_ON_OPPONENT_SPELL("false"),
+        YIELD_INTERRUPT_ON_TRIGGERS("false"),  // When triggered abilities on stack
+        YIELD_INTERRUPT_ON_COMBAT("false"),
+        YIELD_INTERRUPT_ON_REVEAL("false"),   // When opponent reveals cards
+        YIELD_INTERRUPT_ON_MASS_REMOVAL("true"),  // When mass removal spell cast
+        YIELD_SUPPRESS_ON_OWN_TURN("true"),  // Suppress suggestions on player's own turn
+        YIELD_SUPPRESS_AFTER_END("true"),  // Suppress suggestions for one priority pass after yield ends
+        YIELD_DECLINE_SCOPE_STACK_YIELD("always"),  // Decline scope: "never", "always", "stack", "turn"
+        YIELD_DECLINE_SCOPE_NO_ACTIONS("always"),  // Decline scope: "never", "always", "turn"
+        YIELD_AUTO_PASS_NO_ACTIONS("true"),  // Auto-pass priority when no playable actions
+        YIELD_AUTO_CALL_COIN_FLIP("true"),  // Auto-call coin flips where only win/lose matters
+
         UI_STACK_EFFECT_NOTIFICATION_POLICY ("Never"),
         UI_LAND_PLAYED_NOTIFICATION_POLICY ("Never"),
         UI_PAUSE_WHILE_MINIMIZED("false"),
@@ -184,10 +203,11 @@ public class ForgePreferences extends PreferencesStore<ForgePreferences.FPref> {
     	UI_SELECT_FROM_CARD_DISPLAYS("true"),
         UI_FOR_TOUCHSCREN("false"),
         UI_SWITCH_STATES_DECKVIEW("Switch back on hover"),
-        UI_ORDER_HAND("false"),
+        UI_ORDER_HAND("true"),
         UI_HAND_MAX_CARDS_PER_ROW("0"),
         UI_HAND_NO_OVERLAP("false"),
         UI_ZONE_TAB_NEW_COUNT("false"),
+        UI_ZONE_TAB_FIT_CARDS("true"),
         UI_ENABLE_AI_PICKER("false"),
 
         UI_VIBRATE_INTENSITY("100"),
@@ -312,6 +332,15 @@ public class ForgePreferences extends PreferencesStore<ForgePreferences.FPref> {
         SHORTCUT_SHOWHOTKEYS("72"),
         SHORTCUT_PANELTABS("17 84"),
         SHORTCUT_CARDOVERLAYS("17 79"),
+        SHORTCUT_YIELD_OPTIONS("17 89"),                // Ctrl+Y
+        SHORTCUT_YIELD_UNTIL_YOUR_NEXT_TURN("113"),     // F2 key
+        SHORTCUT_YIELD_UNTIL_END_OF_TURN("114"),        // F3 key
+        SHORTCUT_YIELD_UNTIL_NEXT_PHASE("115"),         // F4 key
+        SHORTCUT_YIELD_UNTIL_BEFORE_COMBAT("116"),      // F5 key
+        SHORTCUT_YIELD_UNTIL_END_STEP("117"),           // F6 key
+        SHORTCUT_YIELD_UNTIL_STACK_CLEARS("118"),       // F7 key
+        SHORTCUT_YIELD_AUTO_PASS("119"),               // F8 key
+        SHORTCUT_YIELD_CANCEL("27"),                    // ESC key
 
         LAST_IMPORTED_CUBE_ID("");
 
