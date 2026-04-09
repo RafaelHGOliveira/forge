@@ -274,6 +274,10 @@ public interface IGuiGame {
      */
     void applyDelta(DeltaPacket packet);
 
+    /** Show or hide the disconnect indicator for the given player. */
+    default void showPlayerDisconnected(PlayerView player, boolean disconnected) { }
+
+
     /** Returns true if this game instance is a network game. */
     boolean isNetGame();
     void setNetGame();
