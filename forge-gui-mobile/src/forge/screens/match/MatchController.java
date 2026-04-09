@@ -158,7 +158,7 @@ public class MatchController extends NetworkGuiGame {
     }
 
     @Override
-    public void openView(final TrackableCollection<PlayerView> myPlayers) {
+    public boolean openView(final TrackableCollection<PlayerView> myPlayers) {
         final boolean noHumans = !hasLocalPlayers();
 
         FCollectionView<PlayerView> players = getGameView().getPlayers();
@@ -207,6 +207,7 @@ public class MatchController extends NetworkGuiGame {
         //reset daytime every match
         updateDayTime(null);
         Forge.openScreen(view);
+        return true;
     }
 
     @Override

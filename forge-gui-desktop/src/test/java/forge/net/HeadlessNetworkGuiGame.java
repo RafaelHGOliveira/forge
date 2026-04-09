@@ -62,8 +62,9 @@ public class HeadlessNetworkGuiGame extends NetworkGuiGame {
     public void restoreOldZones(PlayerView playerView, PlayerZoneUpdates playerZoneUpdates) { }
 
     @Override
-    public void openView(TrackableCollection<PlayerView> myPlayers) {
+    public boolean openView(TrackableCollection<PlayerView> myPlayers) {
         openViewCalled = true;
+        return true;
     }
 
     @Override
