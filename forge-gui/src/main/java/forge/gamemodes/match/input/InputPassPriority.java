@@ -29,7 +29,6 @@ import forge.gamemodes.match.YieldMode;
 import forge.gamemodes.net.server.FServerManager;
 import forge.gamemodes.net.server.FServerManager.AfkTimeout;
 import forge.gui.GuiBase;
-import forge.gamemodes.net.server.FServerManager.AfkTimeout;
 import forge.localinstance.properties.ForgePreferences;
 import forge.localinstance.properties.ForgePreferences.FPref;
 import forge.model.FModel;
