@@ -17,6 +17,7 @@ import forge.localinstance.skin.FSkinProp;
 import forge.menus.MenuUtil;
 import forge.model.FModel;
 import forge.screens.match.CMatchUI;
+import forge.screens.match.VAutoTriggers;
 import forge.screens.match.VAutoYields;
 import forge.screens.match.controllers.CDock.ArcState;
 import forge.toolbox.FSkin.SkinIcon;
@@ -51,6 +52,7 @@ public final class GameMenu {
         menu.add(getMenuItem_TargetingArcs());
         menu.add(new CardOverlaysMenu(matchUI).getMenu());
         menu.add(getMenuItem_AutoYields());
+        menu.add(getMenuItem_AutoTriggers());
         menu.addSeparator();
         menu.add(getMenuItem_ViewDeckList());
         return menu;
@@ -181,6 +183,21 @@ public final class GameMenu {
         return e -> {
             final VAutoYields autoYields = new VAutoYields(matchUI);
             autoYields.showAutoYields();
+        };
+    }
+
+    private SkinnedMenuItem getMenuItem_AutoTriggers() {
+        final Localizer localizer = Localizer.getInstance();
+        final SkinnedMenuItem menuItem = new SkinnedMenuItem(localizer.getMessage("lblAutoTriggers"));
+        menuItem.setIcon((showIcons ? MenuUtil.getMenuIcon(FSkinProp.ICO_WARNING) : null));
+        menuItem.addActionListener(getAutoTriggersAction());
+        return menuItem;
+    }
+
+    private ActionListener getAutoTriggersAction() {
+        return e -> {
+            final VAutoTriggers autoTriggers = new VAutoTriggers(matchUI);
+            autoTriggers.showAutoTriggers();
         };
     }
 

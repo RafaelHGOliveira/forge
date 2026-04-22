@@ -42,6 +42,7 @@ import forge.gui.framework.DragCell;
 import forge.gui.framework.DragTab;
 import forge.gui.framework.EDocID;
 import forge.gui.framework.IVDoc;
+import forge.interfaces.IGameController;
 import forge.screens.match.controllers.CDock.ArcState;
 import forge.screens.match.controllers.CStack;
 import forge.toolbox.FMouseAdapter;
@@ -286,7 +287,7 @@ public class VStack implements IVDoc<CStack> {
         private final JCheckBoxMenuItem jmiAlwaysNo;
         private StackItemView item;
 
-        private Integer triggerID = 0;
+        private String triggerYieldKey = "";
 
         public AbilityMenu(){
             jmiAutoYield = new JCheckBoxMenuItem(Localizer.getInstance().getMessage("cbpAutoYieldMode"));
@@ -305,22 +306,24 @@ public class VStack implements IVDoc<CStack> {
 
             jmiAlwaysYes = new JCheckBoxMenuItem(Localizer.getInstance().getMessage("lblAlwaysYes"));
             jmiAlwaysYes.addActionListener(arg0 -> {
-                if (controller.getMatchUI().getGameController().shouldAlwaysAcceptTrigger(triggerID)) {
-                    controller.getMatchUI().getGameController().setShouldAlwaysAskTrigger(triggerID);
-                }
-                else {
-                    controller.getMatchUI().getGameController().setShouldAlwaysAcceptTrigger(triggerID);
+                final IGameController c = controller.getMatchUI().getGameController();
+                final boolean abilityScope = activeTriggerModeIsAbilityScope();
+                if (c.shouldAlwaysAcceptTrigger(triggerYieldKey)) {
+                    c.setShouldAlwaysAskTrigger(triggerYieldKey, abilityScope);
+                } else {
+                    c.setShouldAlwaysAcceptTrigger(triggerYieldKey, abilityScope);
                 }
             });
             add(jmiAlwaysYes);
 
             jmiAlwaysNo = new JCheckBoxMenuItem(Localizer.getInstance().getMessage("lblAlwaysNo"));
             jmiAlwaysNo.addActionListener(arg0 -> {
-                if (controller.getMatchUI().getGameController().shouldAlwaysDeclineTrigger(triggerID)) {
-                    controller.getMatchUI().getGameController().setShouldAlwaysAskTrigger(triggerID);
-                }
-                else {
-                    controller.getMatchUI().getGameController().setShouldAlwaysDeclineTrigger(triggerID);
+                final IGameController c = controller.getMatchUI().getGameController();
+                final boolean abilityScope = activeTriggerModeIsAbilityScope();
+                if (c.shouldAlwaysDeclineTrigger(triggerYieldKey)) {
+                    c.setShouldAlwaysAskTrigger(triggerYieldKey, abilityScope);
+                } else {
+                    c.setShouldAlwaysDeclineTrigger(triggerYieldKey, abilityScope);
                 }
             });
             add(jmiAlwaysNo);
@@ -328,19 +331,28 @@ public class VStack implements IVDoc<CStack> {
 
         public void setStackInstance(final StackItemView item0) {
             item = item0;
-            triggerID = item.getSourceTrigger();
+            triggerYieldKey = item.getSourceTriggerYieldKey();
 
             jmiAutoYield.setSelected(controller.getMatchUI().getGameController().shouldAutoYield(item.getKey()));
 
             if (item.isOptionalTrigger() && controller.getMatchUI().isLocalPlayer(item.getActivatingPlayer())) {
-                jmiAlwaysYes.setSelected(controller.getMatchUI().getGameController().shouldAlwaysAcceptTrigger(triggerID));
-                jmiAlwaysNo.setSelected(controller.getMatchUI().getGameController().shouldAlwaysDeclineTrigger(triggerID));
+                final IGameController c = controller.getMatchUI().getGameController();
+                final boolean hasKey = !triggerYieldKey.isEmpty();
+                jmiAlwaysYes.setSelected(c.shouldAlwaysAcceptTrigger(triggerYieldKey));
+                jmiAlwaysNo.setSelected(c.shouldAlwaysDeclineTrigger(triggerYieldKey));
+                jmiAlwaysYes.setEnabled(hasKey);
+                jmiAlwaysNo.setEnabled(hasKey);
                 jmiAlwaysYes.setVisible(true);
                 jmiAlwaysNo.setVisible(true);
             } else {
                 jmiAlwaysYes.setVisible(false);
                 jmiAlwaysNo.setVisible(false);
             }
+        }
+
+        private boolean activeTriggerModeIsAbilityScope() {
+            return !forge.localinstance.properties.ForgeConstants.AUTO_TRIGGER_PER_CARD.equals(
+                    forge.model.FModel.getPreferences().getPref(forge.localinstance.properties.ForgePreferences.FPref.UI_AUTO_TRIGGER_MODE));
         }
     }
 }

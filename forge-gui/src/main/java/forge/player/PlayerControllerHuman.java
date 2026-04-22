@@ -104,8 +104,10 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
     // the isAbilityScope flag on setShouldAutoYield.
     private final Set<String> remoteCardYields = Sets.newHashSet();
     private final Set<String> remoteAbilityYields = Sets.newHashSet();
-    private final Map<Integer, Boolean> remoteTriggerDecisions = Maps.newTreeMap();
+    private final Map<String, Boolean> remoteCardTriggers = Maps.newHashMap();
+    private final Map<String, Boolean> remoteAbilityTriggers = Maps.newHashMap();
     private boolean remoteAutoYieldsDisabled;
+    private boolean remoteAutoTriggersDisabled;
 
     protected final InputQueue inputQueue;
     protected final InputProxy inputProxy;
@@ -778,10 +780,11 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
     public boolean confirmTrigger(final WrappedAbility wrapper) {
         final SpellAbility sa = wrapper.getWrappedAbility();
         final Trigger regtrig = wrapper.getTrigger();
-        if (shouldAlwaysAcceptTrigger(regtrig.getId())) {
+        final String key = regtrig.getYieldKey();
+        if (shouldAlwaysAcceptTrigger(key)) {
             return true;
         }
-        if (shouldAlwaysDeclineTrigger(regtrig.getId())) {
+        if (shouldAlwaysDeclineTrigger(key)) {
             return false;
         }
 
@@ -3504,7 +3507,7 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         }
         if (localStore().isDisabled()) return false;
         if (activeModeIsInstall()) {
-            return PersistentYieldStore.get().contains(AutoYieldStore.abilitySuffix(key));
+            return PersistentAutoDecisionStore.get().contains(AutoYieldStore.abilitySuffix(key));
         }
         boolean abilityScope = activeTier() != AutoYieldStore.Tier.GAME;
         String storageKey = abilityScope ? AutoYieldStore.abilitySuffix(key) : key;
@@ -3520,7 +3523,7 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         }
         String storageKey = isAbilityScope ? AutoYieldStore.abilitySuffix(key) : key;
         if (activeModeIsInstall()) {
-            PersistentYieldStore.get().setYield(storageKey, autoYield);
+            PersistentAutoDecisionStore.get().setYield(storageKey, autoYield);
             return;
         }
         localStore().setYield(activeTier(), storageKey, autoYield);
@@ -3531,7 +3534,7 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         if (isRemoteClient()) {
             return com.google.common.collect.Iterables.concat(remoteCardYields, remoteAbilityYields);
         }
-        if (activeModeIsInstall()) return PersistentYieldStore.get().getYields();
+        if (activeModeIsInstall()) return PersistentAutoDecisionStore.get().getYields();
         return localStore().getYields(activeTier());
     }
 
@@ -3540,7 +3543,8 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         if (isRemoteClient()) {
             remoteCardYields.clear();
             remoteAbilityYields.clear();
-            remoteTriggerDecisions.clear();
+            remoteCardTriggers.clear();
+            remoteAbilityTriggers.clear();
             return;
         }
         localStore().onGameEnd(getGame() == null || getGame().getView().isMatchOver());
@@ -3558,40 +3562,134 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
     }
 
     @Override
-    public boolean shouldAlwaysAcceptTrigger(final int trigger) {
-        if (isRemoteClient()) return Boolean.TRUE.equals(remoteTriggerDecisions.get(trigger));
-        return localStore().getTriggerDecision(trigger) == AutoYieldStore.TriggerDecision.ACCEPT;
+    public boolean shouldAlwaysAcceptTrigger(final String key) {
+        if (isRemoteClient()) {
+            if (remoteAutoTriggersDisabled) return false;
+            Boolean cardScope = remoteCardTriggers.get(key);
+            if (cardScope != null) return cardScope;
+            Boolean abilityScope = remoteAbilityTriggers.get(AutoYieldStore.abilitySuffix(key));
+            return Boolean.TRUE.equals(abilityScope);
+        }
+        return lookupTriggerDecision(key) == AutoYieldStore.TriggerDecision.ACCEPT;
     }
 
     @Override
-    public boolean shouldAlwaysDeclineTrigger(final int trigger) {
-        if (isRemoteClient()) return Boolean.FALSE.equals(remoteTriggerDecisions.get(trigger));
-        return localStore().getTriggerDecision(trigger) == AutoYieldStore.TriggerDecision.DECLINE;
+    public boolean shouldAlwaysDeclineTrigger(final String key) {
+        if (isRemoteClient()) {
+            if (remoteAutoTriggersDisabled) return false;
+            Boolean cardScope = remoteCardTriggers.get(key);
+            if (cardScope != null) return !cardScope;
+            Boolean abilityScope = remoteAbilityTriggers.get(AutoYieldStore.abilitySuffix(key));
+            return Boolean.FALSE.equals(abilityScope);
+        }
+        return lookupTriggerDecision(key) == AutoYieldStore.TriggerDecision.DECLINE;
     }
 
     @Override
-    public void setShouldAlwaysAcceptTrigger(final int trigger) {
-        if (isRemoteClient()) remoteTriggerDecisions.put(trigger, Boolean.TRUE);
-        else localStore().setTriggerDecision(trigger, AutoYieldStore.TriggerDecision.ACCEPT);
-        if (isPromptingForTrigger(trigger)) selectButtonOk();
+    public void setShouldAlwaysAcceptTrigger(final String key, final boolean isAbilityScope) {
+        if (isRemoteClient()) {
+            Map<String, Boolean> bucket = isAbilityScope ? remoteAbilityTriggers : remoteCardTriggers;
+            bucket.put(key, Boolean.TRUE);
+        } else {
+            String storageKey = isAbilityScope ? AutoYieldStore.abilitySuffix(key) : key;
+            writeTriggerDecision(storageKey, AutoYieldStore.TriggerDecision.ACCEPT);
+        }
+        if (isPromptingForTrigger(key)) selectButtonOk();
     }
 
     @Override
-    public void setShouldAlwaysDeclineTrigger(final int trigger) {
-        if (isRemoteClient()) remoteTriggerDecisions.put(trigger, Boolean.FALSE);
-        else localStore().setTriggerDecision(trigger, AutoYieldStore.TriggerDecision.DECLINE);
-        if (isPromptingForTrigger(trigger)) selectButtonCancel();
+    public void setShouldAlwaysDeclineTrigger(final String key, final boolean isAbilityScope) {
+        if (isRemoteClient()) {
+            Map<String, Boolean> bucket = isAbilityScope ? remoteAbilityTriggers : remoteCardTriggers;
+            bucket.put(key, Boolean.FALSE);
+        } else {
+            String storageKey = isAbilityScope ? AutoYieldStore.abilitySuffix(key) : key;
+            writeTriggerDecision(storageKey, AutoYieldStore.TriggerDecision.DECLINE);
+        }
+        if (isPromptingForTrigger(key)) selectButtonCancel();
     }
 
-    private boolean isPromptingForTrigger(final int trigger) {
+    @Override
+    public void setShouldAlwaysAskTrigger(final String key, final boolean isAbilityScope) {
+        if (isRemoteClient()) {
+            Map<String, Boolean> bucket = isAbilityScope ? remoteAbilityTriggers : remoteCardTriggers;
+            bucket.remove(key);
+            return;
+        }
+        String storageKey = isAbilityScope ? AutoYieldStore.abilitySuffix(key) : key;
+        writeTriggerDecision(storageKey, AutoYieldStore.TriggerDecision.ASK);
+    }
+
+    @Override
+    public Iterable<java.util.Map.Entry<String, AutoYieldStore.TriggerDecision>> getAutoTriggers() {
+        if (isRemoteClient()) {
+            com.google.common.base.Function<java.util.Map.Entry<String, Boolean>, java.util.Map.Entry<String, AutoYieldStore.TriggerDecision>> conv =
+                    e -> new java.util.AbstractMap.SimpleEntry<>(e.getKey(),
+                            e.getValue() ? AutoYieldStore.TriggerDecision.ACCEPT : AutoYieldStore.TriggerDecision.DECLINE);
+            return com.google.common.collect.Iterables.concat(
+                    com.google.common.collect.Iterables.transform(remoteCardTriggers.entrySet(), conv),
+                    com.google.common.collect.Iterables.transform(remoteAbilityTriggers.entrySet(), conv));
+        }
+        if (activeTriggerModeIsInstall()) return PersistentAutoDecisionStore.get().getAutoTriggers();
+        return localStore().getAutoTriggers(activeTriggerTier());
+    }
+
+    @Override
+    public boolean getDisableAutoTriggers() {
+        return isRemoteClient() ? remoteAutoTriggersDisabled : localStore().isTriggerDecisionsDisabled();
+    }
+
+    @Override
+    public void setDisableAutoTriggers(final boolean disable) {
+        if (isRemoteClient()) remoteAutoTriggersDisabled = disable;
+        else localStore().setTriggerDecisionsDisabled(disable);
+    }
+
+    private AutoYieldStore.TriggerDecision lookupTriggerDecision(final String key) {
+        if (key == null || key.isEmpty()) return AutoYieldStore.TriggerDecision.ASK;
+        if (localStore().isTriggerDecisionsDisabled()) return AutoYieldStore.TriggerDecision.ASK;
+        if (activeTriggerModeIsInstall()) {
+            return PersistentAutoDecisionStore.get().getTriggerDecision(AutoYieldStore.abilitySuffix(key));
+        }
+        boolean abilityScope = activeTriggerModeIsAbilityScope();
+        String storageKey = abilityScope ? AutoYieldStore.abilitySuffix(key) : key;
+        return localStore().getTriggerDecision(activeTriggerTier(), storageKey);
+    }
+
+    private void writeTriggerDecision(final String storageKey, final AutoYieldStore.TriggerDecision decision) {
+        if (activeTriggerModeIsInstall()) {
+            PersistentAutoDecisionStore.get().setTriggerDecision(storageKey, decision);
+            return;
+        }
+        localStore().setTriggerDecision(activeTriggerTier(), storageKey, decision);
+    }
+
+    private boolean activeTriggerModeIsInstall() {
+        return ForgeConstants.AUTO_TRIGGER_PER_ABILITY_INSTALL.equals(
+                FModel.getPreferences().getPref(FPref.UI_AUTO_TRIGGER_MODE));
+    }
+
+    private boolean activeTriggerModeIsAbilityScope() {
+        return !ForgeConstants.AUTO_TRIGGER_PER_CARD.equals(
+                FModel.getPreferences().getPref(FPref.UI_AUTO_TRIGGER_MODE));
+    }
+
+    private AutoYieldStore.Tier activeTriggerTier() {
+        String mode = FModel.getPreferences().getPref(FPref.UI_AUTO_TRIGGER_MODE);
+        if (ForgeConstants.AUTO_TRIGGER_PER_CARD.equals(mode))            return AutoYieldStore.Tier.GAME;
+        if (ForgeConstants.AUTO_TRIGGER_PER_ABILITY_SESSION.equals(mode)) return AutoYieldStore.Tier.SESSION;
+        return AutoYieldStore.Tier.MATCH;
+    }
+
+    private boolean isPromptingForTrigger(final String key) {
+        if (key == null || key.isEmpty()) return false;
         if (!(inputQueue.getInput() instanceof InputConfirm)) return false;
         final SpellAbilityStackInstance top = getGame().getStack().peek();
-        return top != null && top.isStateTrigger(trigger);
-    }
-
-    @Override
-    public void setShouldAlwaysAskTrigger(final int trigger) {
-        if (isRemoteClient()) remoteTriggerDecisions.remove(trigger);
-        else localStore().setTriggerDecision(trigger, AutoYieldStore.TriggerDecision.ASK);
+        if (top == null) return false;
+        final SpellAbility sa = top.getSpellAbility();
+        if (sa == null || !sa.isTrigger() || sa.getTrigger() == null) return false;
+        final String topKey = sa.getTrigger().getYieldKey();
+        if (key.equals(topKey)) return true;
+        return key.equals(AutoYieldStore.abilitySuffix(topKey));
     }
 }

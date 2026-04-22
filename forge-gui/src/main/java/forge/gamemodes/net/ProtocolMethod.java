@@ -96,9 +96,11 @@ public enum ProtocolMethod implements IHasForgeLog {
     reorderHand               (Mode.CLIENT, Void.TYPE, CardView.class, Integer.TYPE),
     requestResync             (Mode.CLIENT, Void.TYPE),
     setShouldAutoYield        (Mode.CLIENT, Void.TYPE, String.class, Boolean.TYPE, Boolean.TYPE),
-    setShouldAlwaysAcceptTrigger  (Mode.CLIENT, Void.TYPE, Integer.TYPE),
-    setShouldAlwaysDeclineTrigger (Mode.CLIENT, Void.TYPE, Integer.TYPE),
-    setShouldAlwaysAskTrigger     (Mode.CLIENT, Void.TYPE, Integer.TYPE);
+    setDisableAutoYields          (Mode.CLIENT, Void.TYPE, Boolean.TYPE),
+    setShouldAlwaysAcceptTrigger  (Mode.CLIENT, Void.TYPE, String.class, Boolean.TYPE),
+    setShouldAlwaysDeclineTrigger (Mode.CLIENT, Void.TYPE, String.class, Boolean.TYPE),
+    setShouldAlwaysAskTrigger     (Mode.CLIENT, Void.TYPE, String.class, Boolean.TYPE),
+    setDisableAutoTriggers        (Mode.CLIENT, Void.TYPE, Boolean.TYPE);
 
     private enum Mode {
         SERVER(IGuiGame.class),

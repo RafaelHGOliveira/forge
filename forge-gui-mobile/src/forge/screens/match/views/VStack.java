@@ -301,27 +301,36 @@ public class VStack extends FDropDown {
                                         }
                                     }));
                             if (stackInstance.isOptionalTrigger() && stackInstance.getActivatingPlayer().equals(player)) {
-                                final int triggerID = stackInstance.getSourceTrigger();
+                                final String triggerYieldKey = stackInstance.getSourceTriggerYieldKey();
+                                final boolean hasKey = !triggerYieldKey.isEmpty();
                                 addItem(new FCheckBoxMenuItem(Forge.getLocalizer().getMessage("lblAlwaysYes"),
-                                        controller.shouldAlwaysAcceptTrigger(triggerID),
+                                        hasKey && controller.shouldAlwaysAcceptTrigger(triggerYieldKey),
                                         e -> {
-                                            if (controller.shouldAlwaysAcceptTrigger(triggerID)) {
-                                                controller.setShouldAlwaysAskTrigger(triggerID);
+                                            if (!hasKey) {
+                                                return;
+                                            }
+                                            final boolean abilityScope = activeTriggerModeIsAbilityScope();
+                                            if (controller.shouldAlwaysAcceptTrigger(triggerYieldKey)) {
+                                                controller.setShouldAlwaysAskTrigger(triggerYieldKey, abilityScope);
                                             }
                                             else {
-                                                controller.setShouldAlwaysAcceptTrigger(triggerID);
+                                                controller.setShouldAlwaysAcceptTrigger(triggerYieldKey, abilityScope);
                                             }
-                                        }));
+                                        }, hasKey));
                                 addItem(new FCheckBoxMenuItem(Forge.getLocalizer().getMessage("lblAlwaysNo"),
-                                        controller.shouldAlwaysDeclineTrigger(triggerID),
+                                        hasKey && controller.shouldAlwaysDeclineTrigger(triggerYieldKey),
                                         e -> {
-                                            if (controller.shouldAlwaysDeclineTrigger(triggerID)) {
-                                                controller.setShouldAlwaysAskTrigger(triggerID);
+                                            if (!hasKey) {
+                                                return;
+                                            }
+                                            final boolean abilityScope = activeTriggerModeIsAbilityScope();
+                                            if (controller.shouldAlwaysDeclineTrigger(triggerYieldKey)) {
+                                                controller.setShouldAlwaysAskTrigger(triggerYieldKey, abilityScope);
                                             }
                                             else {
-                                                controller.setShouldAlwaysDeclineTrigger(triggerID);
+                                                controller.setShouldAlwaysDeclineTrigger(triggerYieldKey, abilityScope);
                                             }
-                                        }));
+                                        }, hasKey));
                             }
                             addItem(new FMenuItem(Forge.getLocalizer().getMessage("lblZoomOrDetails"), e -> CardZoom.show(stackInstance.getSourceCard())));
                         }
@@ -339,6 +348,11 @@ public class VStack extends FDropDown {
         public boolean longPress(float x, float y) {
             CardZoom.show(stackInstance.getSourceCard());
             return true;
+        }
+
+        private boolean activeTriggerModeIsAbilityScope() {
+            return !forge.localinstance.properties.ForgeConstants.AUTO_TRIGGER_PER_CARD.equals(
+                    forge.model.FModel.getPreferences().getPref(forge.localinstance.properties.ForgePreferences.FPref.UI_AUTO_TRIGGER_MODE));
         }
 
         @Override

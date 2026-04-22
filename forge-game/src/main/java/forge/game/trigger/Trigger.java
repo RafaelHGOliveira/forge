@@ -149,6 +149,40 @@ public abstract class Trigger extends TriggerReplacementBase {
         }
     }
 
+    /**
+     * Returns a stable key for persisting Always-Yes / Always-No decisions.
+     * Omits the per-game-state "triggerRemembered" suffix from toString so the
+     * key matches across game instances. Staleness across Forge versions or
+     * card-text edits is acceptable -- stale keys silently fail to match.
+     */
+    public final String getStableKey() {
+        if (!hasParam("TriggerDescription") || isSuppressed()) return "";
+        String desc = getParam("TriggerDescription");
+        if (getHostCard() != null) {
+            ITranslatable nameSource = getHostName(this);
+            if (!desc.contains("ABILITY")) {
+                desc = CardTranslation.translateSingleDescriptionText(desc, nameSource);
+                String translatedName = nameSource.getTranslatedName();
+                desc = TextUtil.fastReplace(desc, "CARDNAME", translatedName);
+                desc = TextUtil.fastReplace(desc, "NICKNAME", Lang.getInstance().getNickName(translatedName));
+                if (desc.contains("ORIGINALHOST") && this.getOriginalHost() != null) {
+                    desc = TextUtil.fastReplace(desc, "ORIGINALHOST", this.getOriginalHost().getDisplayName());
+                }
+            }
+            if (getHostCard().getEffectSource() != null) {
+                desc = TextUtil.fastReplace(desc, "EFFECTSOURCE", getHostCard().getEffectSource().getDisplayName());
+            }
+        }
+        return desc;
+    }
+
+    /** Composed per-card-instance key, mirroring SpellAbility.yieldKey(). Empty if no stable key. */
+    public final String getYieldKey() {
+        String stable = getStableKey();
+        if (stable.isEmpty()) return "";
+        return getHostCard() != null ? getHostCard().toString() + ": " + stable : stable;
+    }
+
     public final String replaceAbilityText(final String desc, final CardState state) {
         // this function is for ABILITY
         if (!desc.contains("ABILITY")) {

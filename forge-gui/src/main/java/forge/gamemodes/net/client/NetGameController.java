@@ -14,7 +14,7 @@ import forge.localinstance.properties.ForgeConstants;
 import forge.localinstance.properties.ForgePreferences;
 import forge.model.FModel;
 import forge.player.AutoYieldStore;
-import forge.player.PersistentYieldStore;
+import forge.player.PersistentAutoDecisionStore;
 import forge.util.ITriggerEvent;
 
 import java.util.List;
@@ -155,7 +155,7 @@ public class NetGameController implements IGameController {
     public boolean shouldAutoYield(final String key) {
         if (yieldStore.isDisabled()) return false;
         if (activeModeIsInstall()) {
-            return PersistentYieldStore.get().contains(AutoYieldStore.abilitySuffix(key));
+            return PersistentAutoDecisionStore.get().contains(AutoYieldStore.abilitySuffix(key));
         }
         String storageKey = activeModeIsAbilityScope() ? AutoYieldStore.abilitySuffix(key) : key;
         return yieldStore.shouldYield(activeTier(), storageKey);
@@ -165,7 +165,7 @@ public class NetGameController implements IGameController {
     public void setShouldAutoYield(final String key, final boolean autoYield, final boolean isAbilityScope) {
         String storageKey = isAbilityScope ? AutoYieldStore.abilitySuffix(key) : key;
         if (activeModeIsInstall()) {
-            PersistentYieldStore.get().setYield(storageKey, autoYield);
+            PersistentAutoDecisionStore.get().setYield(storageKey, autoYield);
         } else {
             yieldStore.setYield(activeTier(), storageKey, autoYield);
         }
@@ -175,7 +175,7 @@ public class NetGameController implements IGameController {
     @Override
     public Iterable<String> getAutoYields() {
         return activeModeIsInstall()
-                ? PersistentYieldStore.get().getYields()
+                ? PersistentAutoDecisionStore.get().getYields()
                 : yieldStore.getYields(activeTier());
     }
 
@@ -188,40 +188,112 @@ public class NetGameController implements IGameController {
     public boolean getDisableAutoYields() { return yieldStore.isDisabled(); }
 
     @Override
-    public void setDisableAutoYields(final boolean disable) { yieldStore.setDisabled(disable); }
-
-    @Override
-    public boolean shouldAlwaysAcceptTrigger(final int trigger) {
-        return yieldStore.getTriggerDecision(trigger) == AutoYieldStore.TriggerDecision.ACCEPT;
+    public void setDisableAutoYields(final boolean disable) {
+        yieldStore.setDisabled(disable);
+        send(ProtocolMethod.setDisableAutoYields, disable);
     }
 
     @Override
-    public boolean shouldAlwaysDeclineTrigger(final int trigger) {
-        return yieldStore.getTriggerDecision(trigger) == AutoYieldStore.TriggerDecision.DECLINE;
+    public boolean shouldAlwaysAcceptTrigger(final String key) {
+        if (yieldStore.isTriggerDecisionsDisabled()) return false;
+        return readTriggerDecision(key) == AutoYieldStore.TriggerDecision.ACCEPT;
     }
 
     @Override
-    public void setShouldAlwaysAcceptTrigger(final int trigger) {
-        yieldStore.setTriggerDecision(trigger, AutoYieldStore.TriggerDecision.ACCEPT);
-        send(ProtocolMethod.setShouldAlwaysAcceptTrigger, trigger);
+    public boolean shouldAlwaysDeclineTrigger(final String key) {
+        if (yieldStore.isTriggerDecisionsDisabled()) return false;
+        return readTriggerDecision(key) == AutoYieldStore.TriggerDecision.DECLINE;
     }
 
     @Override
-    public void setShouldAlwaysDeclineTrigger(final int trigger) {
-        yieldStore.setTriggerDecision(trigger, AutoYieldStore.TriggerDecision.DECLINE);
-        send(ProtocolMethod.setShouldAlwaysDeclineTrigger, trigger);
+    public void setShouldAlwaysAcceptTrigger(final String key, final boolean isAbilityScope) {
+        String storageKey = isAbilityScope ? AutoYieldStore.abilitySuffix(key) : key;
+        writeTriggerDecisionLocal(storageKey, AutoYieldStore.TriggerDecision.ACCEPT);
+        send(ProtocolMethod.setShouldAlwaysAcceptTrigger, storageKey, isAbilityScope);
     }
 
     @Override
-    public void setShouldAlwaysAskTrigger(final int trigger) {
-        yieldStore.setTriggerDecision(trigger, AutoYieldStore.TriggerDecision.ASK);
-        send(ProtocolMethod.setShouldAlwaysAskTrigger, trigger);
+    public void setShouldAlwaysDeclineTrigger(final String key, final boolean isAbilityScope) {
+        String storageKey = isAbilityScope ? AutoYieldStore.abilitySuffix(key) : key;
+        writeTriggerDecisionLocal(storageKey, AutoYieldStore.TriggerDecision.DECLINE);
+        send(ProtocolMethod.setShouldAlwaysDeclineTrigger, storageKey, isAbilityScope);
+    }
+
+    @Override
+    public void setShouldAlwaysAskTrigger(final String key, final boolean isAbilityScope) {
+        String storageKey = isAbilityScope ? AutoYieldStore.abilitySuffix(key) : key;
+        writeTriggerDecisionLocal(storageKey, AutoYieldStore.TriggerDecision.ASK);
+        send(ProtocolMethod.setShouldAlwaysAskTrigger, storageKey, isAbilityScope);
+    }
+
+    @Override
+    public Iterable<java.util.Map.Entry<String, AutoYieldStore.TriggerDecision>> getAutoTriggers() {
+        return activeTriggerModeIsInstall()
+                ? PersistentAutoDecisionStore.get().getAutoTriggers()
+                : yieldStore.getAutoTriggers(activeTriggerTier());
+    }
+
+    @Override
+    public boolean getDisableAutoTriggers() { return yieldStore.isTriggerDecisionsDisabled(); }
+
+    @Override
+    public void setDisableAutoTriggers(final boolean disable) {
+        yieldStore.setTriggerDecisionsDisabled(disable);
+        send(ProtocolMethod.setDisableAutoTriggers, disable);
+    }
+
+    private AutoYieldStore.TriggerDecision readTriggerDecision(final String key) {
+        if (key == null || key.isEmpty()) return AutoYieldStore.TriggerDecision.ASK;
+        if (activeTriggerModeIsInstall()) return PersistentAutoDecisionStore.get().getTriggerDecision(AutoYieldStore.abilitySuffix(key));
+        String storageKey = activeTriggerModeIsAbilityScope() ? AutoYieldStore.abilitySuffix(key) : key;
+        return yieldStore.getTriggerDecision(activeTriggerTier(), storageKey);
+    }
+
+    private void writeTriggerDecisionLocal(final String storageKey, final AutoYieldStore.TriggerDecision decision) {
+        if (activeTriggerModeIsInstall()) {
+            PersistentAutoDecisionStore.get().setTriggerDecision(storageKey, decision);
+        } else {
+            yieldStore.setTriggerDecision(activeTriggerTier(), storageKey, decision);
+        }
+    }
+
+    private boolean activeTriggerModeIsInstall() {
+        return ForgeConstants.AUTO_TRIGGER_PER_ABILITY_INSTALL.equals(
+                FModel.getPreferences().getPref(ForgePreferences.FPref.UI_AUTO_TRIGGER_MODE));
+    }
+
+    private boolean activeTriggerModeIsAbilityScope() {
+        return !ForgeConstants.AUTO_TRIGGER_PER_CARD.equals(
+                FModel.getPreferences().getPref(ForgePreferences.FPref.UI_AUTO_TRIGGER_MODE));
+    }
+
+    private AutoYieldStore.Tier activeTriggerTier() {
+        String mode = FModel.getPreferences().getPref(ForgePreferences.FPref.UI_AUTO_TRIGGER_MODE);
+        if (ForgeConstants.AUTO_TRIGGER_PER_CARD.equals(mode))            return AutoYieldStore.Tier.GAME;
+        if (ForgeConstants.AUTO_TRIGGER_PER_ABILITY_SESSION.equals(mode)) return AutoYieldStore.Tier.SESSION;
+        return AutoYieldStore.Tier.MATCH;
     }
 
     public void replayActiveYields() {
         boolean abilityScope = activeModeIsAbilityScope();
         for (String key : getAutoYields()) {
             send(ProtocolMethod.setShouldAutoYield, key, Boolean.TRUE, abilityScope);
+        }
+    }
+
+    public void replayActiveTriggerDecisions() {
+        boolean abilityScope = activeTriggerModeIsAbilityScope();
+        for (java.util.Map.Entry<String, AutoYieldStore.TriggerDecision> entry : getAutoTriggers()) {
+            switch (entry.getValue()) {
+                case ACCEPT:
+                    send(ProtocolMethod.setShouldAlwaysAcceptTrigger, entry.getKey(), abilityScope);
+                    break;
+                case DECLINE:
+                    send(ProtocolMethod.setShouldAlwaysDeclineTrigger, entry.getKey(), abilityScope);
+                    break;
+                case ASK:
+                    break;
+            }
         }
     }
 
