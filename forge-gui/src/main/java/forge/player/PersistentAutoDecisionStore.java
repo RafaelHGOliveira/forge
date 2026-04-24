@@ -22,9 +22,9 @@ import java.util.Set;
  * Shared across all local controllers on this install of Forge.
  *
  * Key stability: entries are keyed by SpellAbility.toUnsuppressedString() (yields)
- * or Trigger.getStableKey() (trigger decisions) and are not guaranteed stable
- * across Forge versions or card text edits. Stale entries silently fail to
- * match — acceptable; users can re-add as needed.
+ * or Trigger.toString(false, false) (trigger decisions) and are not guaranteed
+ * stable across Forge versions or card text edits. Stale entries silently fail
+ * to match — acceptable; users can re-add as needed.
  *
  * File schema (auto-yields.dat):
  *   yield.<urlencoded-key>=true
