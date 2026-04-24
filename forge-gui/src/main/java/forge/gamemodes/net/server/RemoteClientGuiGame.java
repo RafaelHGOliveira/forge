@@ -26,7 +26,6 @@ import forge.localinstance.skin.FSkinProp;
 import forge.model.FModel;
 import forge.player.PlayerZoneUpdate;
 import forge.player.PlayerZoneUpdates;
-
 import forge.trackable.TrackableCollection;
 import forge.util.FSerializableFunction;
 import forge.util.ITriggerEvent;
@@ -174,6 +173,11 @@ public class RemoteClientGuiGame extends NetworkGuiGame implements IHasForgeLog 
                     client.getIndex(), useDeltaSync, initialSyncSent);
                 fallbackLogged = true;
             }
+            // Batch flush already emits setGameView; skip the duplicate.
+            if (forwarder != null && forwarder.hasPendingEvents()) {
+                flushPendingEvents();
+                return;
+            }
             if (flush) {
                 send(ProtocolMethod.setGameView, gameView, -1L);
             } else {
@@ -190,10 +194,12 @@ public class RemoteClientGuiGame extends NetworkGuiGame implements IHasForgeLog 
             return;
         }
 
-        // Flush pending events BEFORE collecting deltas — ensures events
-        // get the dirty props bundled with them, and this standalone delta
-        // only picks up whatever changed after the flush.
-        flushPendingEvents();
+        // If events are pending, the batch flush bundles dirty props with
+        // them into applyDelta — skip the redundant graph walk here.
+        if (forwarder != null && forwarder.hasPendingEvents()) {
+            flushPendingEvents();
+            return;
+        }
         DeltaPacket delta = syncManager.collectDeltas(gameView);
         if (!delta.isEmpty()) {
             if (flush) {
@@ -203,8 +209,8 @@ public class RemoteClientGuiGame extends NetworkGuiGame implements IHasForgeLog 
             }
 
             if (logBandwidth) {
-                int deltaSize = measureDeltaSize(delta);
-                int fullStateSize = measureFullStateSize(gameView);
+                int deltaSize = TrackableSerializer.measureSize(delta, gameView.getTracker());
+                int fullStateSize = TrackableSerializer.measureSize(gameView, null);
 
                 totalDeltaBytes += deltaSize;
                 totalFullStateBytes += fullStateSize;
@@ -219,17 +225,6 @@ public class RemoteClientGuiGame extends NetworkGuiGame implements IHasForgeLog 
                     totalFullStateBytes > 0 ? (int)((1.0 - (double)totalDeltaBytes / totalFullStateBytes) * 100) : 0);
             }
         }
-    }
-
-    /** Measure serialized size with IdRef replacement (applyDelta wire format). */
-    private int measureDeltaSize(Object obj) {
-        forge.trackable.Tracker tracker = getGameView() != null ? getGameView().getTracker() : null;
-        return TrackableSerializer.measureReplacedSize(obj, tracker);
-    }
-
-    /** Measure serialized size without replacement (setGameView wire format). */
-    private int measureFullStateSize(Object obj) {
-        return TrackableSerializer.measurePlainSize(obj);
     }
 
     /**
@@ -557,12 +552,11 @@ public class RemoteClientGuiGame extends NetworkGuiGame implements IHasForgeLog 
                 sender.send(ProtocolMethod.applyDelta, delta);
 
                 if (logBandwidth) {
-                    int deltaSize = measureDeltaSize(delta);
-                    int eventsSize = measureDeltaSize(events);
-                    int stateOnlyFullSize = measureFullStateSize(gameView);
+                    int deltaSize = TrackableSerializer.measureSize(delta, gameView.getTracker());
+                    int eventsSize = TrackableSerializer.measureSize(events, gameView.getTracker());
+                    int stateOnlyFullSize = TrackableSerializer.measureSize(gameView, null);
                     int fullStateSize = stateOnlyFullSize + eventsSize;
-                    DeltaPacket stateOnly = delta.withoutEvents();
-                    int stateOnlyDeltaSize = measureDeltaSize(stateOnly);
+                    int stateOnlyDeltaSize = TrackableSerializer.measureSize(delta.withoutEvents(), gameView.getTracker());
 
                     totalDeltaBytes += deltaSize;
                     totalFullStateBytes += fullStateSize;

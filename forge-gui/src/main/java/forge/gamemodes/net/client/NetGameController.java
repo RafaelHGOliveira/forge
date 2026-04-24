@@ -28,7 +28,7 @@ public class NetGameController implements IGameController {
     private final AutoYieldStore yieldStore = new AutoYieldStore();
 
     public NetGameController(final IToServer server) {
-        this.sender = new GameProtocolSender(server);
+        sender = new GameProtocolSender(server);
     }
 
     private void send(final ProtocolMethod method, final Object... args) {
