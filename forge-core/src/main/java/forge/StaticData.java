@@ -154,7 +154,8 @@ public class StaticData {
                     tokens.put(card.getNormalizedName(), card);
                 }
             }
-            allTokens = new TokenDb(tokens, editions, enableSmartTokenSelection);
+            allTokens = new TokenDb(tokens, editions);
+            allTokens.setPreferEraMatchedArt(enableSmartTokenSelection);
         } else {
             allTokens = null;
         }

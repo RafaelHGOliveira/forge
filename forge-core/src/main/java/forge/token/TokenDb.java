@@ -5,14 +5,12 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
-import forge.StaticData;
 import forge.card.CardDb;
 import forge.card.CardEdition;
 import forge.card.CardRules;
 import forge.item.IPaperCard;
 import forge.item.PaperToken;
 import forge.util.Aggregates;
-import org.apache.commons.lang3.function.Predicates;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -37,12 +35,30 @@ public class TokenDb implements ITokenDatabase {
     private final CardEdition.Collection editions;
     private final Map<String, CardRules> rulesByName;
 
-    private boolean smartTokenSelection;
+    // null preserves first-alphabetical match; adventure pushes a filter here.
+    private Predicate<CardEdition> defaultEditionFilter = null;
+    // Blocklist of "{EDITION_CODE}/{tokenScript}" pairs; skipped in fallback.
+    private Set<String> restrictedTokenEntries = Collections.emptySet();
+    // When true and a host-card date is known, pick the legal edition whose
+    // release date is closest to the host's, so eras match (e.g. a 1999 card
+    // gets a 1998 Unglued token rather than a 2002 Player Rewards print).
+    private boolean preferEraMatchedArt = false;
 
-    public TokenDb(Map<String, CardRules> rules, CardEdition.Collection editions, boolean smartTokenSelection) {
+    public TokenDb(Map<String, CardRules> rules, CardEdition.Collection editions) {
         this.rulesByName = rules;
         this.editions = editions;
-        this.smartTokenSelection = smartTokenSelection;
+    }
+
+    public void setDefaultEditionFilter(Predicate<CardEdition> filter) {
+        this.defaultEditionFilter = filter;
+    }
+
+    public void setRestrictedTokenEntries(Set<String> entries) {
+        this.restrictedTokenEntries = entries != null ? entries : Collections.emptySet();
+    }
+
+    public void setPreferEraMatchedArt(boolean flag) {
+        this.preferEraMatchedArt = flag;
     }
 
     public boolean containsRule(String rule) {
@@ -88,55 +104,53 @@ public class TokenDb implements ITokenDatabase {
         return new PaperToken(rules, edition, name, t.collectorNumber(), t.artistName());
     }
 
-    // try all editions to find token
-    protected PaperToken fallbackToken(String name, CardEdition realEdition) {
-        if (smartTokenSelection) {
-            return smartFallbackToken(name, realEdition);
-        } else {
+    // Null filter: historical first-alphabetical match. Non-null: random among
+    // editions that register the token and pass the filter, or null if none.
+    // When preferEraMatchedArt is on and hostDate != null, instead picks the
+    // legal edition whose release date is closest to hostDate.
+    public PaperToken getTokenFromEditions(String tokenName, Predicate<CardEdition> editionFilter, Date hostDate) {
+        if (editionFilter == null) {
             for (CardEdition edition : this.editions) {
-                String fullName = String.format("%s_%s", name, edition.getCode().toLowerCase());
-                if (loadTokenFromSet(edition, name)) {
+                if (restrictedTokenEntries.contains(edition.getCode() + "/" + tokenName)) continue;
+                String fullName = String.format("%s_%s", tokenName, edition.getCode().toLowerCase());
+                if (loadTokenFromSet(edition, tokenName)) {
                     return Aggregates.random(allTokenByName.get(fullName));
                 }
             }
+            return null;
         }
-        return null;
+        List<CardEdition> legal = new ArrayList<>();
+        for (CardEdition edition : this.editions) {
+            if (!loadTokenFromSet(edition, tokenName)) continue;
+            if (restrictedTokenEntries.contains(edition.getCode() + "/" + tokenName)) continue;
+            if (editionFilter.test(edition)) legal.add(edition);
+        }
+        if (legal.isEmpty()) return null;
+        CardEdition pick;
+        if (preferEraMatchedArt && hostDate != null) {
+            pick = legal.get(0);
+            long best = Math.abs(pick.getDate().getTime() - hostDate.getTime());
+            for (int i = 1; i < legal.size(); i++) {
+                long delta = Math.abs(legal.get(i).getDate().getTime() - hostDate.getTime());
+                if (delta < best) {
+                    best = delta;
+                    pick = legal.get(i);
+                }
+            }
+        } else {
+            pick = Aggregates.random(legal);
+        }
+        String fullName = String.format("%s_%s", tokenName, pick.getCode().toLowerCase());
+        return Aggregates.random(allTokenByName.get(fullName));
     }
 
-    // Find latest token before release of original card, or earliest after that
-    private PaperToken smartFallbackToken(String name, CardEdition realEdition) {
-
-        // Try to optimistically adhere to CardArtPreference and filter out special editions other than realEdition's own type first
-        final EnumSet<CardEdition.Type> specialEditions = EnumSet.of(CardEdition.Type.FUNNY, CardEdition.Type.ONLINE, CardEdition.Type.OTHER);
-        specialEditions.remove(realEdition.getType());
-        CardDb.CardArtPreference artPreference = StaticData.instance().getCardArtPreference();
-
-        PaperToken paperToken = smartFallbackToken(name, realEdition, Predicate.<CardEdition>not(
-                edition -> specialEditions.contains(edition.getType())).and(artPreference::accept));
-
-        // Further fall back if a token still isn't found, try all editions without filtering
-        return paperToken != null ? paperToken : smartFallbackToken(name, realEdition, Predicates.truePredicate());
-    }
-
-    private PaperToken smartFallbackToken(String name, CardEdition realEdition, Predicate<CardEdition> eligible) {
-        String lastMatchedKey = null;
-        boolean reachedRealEdition = false; // This is to find the closest edition to realEdition, rather than terminate at the first (earliest) result
-        for (CardEdition edition : this.editions.getOrderedEditions(false)) {
-            if (edition.equals(realEdition)) {
-                reachedRealEdition = true;
-            }
-            if (!eligible.test(edition)) {
-                continue;
-            }
-            String fullName = String.format("%s_%s", name, edition.getCode().toLowerCase());
-            if (loadTokenFromSet(edition, name)) {
-                lastMatchedKey = fullName;
-            }
-            if (reachedRealEdition && lastMatchedKey != null) {
-                break;
-            }
+    protected PaperToken fallbackToken(String name, String hostEditionCode) {
+        Date hostDate = null;
+        if (hostEditionCode != null) {
+            CardEdition host = this.editions.get(hostEditionCode);
+            if (host != null) hostDate = host.getDate();
         }
-        return lastMatchedKey != null ? Aggregates.random(allTokenByName.get(lastMatchedKey)) : null;
+        return getTokenFromEditions(name, defaultEditionFilter, hostDate);
     }
 
     @Override
@@ -164,7 +178,7 @@ public class TokenDb implements ITokenDatabase {
 
             return Iterables.get(collection, artIndex - 1);
         }
-        PaperToken fallback = this.fallbackToken(tokenName, realEdition);
+        PaperToken fallback = this.fallbackToken(tokenName, edition);
         if (fallback != null) {
             return fallback;
         }
