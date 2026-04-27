@@ -3,6 +3,7 @@ package forge.interfaces;
 import java.util.List;
 
 import forge.game.card.CardView;
+import forge.game.phase.PhaseType;
 import forge.game.player.PlayerView;
 import forge.game.spellability.SpellAbilityView;
 import forge.gamemodes.match.NextGameDecision;
@@ -75,4 +76,6 @@ public interface IGameController {
     Iterable<java.util.Map.Entry<String, AutoYieldStore.TriggerDecision>> getAutoTriggers();
     boolean getDisableAutoTriggers();
     void setDisableAutoTriggers(boolean disable);
+
+    void setUiShouldSkipPhase(PlayerView turnPlayer, PhaseType phase, boolean shouldSkip);
 }

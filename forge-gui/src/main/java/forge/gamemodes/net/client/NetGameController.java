@@ -1,6 +1,7 @@
 package forge.gamemodes.net.client;
 
 import forge.game.card.CardView;
+import forge.game.phase.PhaseType;
 import forge.game.player.PlayerView;
 import forge.game.player.actions.PlayerAction;
 import forge.game.spellability.SpellAbilityView;
@@ -26,7 +27,7 @@ public class NetGameController implements IGameController {
     private final AutoYieldStore yieldStore = new AutoYieldStore();
 
     public NetGameController(final IToServer server) {
-        this.sender = new GameProtocolSender(server);
+        sender = new GameProtocolSender(server);
     }
 
     private void send(final ProtocolMethod method, final Object... args) {
@@ -295,6 +296,11 @@ public class NetGameController implements IGameController {
                     break;
             }
         }
+    }
+
+    @Override
+    public void setUiShouldSkipPhase(final PlayerView turnPlayer, final PhaseType phase, final boolean shouldSkip) {
+        send(ProtocolMethod.setUiShouldSkipPhase, turnPlayer, phase, shouldSkip);
     }
 
     private IMacroSystem macros;

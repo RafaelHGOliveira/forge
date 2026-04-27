@@ -69,7 +69,6 @@ public enum ProtocolMethod implements IHasForgeLog {
     // TODO case "setPlayerAvatar":
     openZones           (Mode.SERVER, PlayerZoneUpdates.class, PlayerView.class, Collection/*ZoneType*/.class, Map/*PlayerView,Object*/.class, Boolean.TYPE),
     restoreOldZones     (Mode.SERVER, Void.TYPE, PlayerView.class, PlayerZoneUpdates.class),
-    isUiSetToSkipPhase  (Mode.SERVER, Boolean.TYPE, PlayerView.class, PhaseType.class),
     setRememberedActions(Mode.SERVER, Void.TYPE),
     nextRememberedAction(Mode.SERVER, Void.TYPE),
     showWaitingTimer    (Mode.SERVER, Void.TYPE, PlayerView.class, String.class),
@@ -100,7 +99,8 @@ public enum ProtocolMethod implements IHasForgeLog {
     setShouldAlwaysAcceptTrigger  (Mode.CLIENT, Void.TYPE, String.class, Boolean.TYPE),
     setShouldAlwaysDeclineTrigger (Mode.CLIENT, Void.TYPE, String.class, Boolean.TYPE),
     setShouldAlwaysAskTrigger     (Mode.CLIENT, Void.TYPE, String.class, Boolean.TYPE),
-    setDisableAutoTriggers        (Mode.CLIENT, Void.TYPE, Boolean.TYPE);
+    setDisableAutoTriggers        (Mode.CLIENT, Void.TYPE, Boolean.TYPE)
+    setUiShouldSkipPhase          (Mode.CLIENT, Void.TYPE, PlayerView.class, PhaseType.class, Boolean.TYPE);
 
     private enum Mode {
         SERVER(IGuiGame.class),
