@@ -5,6 +5,7 @@ import forge.ai.LobbyPlayerAi;
 import forge.ai.PlayerControllerAi;
 import forge.game.Game;
 import forge.game.player.Player;
+import forge.game.player.PlayerView;
 import forge.gamemodes.match.HostedMatch;
 import forge.gamemodes.match.LobbySlot;
 import forge.gamemodes.match.LobbySlotType;
@@ -592,6 +593,45 @@ public final class FServerManager implements IHasForgeLog {
         return false;
     }
 
+    public boolean replaceDisconnectedWithAI(final String username) {
+        final RemoteClient client = disconnectedClients.remove(username);
+        if (client == null) { return false; }
+        final Timer timer = reconnectTimers.remove(username);
+        if (timer != null) { timer.cancel(); }
+        if (isMatchActive()) {
+            broadcastPlayerDisconnected(client.getIndex(), false);
+            convertToAI(client.getIndex(), username);
+        }
+        localLobby.disconnectPlayer(client.getIndex());
+        broadcast(new MessageEvent(String.format("Host replaced %s with AI.", username)));
+        return true;
+    }
+
+    private void broadcastPlayerDisconnected(final int slotIndex, final boolean disconnected) {
+        final HostedMatch hostedMatch = localLobby.getHostedMatch();
+        if (hostedMatch == null) { return; }
+        final Game game = hostedMatch.getGame();
+        if (game == null) { return; }
+
+        PlayerView disconnectedPlayerView = null;
+        for (final Player p : game.getPlayers()) {
+            final IGuiGame gui = hostedMatch.getGuiForPlayer(p);
+            if (gui instanceof RemoteClientGuiGame ngg && ngg.getSlotIndex() == slotIndex) {
+                disconnectedPlayerView = p.getView();
+                break;
+            }
+        }
+        if (disconnectedPlayerView == null) { return; }
+
+        for (final Player p : game.getPlayers()) {
+            final IGuiGame gui = hostedMatch.getGuiForPlayer(p);
+            if (gui instanceof RemoteClientGuiGame ngg && ngg.getSlotIndex() == slotIndex) {
+                continue; // Skip the disconnected player's own GUI
+            }
+            gui.showPlayerDisconnected(disconnectedPlayerView, disconnected);
+        }
+    }
+
     public static String getExternalAddress() {
         BufferedReader in = null;
         try {
@@ -967,6 +1007,9 @@ public final class FServerManager implements IHasForgeLog {
                     clients.put(ctx.channel(), disconnected);
                     netLog.info("[Reconnect] Channel swapped for {} (slot {})", username, disconnected.getIndex());
 
+                    // Clear disconnect indicator on all GUIs
+                    broadcastPlayerDisconnected(disconnected.getIndex(), false);
+
                     // Resume and resync
                     resumeAndResync(disconnected);
 
@@ -1052,6 +1095,9 @@ public final class FServerManager implements IHasForgeLog {
 
                 // Store for reconnection lookup
                 disconnectedClients.put(username, client);
+
+                // Notify all GUIs to show disconnect indicator
+                broadcastPlayerDisconnected(playerIndex, true);
 
                 // Start periodic countdown timer (ticks every 30s)
                 final int[] remaining = {RECONNECT_TIMEOUT_SECONDS};
