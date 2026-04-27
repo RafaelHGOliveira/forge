@@ -673,12 +673,14 @@ public class MatchScreen extends FScreen {
                     if (!stackInstance.isAbility()) {
                         return false;
                     }
-                    final int triggerID = stackInstance.getSourceTrigger();
-
-                    if (controller.shouldAlwaysAcceptTrigger(triggerID)) {
-                        controller.setShouldAlwaysAskTrigger(triggerID);
-                    } else {
-                        controller.setShouldAlwaysAcceptTrigger(triggerID);
+                    final String triggerYieldKey = stackInstance.getSourceTriggerYieldKey();
+                    if (!triggerYieldKey.isEmpty()) {
+                        final boolean triggerAbilityScope = activeTriggerModeIsAbilityScope();
+                        if (controller.shouldAlwaysAcceptTrigger(triggerYieldKey)) {
+                            controller.setShouldAlwaysAskTrigger(triggerYieldKey, triggerAbilityScope);
+                        } else {
+                            controller.setShouldAlwaysAcceptTrigger(triggerYieldKey, triggerAbilityScope);
+                        }
                     }
 
                     final String key = stackInstance.getKey();
@@ -703,12 +705,14 @@ public class MatchScreen extends FScreen {
                     if (!stackInstance.isAbility()) {
                         return false;
                     }
-                    final int triggerID = stackInstance.getSourceTrigger();
-
-                    if (controller.shouldAlwaysDeclineTrigger(triggerID)) {
-                        controller.setShouldAlwaysAskTrigger(triggerID);
-                    } else {
-                        controller.setShouldAlwaysDeclineTrigger(triggerID);
+                    final String triggerYieldKey = stackInstance.getSourceTriggerYieldKey();
+                    if (!triggerYieldKey.isEmpty()) {
+                        final boolean triggerAbilityScope = activeTriggerModeIsAbilityScope();
+                        if (controller.shouldAlwaysDeclineTrigger(triggerYieldKey)) {
+                            controller.setShouldAlwaysAskTrigger(triggerYieldKey, triggerAbilityScope);
+                        } else {
+                            controller.setShouldAlwaysDeclineTrigger(triggerYieldKey, triggerAbilityScope);
+                        }
                     }
 
                     final String key = stackInstance.getKey();
@@ -728,6 +732,11 @@ public class MatchScreen extends FScreen {
     @Override
     public void showMenu() {
         //don't show menu from this screen since it's too easy to bump the menu button when trying to press OK or Cancel
+    }
+
+    private static boolean activeTriggerModeIsAbilityScope() {
+        return !forge.localinstance.properties.ForgeConstants.AUTO_TRIGGER_PER_CARD.equals(
+                FModel.getPreferences().getPref(ForgePreferences.FPref.UI_AUTO_TRIGGER_MODE));
     }
 
     public boolean stopAtPhase(final PlayerView turn, final PhaseType phase) {
