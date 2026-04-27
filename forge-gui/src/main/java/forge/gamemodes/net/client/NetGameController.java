@@ -1,6 +1,7 @@
 package forge.gamemodes.net.client;
 
 import forge.game.card.CardView;
+import forge.game.phase.PhaseType;
 import forge.game.player.PlayerView;
 import forge.game.player.actions.PlayerAction;
 import forge.game.spellability.SpellAbilityView;
@@ -225,6 +226,11 @@ public class NetGameController implements IGameController {
         for (String key : getAutoYields()) {
             send(ProtocolMethod.setShouldAutoYield, key, Boolean.TRUE, abilityScope);
         }
+    }
+
+    @Override
+    public void setUiShouldSkipPhase(final PlayerView turnPlayer, final PhaseType phase, final boolean shouldSkip) {
+        send(ProtocolMethod.setUiShouldSkipPhase, turnPlayer, phase, shouldSkip);
     }
 
     private IMacroSystem macros;

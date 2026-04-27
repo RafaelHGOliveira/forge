@@ -277,6 +277,7 @@ public interface IGuiGame {
         autoPassCancel(player);
     }
 
+
     void updateAutoPassPrompt();
 
     void setCurrentPlayer(PlayerView player);
