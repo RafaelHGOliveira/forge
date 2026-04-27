@@ -157,6 +157,9 @@ public enum CSubmenuPreferences implements ICDoc {
         lstControls.add(Pair.of(view.getCbCardTextHideReminder(), FPref.UI_CARD_IMAGE_RENDER_HIDE_REMINDER_TEXT));
         lstControls.add(Pair.of(view.getCbOpenPacksIndiv(), FPref.UI_OPEN_PACKS_INDIV));
         lstControls.add(Pair.of(view.getCbTokensInSeparateRow(), FPref.UI_TOKENS_IN_SEPARATE_ROW));
+        lstControls.add(Pair.of(view.getCbStackCreatures(), FPref.UI_STACK_CREATURES));
+        lstControls.add(Pair.of(view.getCbHoverTooltipsEnabled(), FPref.UI_SHOW_HOVER_TOOLTIPS));
+        lstControls.add(Pair.of(view.getCbZoomTooltipsEnabled(), FPref.UI_SHOW_ZOOM_TOOLTIPS));
         lstControls.add(Pair.of(view.getCbManaLostPrompt(), FPref.UI_MANA_LOST_PROMPT));
         lstControls.add(Pair.of(view.getCbAutoCallCoinFlip(), FPref.UI_AUTO_CALL_COIN_FLIP));
         lstControls.add(Pair.of(view.getCbEscapeEndsTurn(), FPref.UI_ALLOW_ESC_TO_END_TURN));
@@ -189,6 +192,7 @@ public enum CSubmenuPreferences implements ICDoc {
             FModel.getMagicDb().setEnableSmartCardArtSelection(isEnabled);
         });
 
+
         view.getBtnReset().setCommand((UiCommand) CSubmenuPreferences.this::resetForgeSettingsToDefault);
 
         view.getBtnDeleteEditorUI().setCommand((UiCommand) CSubmenuPreferences.this::resetDeckEditorLayout);
@@ -202,6 +206,9 @@ public enum CSubmenuPreferences implements ICDoc {
         view.getBtnClearImageCache().setCommand((UiCommand) CSubmenuPreferences.this::clearImageCache);
 
         view.getBtnTokenPreviewer().setCommand((UiCommand) CSubmenuPreferences.this::openTokenPreviewer);
+
+        view.getBtnCardOverlaySettings().setCommand((UiCommand) () ->
+                forge.screens.match.menus.CardOverlaySettingsDialog.show(null));
 
         view.getBtnContentDirectoryUI().setCommand((UiCommand) CSubmenuPreferences.this::openContentDirectory);
         view.getCbCheckSnapshot().addItemListener(e -> {
@@ -257,6 +264,7 @@ public enum CSubmenuPreferences implements ICDoc {
         for(final Pair<JCheckBox, FPref> kv: lstControls) {
             kv.getKey().setSelected(prefs.getPrefBoolean(kv.getValue()));
         }
+
         view.reloadShortcuts();
 
         SwingUtilities.invokeLater(() -> view.getCbRemoveSmall().requestFocusInWindow());
