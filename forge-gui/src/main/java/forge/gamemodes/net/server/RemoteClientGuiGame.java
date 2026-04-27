@@ -63,6 +63,10 @@ public class RemoteClientGuiGame extends NetworkGuiGame implements IHasForgeLog 
         return client;
     }
 
+    public int getSlotIndex() {
+        return client.getIndex();
+    }
+
     public void pause() {
         paused = true;
     }
