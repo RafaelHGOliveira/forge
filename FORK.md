@@ -1,7 +1,7 @@
 # Fork Differences vs Card-Forge/forge
 
 This file tracks what's unique in this fork (RafaelHGOliveira/forge) relative to upstream.
-Updated: 2026-04-27 (master reset to upstream/master + selective PR merges; +#9806 card info tooltips; +#10466 client-side reconnect).
+Updated: 2026-04-27 (master reset to upstream/master + selective PR merges; +#9806 card info tooltips; +#10466 client-side reconnect; +#10506 persistent always-yes/no triggers; +#9643 expanded yield system).
 
 ## Open PRs submitted upstream (awaiting merge)
 
@@ -30,6 +30,8 @@ These PRs are open in Card-Forge/forge and were merged here on top of `upstream/
 | [#10517](https://github.com/Card-Forge/forge/pull/10517) | Format dropdown and commander shortcuts in desktop deck editor |
 | [#9806](https://github.com/Card-Forge/forge/pull/9806) | Card info tooltips — hover/zoom keyword explanations, related cards, and card image overlay |
 | [#10466](https://github.com/Card-Forge/forge/pull/10466) | Client-side automatic reconnect — exponential-backoff loop + live modal; `SeatLostEvent`; `/simulatedisconnect` test hook; server HeartbeatEvent echo |
+| [#10506](https://github.com/Card-Forge/forge/pull/10506) | Persistent always-yes/no trigger preferences — `PersistentAutoDecisionStore`; trigger choice persists across matches |
+| [#9643](https://github.com/Card-Forge/forge/pull/9643) | Expanded yield system / auto-pass options — `YieldController`, `YieldPrefs`, `YieldMarker`; yield-to-phase marker; auto-pass no-actions; stack-yield; per-player yield prefs in multiplayer |
 
 ## Custom features (not submitted upstream)
 
@@ -41,19 +43,10 @@ Branch: `feat/disconnect-indicator-replace-ai` (also merged into master).
 
 Key files: `VField.java`, `CMatchUI.java`, `FServerManager.java`, `RemoteClientGuiGame.java`, `IGuiGame.java`
 
-## Upstream PRs evaluated but NOT merged (conflict-heavy — deferred)
+### Notes on merged PRs
 
-These were attempted with `-X theirs` but produced compile failures due to deep semantic overlap with already-merged code or with each other. Re-evaluate once upstream merges any of them, or merge selectively with manual conflict resolution.
-
-| PR | Reason deferred |
-|----|-----------------|
-| [#9643](https://github.com/Card-Forge/forge/pull/9643) | Yield rework — overlaps heavily with our auto-pass/yield code paths in `PlayerControllerHuman`, `IGameController`, `ProtocolMethod`, `RemoteClientGuiGame` |
-| [#10506](https://github.com/Card-Forge/forge/pull/10506) | Auto-triggers / `PersistentYieldStore` → `PersistentAutoDecisionStore` rename — overlaps with #9643 yield system and our existing yield code |
-
-### Notes for future merge attempts
-
-- `#9643` and `#10506` together rewrite the yield/trigger subsystem; merging needs upstream to land #9643 first OR a careful manual port that picks one design.
 - `#9806` conflicts were all additive (prefs enum ordering, settings UI fields, en-US.properties) — resolved manually 2026-04-27.
+- `#10506` + `#9643` were merged manually 2026-04-27 with careful conflict resolution; both PRs rewrite the yield/trigger subsystem and were merged in order (#10506 first, then #9643).
 
 ## Backup branches
 
