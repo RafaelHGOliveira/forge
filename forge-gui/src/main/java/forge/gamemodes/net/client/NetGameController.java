@@ -5,7 +5,6 @@ import forge.game.phase.PhaseType;
 import forge.game.player.PlayerView;
 import forge.game.player.actions.PlayerAction;
 import forge.game.spellability.SpellAbilityView;
-import forge.game.phase.PhaseType;
 import forge.gamemodes.match.NextGameDecision;
 import forge.gamemodes.match.YieldMarker;
 import forge.gamemodes.match.YieldPrefs;
