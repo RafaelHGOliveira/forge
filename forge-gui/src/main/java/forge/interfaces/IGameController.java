@@ -7,6 +7,9 @@ import forge.game.phase.PhaseType;
 import forge.game.player.PlayerView;
 import forge.game.spellability.SpellAbilityView;
 import forge.gamemodes.match.NextGameDecision;
+import forge.gamemodes.match.YieldMarker;
+import forge.gamemodes.match.YieldPrefs;
+import forge.localinstance.properties.ForgePreferences;
 import forge.player.AutoYieldStore;
 import forge.util.ITriggerEvent;
 
@@ -48,10 +51,7 @@ public interface IGameController {
 
     void reorderHand(CardView card, int index);
 
-    /**
-     * Request a full state resync from the server.
-     * Called automatically when checksum validation fails to recover from desynchronization.
-     */
+    /** Request a full state resync from the server. */
     void requestResync();
 
     // --- Auto-yield preferences (per-player) ---
@@ -78,4 +78,18 @@ public interface IGameController {
     void setDisableAutoTriggers(boolean disable);
 
     void setUiShouldSkipPhase(PlayerView turnPlayer, PhaseType phase, boolean shouldSkip);
+
+    // --- Yield marker (phase-targeted) and stack-yield state (per-player) ---
+    default YieldMarker getYieldMarker() { return null; }
+    default void setYieldMarker(PlayerView phaseOwner, PhaseType phase) { }
+    default void clearYieldMarker() { }
+
+    default boolean isStackYieldActive() { return false; }
+    default void setStackYield(boolean active) { }
+
+    // --- Interrupt preferences (per-player) ---
+    default boolean getYieldInterruptPref(ForgePreferences.FPref pref) { return false; }
+    default void setYieldInterruptPref(ForgePreferences.FPref pref, boolean value) { }
+    default YieldPrefs getYieldPrefs() { return null; }
+    default void setYieldPrefs(YieldPrefs prefs) { }
 }

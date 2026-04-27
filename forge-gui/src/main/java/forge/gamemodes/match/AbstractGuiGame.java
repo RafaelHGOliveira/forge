@@ -114,6 +114,9 @@ public abstract class AbstractGuiGame implements IGuiGame, IMayViewCards {
     @Override
     public void setGameView(final GameView gameView0) {
         if (gameView == null || gameView0 == null) {
+            if (gameView0 == null && yieldController != null) {
+                yieldController.reset();
+            }
             if (gameView0 != null) {
                 gameView0.updateObjLookup();
             }
@@ -169,7 +172,7 @@ public abstract class AbstractGuiGame implements IGuiGame, IMayViewCards {
                 gameControllers.put(player, originalGameControllers.get(player));
             } else {
                 gameControllers.remove(player);
-                autoPassUntilEndOfTurn.remove(player);
+                getYieldController().removeFromLegacyAutoPass(player);
                 final PlayerView currentPlayer = getCurrentPlayer();
                 if (player.equals(currentPlayer)) {
                     // set current player to a value known to be legal
@@ -418,7 +421,15 @@ public abstract class AbstractGuiGame implements IGuiGame, IMayViewCards {
 
     // Auto-yield and other input-related code
 
-    private final Set<PlayerView> autoPassUntilEndOfTurn = Sets.newHashSet();
+    // Yield controller manages all yield state and logic
+    private YieldController yieldController;
+
+    private YieldController getYieldController() {
+        if (yieldController == null) {
+            yieldController = new YieldController(this);
+        }
+        return yieldController;
+    }
 
     /**
      * Automatically pass priority until reaching the Cleanup phase of the
@@ -426,26 +437,28 @@ public abstract class AbstractGuiGame implements IGuiGame, IMayViewCards {
      */
     @Override
     public final void autoPassUntilEndOfTurn(final PlayerView player) {
-        autoPassUntilEndOfTurn.add(player);
+        getYieldController().autoPassUntilEndOfTurn(player);
         updateAutoPassPrompt();
     }
 
     @Override
     public final void autoPassCancel(final PlayerView player) {
-        if (!autoPassUntilEndOfTurn.remove(player)) {
-            return;
-        }
-
-        //prevent prompt getting stuck on yielding message while actually waiting for next input opportunity
-        final PlayerView playerView = getCurrentPlayer();
-        showPromptMessage(playerView, "");
-        updateButtons(playerView, false, false, false);
-        awaitNextInput();
+        getYieldController().autoPassCancel(player);
     }
 
     @Override
     public final boolean mayAutoPass(final PlayerView player) {
-        return autoPassUntilEndOfTurn.contains(player);
+        return getYieldController().mayAutoPass(player);
+    }
+
+    @Override
+    public final boolean isAutoPassingNoActions(final PlayerView player) {
+        return getYieldController().isAutoPassingNoActions(player);
+    }
+
+    @Override
+    public final boolean shouldAutoYieldForPlayer(final PlayerView player) {
+        return getYieldController().shouldAutoYieldForPlayer(player);
     }
 
     private Timer awaitNextInputTimer;
@@ -581,13 +594,65 @@ public abstract class AbstractGuiGame implements IGuiGame, IMayViewCards {
 
     @Override
     public final void updateAutoPassPrompt() {
-        if (!autoPassUntilEndOfTurn.isEmpty()) {
-            //allow user to cancel auto-pass
-            cancelAwaitNextInput(); //don't overwrite prompt with awaiting opponent
-            showPromptMessage(getCurrentPlayer(), Localizer.getInstance().getMessage("lblYieldingUntilEndOfTurn"));
-            updateButtons(getCurrentPlayer(), false, true, false);
-        }
+        getYieldController().updateAutoPassPrompt(getCurrentPlayer());
     }
+
+    @Override
+    public void activateYieldMarker(PlayerView player, YieldMarker marker) {
+        getYieldController().setYieldMarker(player, marker);
+    }
+
+    @Override
+    public void clearYieldMarker(PlayerView player) {
+        getYieldController().clearYieldMarker(player);
+    }
+
+    @Override
+    public void setStackYieldUiState(PlayerView player, boolean active) {
+        getYieldController().setStackYield(player, active);
+    }
+
+    @Override
+    public void applyRemoteYieldMarker(PlayerView player, YieldMarker marker) {
+        player = PlayerView.findById(getGameView(), player);
+        if (player == null) return;
+        getYieldController().setYieldMarkerSilent(player, marker);
+    }
+
+    @Override
+    public void applyRemoteStackYield(PlayerView player, boolean active) {
+        player = PlayerView.findById(getGameView(), player);
+        if (player == null) return;
+        getYieldController().setStackYieldSilent(player, active);
+    }
+
+    @Override
+    public void syncYieldMarkerCleared(PlayerView player) {
+        player = PlayerView.findById(getGameView(), player);
+        if (player == null) return;
+        getYieldController().clearYieldMarkerSilent(player);
+        // Silent path skipped the UI hook; trigger it here.
+        refreshYieldUi(player);
+    }
+
+    @Override
+    public YieldMarker getCurrentYieldMarker(PlayerView player) {
+        return getYieldController().getYieldMarker(player);
+    }
+
+    @Override
+    public boolean isCurrentStackYieldActive(PlayerView player) {
+        return getYieldController().isStackYieldActive(player);
+    }
+
+    @Override
+    public void refreshYieldUi(PlayerView player) {
+    }
+
+    @Override
+    public void setHostYieldEnabled(boolean enabled) {
+    }
+
     // End auto-yield/input code
 
     /**

@@ -51,6 +51,7 @@ import forge.deck.Deck;
 import forge.deckchooser.FDeckViewer;
 import forge.game.GameEntityView;
 import forge.game.GameView;
+import forge.interfaces.IGameController;
 import forge.game.card.Card;
 import forge.game.card.CardView;
 import forge.game.card.CardView.CardStateView;
@@ -66,9 +67,10 @@ import forge.game.player.PlayerView;
 import forge.game.spellability.SpellAbilityView;
 import forge.game.spellability.StackItemView;
 import forge.game.zone.ZoneType;
-import forge.util.IHasForgeLog;
+import forge.gamemodes.match.YieldMarker;
 import forge.gamemodes.net.NetworkGuiGame;
 import forge.gamemodes.net.client.FGameClient;
+import forge.util.IHasForgeLog;
 import forge.gui.FNetOverlay;
 import forge.gui.FThreads;
 import forge.gui.GuiBase;
@@ -106,6 +108,7 @@ import forge.screens.match.controllers.CDock;
 import forge.screens.match.controllers.CLog;
 import forge.screens.match.controllers.CPrompt;
 import forge.screens.match.controllers.CStack;
+import forge.screens.match.controllers.CYield;
 import forge.screens.match.menus.CMatchUIMenus;
 import forge.screens.match.views.VField;
 import forge.screens.match.views.VHand;
@@ -177,6 +180,7 @@ public final class CMatchUI
     private final CLog cLog = new CLog(this);
     private final CPrompt cPrompt = new CPrompt(this);
     private final CStack cStack = new CStack(this);
+    private final CYield cYield = new CYield(this);
     private int nextNotifiableStackIndex = 0;
 
     public CMatchUI() {
@@ -196,6 +200,7 @@ public final class CMatchUI
         this.myDocs.put(EDocID.REPORT_COMBAT, cCombat.getView());
         this.myDocs.put(EDocID.REPORT_DEPENDENCIES, cDependencies.getView());
         this.myDocs.put(EDocID.REPORT_LOG, cLog.getView());
+        this.myDocs.put(EDocID.REPORT_YIELD, getCYield().getView());
         this.myDocs.put(EDocID.DEV_MODE, getCDev().getView());
         this.myDocs.put(EDocID.BUTTON_DOCK, getCDock().getView());
     }
@@ -215,6 +220,15 @@ public final class CMatchUI
     }
     public boolean isCurrentScreen() {
         return Singletons.getControl().getCurrentScreen() == this.screen;
+    }
+
+    /** Returns the CMatchUI controlling the currently active match screen, or null. */
+    public static CMatchUI getActive() {
+        FScreen current = Singletons.getControl().getCurrentScreen();
+        if (current == null || !current.isMatchScreen()) {
+            return null;
+        }
+        return current.getController() instanceof CMatchUI cm ? cm : null;
     }
 
     private boolean isInGame() {
@@ -274,6 +288,9 @@ public final class CMatchUI
     }
     public CStack getCStack() {
         return cStack;
+    }
+    public CYield getCYield() {
+        return cYield;
     }
     public TargetingOverlay getTargetingOverlay() {
         return targetingOverlay;
@@ -726,6 +743,57 @@ public final class CMatchUI
         cLog.getView().refreshDisplay();
     }
 
+    public void refreshYieldPanel() {
+        view.populate();
+    }
+
+    // Whether the host has advanced yield options enabled (network play).
+    // Defaults to true so local games are unaffected.
+    private volatile boolean hostYieldEnabled = true;
+
+    public boolean isHostYieldEnabled() {
+        return hostYieldEnabled;
+    }
+
+    @Override
+    public void setHostYieldEnabled(boolean enabled) {
+        this.hostYieldEnabled = enabled;
+        FThreads.invokeInEdtNowOrLater(() -> getCYield().updateYieldButtons());
+    }
+
+    @Override
+    public void refreshYieldUi(final PlayerView player) {
+        FThreads.invokeInEdtNowOrLater(() -> {
+            // Marker is rendered only on the local player's view of the targeted phase indicator.
+            PlayerView local = getCurrentPlayer();
+            if (local == null || !local.equals(player)) {
+                return;
+            }
+            for (final VField f : getFieldViews()) {
+                PhaseIndicator pi = f.getPhaseIndicator();
+                if (pi == null) {
+                    continue;
+                }
+                for (PhaseLabel l : pi.allLabels()) {
+                    l.setYieldMarked(false);
+                }
+            }
+            IGameController controller = getGameController();
+            YieldMarker marker = controller == null ? null : controller.getYieldMarker();
+            if (marker == null) {
+                return;
+            }
+            VField markedField = getFieldViewFor(marker.getPhaseOwner());
+            if (markedField == null) {
+                return;
+            }
+            PhaseLabel target = markedField.getPhaseIndicator().getLabelFor(marker.getPhase());
+            if (target != null) {
+                target.setYieldMarked(true);
+            }
+        });
+    }
+
     public void repaintCardOverlays() {
         final List<CardPanel> panels = getVisibleCardPanels();
         for (final CardPanel panel : panels) {
@@ -783,6 +851,9 @@ public final class CMatchUI
         final FButton btn1 = view.getBtnOK(), btn2 = view.getBtnCancel();
         btn1.setText(label1);
         btn2.setText(label2);
+
+        // Update yield buttons state when prompt changes (e.g., entering/exiting mulligan)
+        getCYield().updateYieldButtons();
 
         final FButton toFocus = enable1 && focus1 ? btn1 : (enable2 ? btn2 : null);
 
@@ -897,7 +968,10 @@ public final class CMatchUI
 
     @Override
     public void updateStack() {
-        FThreads.invokeInEdtNowOrLater(() -> getCStack().update());
+        FThreads.invokeInEdtNowOrLater(() -> {
+            getCStack().update();
+            getCYield().updateYieldButtons();  // Update yield button states
+        });
     }
 
     /**
@@ -1141,6 +1215,14 @@ public final class CMatchUI
             FView.SINGLETON_INSTANCE.getPnlInsets().setForegroundImage(FSkin.getIcon(FSkinProp.BG_MATCH), true);
         else
             FView.SINGLETON_INSTANCE.getPnlInsets().setForegroundImage((Image)null);
+
+        // If we're a network client, seed the host with our initial yield prefs.
+        if (myPlayers != null && !myPlayers.isEmpty()) {
+            final IGameController controller = getGameController();
+            if (controller instanceof forge.gamemodes.net.client.NetGameController) {
+                controller.setYieldPrefs(forge.gamemodes.match.YieldPrefs.fromCurrentPreferences());
+            }
+        }
     }
 
     /**

@@ -152,6 +152,23 @@ public class ForgePreferences extends PreferencesStore<ForgePreferences.FPref> {
         UI_MULTIPLAYER_FIELD_PANELS ("SPLIT"),
         UI_CLOSE_ACTION ("NONE"),
         UI_MANA_LOST_PROMPT ("false"),
+
+        // Experimental yield options (feature-gated)
+        YIELD_EXPERIMENTAL_OPTIONS("false"),
+        YIELD_INTERRUPT_ON_ATTACKERS("true"),
+        YIELD_INTERRUPT_ON_TARGETING("true"),
+        YIELD_INTERRUPT_ON_OPPONENT_SPELL("false"),
+        YIELD_INTERRUPT_ON_TRIGGERS("false"),
+        YIELD_INTERRUPT_ON_REVEAL("false"),
+        YIELD_INTERRUPT_ON_MASS_REMOVAL("true"),
+        YIELD_SUPPRESS_ON_OWN_TURN("true"),
+        YIELD_SUPPRESS_AFTER_END("true"),
+        YIELD_DECLINE_SCOPE_STACK_YIELD("stack"),
+        YIELD_DECLINE_SCOPE_NO_ACTIONS("turn"),
+        YIELD_AUTO_PASS_NO_ACTIONS("false"),
+        YIELD_AVAILABLE_ACTIONS_BUDGET_MS("0"),
+        YIELD_SKIP_PHASE_DELAY("false"),
+        YIELD_SKIP_RESOLVE_DELAY("false"),
         UI_STACK_EFFECT_NOTIFICATION_POLICY ("Never"),
         UI_LAND_PLAYED_NOTIFICATION_POLICY ("Never"),
         UI_PAUSE_WHILE_MINIMIZED("false"),
@@ -332,6 +349,9 @@ public class ForgePreferences extends PreferencesStore<ForgePreferences.FPref> {
         SHORTCUT_CARDOVERLAYS("17 79"),
         SHORTCUT_HOVERTOOLTIPS("17 72"),   // Ctrl+H
         SHORTCUT_ZOOMTOOLTIPS("17 73"),    // Ctrl+I
+        SHORTCUT_YIELD_OPTIONS("17 89"),                         // Ctrl+Y
+        SHORTCUT_YIELD_AUTO_PASS("113"),                         // F2 key
+        SHORTCUT_YIELD_CANCEL("27"),                             // ESC key
 
         LAST_IMPORTED_CUBE_ID("");
 

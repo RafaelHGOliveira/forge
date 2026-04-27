@@ -19,8 +19,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import forge.Singletons;
 import forge.game.spellability.StackItemView;
+import forge.gamemodes.net.event.MessageEvent;
+import forge.gamemodes.net.server.FServerManager;
 import forge.gui.framework.EDocID;
 import forge.gui.framework.SDisplayUtil;
+import forge.interfaces.IGameController;
 import forge.localinstance.properties.ForgePreferences;
 import forge.localinstance.properties.ForgePreferences.FPref;
 import forge.model.FModel;
@@ -130,6 +133,26 @@ public class KeyboardShortcuts {
                 if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
                 if (matchUI == null) { return; }
                 matchUI.getGameController().passPriorityUntilEndOfTurn();
+            }
+        };
+
+        /** Cancel any active yield (marker, stack-yield, auto-pass). */
+        final Action actCancelYield = new AbstractAction() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
+                if (matchUI == null || matchUI.getCurrentPlayer() == null) { return; }
+                if (!FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS)) { return; }
+                IGameController ctrl = matchUI.getGameController();
+                if (ctrl != null) {
+                    if (ctrl.getYieldMarker() != null) {
+                        ctrl.clearYieldMarker();
+                    }
+                    if (ctrl.isStackYieldActive()) {
+                        ctrl.setStackYield(false);
+                    }
+                }
+                matchUI.getCYield().cancelAutoPassIfActive();
             }
         };
 
@@ -284,6 +307,46 @@ public class KeyboardShortcuts {
             }
         };
 
+        /** Toggle yield options. */
+        final Action actYieldOptions = new AbstractAction() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
+                final ForgePreferences prefs = FModel.getPreferences();
+                final boolean newState = !prefs.getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS);
+                prefs.setPref(FPref.YIELD_EXPERIMENTAL_OPTIONS, newState);
+                prefs.save();
+                if (matchUI != null) {
+                    matchUI.refreshYieldPanel();
+                }
+                final FServerManager server = FServerManager.getInstance();
+                if (server != null && server.isHosting()) {
+                    server.broadcast(new MessageEvent(Localizer.getInstance().getMessage(
+                        newState ? "lblYieldHostEnabled" : "lblYieldHostToggleDisabled")));
+                    server.broadcastHostYieldEnabled(newState);
+                }
+            }
+        };
+
+        /** Toggle auto-pass when no actions. */
+        final Action actAutoPassNoActions = new AbstractAction() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                if (!Singletons.getControl().getCurrentScreen().isMatchScreen()) { return; }
+                if (!FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS)) { return; }
+                final ForgePreferences prefs = FModel.getPreferences();
+                final boolean newState = !prefs.getPrefBoolean(FPref.YIELD_AUTO_PASS_NO_ACTIONS);
+                prefs.setPref(FPref.YIELD_AUTO_PASS_NO_ACTIONS, newState);
+                prefs.save();
+                if (matchUI != null) {
+                    matchUI.refreshYieldPanel();
+                    if (newState && matchUI.getGameController() != null) {
+                        matchUI.getGameController().selectButtonOk();
+                    }
+                }
+            }
+        };
+
         /** Show keyboard shortcuts dialog. */
         final Action actShowHotkeys = new AbstractAction() {
             @Override
@@ -304,6 +367,9 @@ public class KeyboardShortcuts {
         list.add(new Shortcut(FPref.SHORTCUT_UNDO, localizer.getMessage("lblSHORTCUT_UNDO"), actUndo, am, im));
         list.add(new Shortcut(FPref.SHORTCUT_CONCEDE, localizer.getMessage("lblSHORTCUT_CONCEDE"), actConcede, am, im));
         list.add(new Shortcut(FPref.SHORTCUT_ENDTURN, localizer.getMessage("lblSHORTCUT_ENDTURN"), actEndTurn, am, im));
+        list.add(new Shortcut(FPref.SHORTCUT_YIELD_OPTIONS, localizer.getMessage("lblSHORTCUT_YIELD_OPTIONS"), actYieldOptions, am, im));
+        list.add(new Shortcut(FPref.SHORTCUT_YIELD_AUTO_PASS, localizer.getMessage("lblSHORTCUT_YIELD_AUTO_PASS"), actAutoPassNoActions, am, im));
+        list.add(new Shortcut(FPref.SHORTCUT_YIELD_CANCEL, localizer.getMessage("lblSHORTCUT_YIELD_CANCEL"), actCancelYield, am, im));
         list.add(new Shortcut(FPref.SHORTCUT_ALPHASTRIKE, localizer.getMessage("lblSHORTCUT_ALPHASTRIKE"), actAllAttack, am, im));
         list.add(new Shortcut(FPref.SHORTCUT_SHOWTARGETING, localizer.getMessage("lblSHORTCUT_SHOWTARGETING"), actTgtOverlay, am, im));
         list.add(new Shortcut(FPref.SHORTCUT_AUTOYIELD_ALWAYS_YES, localizer.getMessage("lblSHORTCUT_AUTOYIELD_ALWAYS_YES"), actAutoYieldAndYes, am, im));

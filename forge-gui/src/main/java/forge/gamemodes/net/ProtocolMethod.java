@@ -10,6 +10,7 @@ import forge.game.player.DelayedReveal;
 import forge.game.player.PlayerView;
 import forge.game.spellability.SpellAbilityView;
 import forge.gamemodes.match.NextGameDecision;
+import forge.gamemodes.match.YieldPrefs;
 import forge.gui.GuiBase;
 import forge.gui.interfaces.IGuiGame;
 import forge.interfaces.IGameController;
@@ -71,6 +72,9 @@ public enum ProtocolMethod implements IHasForgeLog {
     restoreOldZones     (Mode.SERVER, Void.TYPE, PlayerView.class, PlayerZoneUpdates.class),
     setRememberedActions(Mode.SERVER, Void.TYPE),
     nextRememberedAction(Mode.SERVER, Void.TYPE),
+    // Server -> client: marker auto-cleared (priority reached the marked phase)
+    syncYieldMarkerCleared(Mode.SERVER, Void.TYPE, PlayerView.class),
+    setHostYieldEnabled (Mode.SERVER, Void.TYPE, Boolean.TYPE),
     showWaitingTimer    (Mode.SERVER, Void.TYPE, PlayerView.class, String.class),
     setHighlighted      (Mode.SERVER, Void.TYPE, GameEntityView.class, Boolean.TYPE),
     applyDelta          (Mode.SERVER, Void.TYPE, DeltaPacket.class),
@@ -100,7 +104,12 @@ public enum ProtocolMethod implements IHasForgeLog {
     setShouldAlwaysDeclineTrigger (Mode.CLIENT, Void.TYPE, String.class, Boolean.TYPE),
     setShouldAlwaysAskTrigger     (Mode.CLIENT, Void.TYPE, String.class, Boolean.TYPE),
     setDisableAutoTriggers        (Mode.CLIENT, Void.TYPE, Boolean.TYPE),
-    setUiShouldSkipPhase          (Mode.CLIENT, Void.TYPE, PlayerView.class, PhaseType.class, Boolean.TYPE);
+    setUiShouldSkipPhase          (Mode.CLIENT, Void.TYPE, PlayerView.class, PhaseType.class, Boolean.TYPE),
+    setYieldMarker           (Mode.CLIENT, Void.TYPE, PlayerView.class, PhaseType.class),
+    clearYieldMarker         (Mode.CLIENT, Void.TYPE),
+    setStackYield            (Mode.CLIENT, Void.TYPE, Boolean.TYPE),
+    setYieldInterruptPref    (Mode.CLIENT, Void.TYPE, forge.localinstance.properties.ForgePreferences.FPref.class, Boolean.TYPE),
+    setYieldPrefs            (Mode.CLIENT, Void.TYPE, YieldPrefs.class);
 
     private enum Mode {
         SERVER(IGuiGame.class),
