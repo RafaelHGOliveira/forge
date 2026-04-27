@@ -99,7 +99,7 @@ public enum ProtocolMethod implements IHasForgeLog {
     setShouldAlwaysAcceptTrigger  (Mode.CLIENT, Void.TYPE, String.class, Boolean.TYPE),
     setShouldAlwaysDeclineTrigger (Mode.CLIENT, Void.TYPE, String.class, Boolean.TYPE),
     setShouldAlwaysAskTrigger     (Mode.CLIENT, Void.TYPE, String.class, Boolean.TYPE),
-    setDisableAutoTriggers        (Mode.CLIENT, Void.TYPE, Boolean.TYPE)
+    setDisableAutoTriggers        (Mode.CLIENT, Void.TYPE, Boolean.TYPE),
     setUiShouldSkipPhase          (Mode.CLIENT, Void.TYPE, PlayerView.class, PhaseType.class, Boolean.TYPE);
 
     private enum Mode {
