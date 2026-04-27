@@ -234,6 +234,7 @@ public enum CSubmenuPreferences implements ICDoc {
         initializeColorIdentityCombobox();
         initializeSwitchStatesCombobox();
         initializeAutoYieldModeComboBox();
+        initializeAutoTriggerModeComboBox();
         initializeStackGroupPermanentsComboBox();
         initializeCounterDisplayTypeComboBox();
         initializeCounterDisplayLocationComboBox();
@@ -588,6 +589,21 @@ public enum CSubmenuPreferences implements ICDoc {
         final FComboBoxPanel<String> panel = this.view.getAutoYieldModeComboBoxPanel();
         final FComboBox<String> comboBox = createComboBox(elems, userSetting);
         final String selectedItem = this.prefs.getPref(userSetting);
+        panel.setComboBox(comboBox, selectedItem);
+    }
+
+    private void initializeAutoTriggerModeComboBox() {
+        final String[] elems = {
+            ForgeConstants.AUTO_TRIGGER_PER_CARD,
+            ForgeConstants.AUTO_TRIGGER_PER_ABILITY,
+            ForgeConstants.AUTO_TRIGGER_PER_ABILITY_SESSION,
+            ForgeConstants.AUTO_TRIGGER_PER_ABILITY_INSTALL,
+        };
+        final FPref userSetting = FPref.UI_AUTO_TRIGGER_MODE;
+        final FComboBoxPanel<String> panel = this.view.getAutoTriggerModeComboBoxPanel();
+        final FComboBox<String> comboBox = createComboBox(elems, userSetting);
+        final String selectedItem = this.prefs.getPref(userSetting);
+        comboBox.setSelectedItem(selectedItem == null ? elems[0] : selectedItem);
         panel.setComboBox(comboBox, selectedItem);
     }
 

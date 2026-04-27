@@ -7,6 +7,7 @@ import forge.game.phase.PhaseType;
 import forge.game.player.PlayerView;
 import forge.game.spellability.SpellAbilityView;
 import forge.gamemodes.match.NextGameDecision;
+import forge.player.AutoYieldStore;
 import forge.util.ITriggerEvent;
 
 public interface IGameController {
@@ -67,11 +68,14 @@ public interface IGameController {
     void setDisableAutoYields(boolean disable);
 
     // --- Trigger accept/decline preferences (per-player) ---
-    boolean shouldAlwaysAcceptTrigger(int trigger);
-    boolean shouldAlwaysDeclineTrigger(int trigger);
-    void setShouldAlwaysAcceptTrigger(int trigger);
-    void setShouldAlwaysDeclineTrigger(int trigger);
-    void setShouldAlwaysAskTrigger(int trigger);
+    boolean shouldAlwaysAcceptTrigger(String key);
+    boolean shouldAlwaysDeclineTrigger(String key);
+    void setShouldAlwaysAcceptTrigger(String key, boolean isAbilityScope);
+    void setShouldAlwaysDeclineTrigger(String key, boolean isAbilityScope);
+    void setShouldAlwaysAskTrigger(String key, boolean isAbilityScope);
+    Iterable<java.util.Map.Entry<String, AutoYieldStore.TriggerDecision>> getAutoTriggers();
+    boolean getDisableAutoTriggers();
+    void setDisableAutoTriggers(boolean disable);
 
     void setUiShouldSkipPhase(PlayerView turnPlayer, PhaseType phase, boolean shouldSkip);
 }
