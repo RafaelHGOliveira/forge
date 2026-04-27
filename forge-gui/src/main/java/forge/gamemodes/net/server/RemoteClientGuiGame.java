@@ -67,6 +67,11 @@ public class RemoteClientGuiGame extends NetworkGuiGame implements IHasForgeLog 
         return client.getIndex();
     }
 
+    @Override
+    public boolean isRemoteGuiProxy() {
+        return true;
+    }
+
     public void pause() {
         paused = true;
     }
@@ -481,6 +486,16 @@ public class RemoteClientGuiGame extends NetworkGuiGame implements IHasForgeLog 
     public boolean isUiSetToSkipPhase(final PlayerView playerTurn, final PhaseType phase) {
         // Host reads from PlayerControllerHuman's cache; this gui-side path is unreachable
         return false;
+    }
+
+    @Override
+    public void syncYieldMarkerCleared(final PlayerView player) {
+        send(ProtocolMethod.syncYieldMarkerCleared, player);
+    }
+
+    @Override
+    public void setHostYieldEnabled(final boolean enabled) {
+        send(ProtocolMethod.setHostYieldEnabled, enabled);
     }
 
     @Override

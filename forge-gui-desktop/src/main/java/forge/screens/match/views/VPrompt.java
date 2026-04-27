@@ -30,6 +30,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import forge.game.card.CardView;
+import forge.interfaces.IGameController;
 import forge.gui.framework.DragCell;
 import forge.gui.framework.DragTab;
 import forge.gui.framework.EDocID;
@@ -75,6 +76,23 @@ public class VPrompt implements IVDoc<CPrompt> {
         @Override
         public void keyPressed(final KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                if (FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS)) {
+                    if (controller.getMatchUI() != null) {
+                        IGameController ctrl = controller.getMatchUI().getGameController();
+                        if (ctrl != null) {
+                            boolean cleared = false;
+                            if (ctrl.getYieldMarker() != null) {
+                                ctrl.clearYieldMarker();
+                                cleared = true;
+                            }
+                            if (ctrl.isStackYieldActive()) {
+                                ctrl.setStackYield(false);
+                                cleared = true;
+                            }
+                            if (cleared) return;
+                        }
+                    }
+                }
                 if (btnCancel.isEnabled()) {
                     if (FModel.getPreferences().getPrefBoolean(FPref.UI_ALLOW_ESC_TO_END_TURN) || !btnCancel.getText().equals("End Turn")) {
                         btnCancel.doClick();

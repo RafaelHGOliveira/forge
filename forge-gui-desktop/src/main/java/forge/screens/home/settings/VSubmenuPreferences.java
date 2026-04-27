@@ -78,6 +78,7 @@ public enum VSubmenuPreferences implements IVSubmenu<CSubmenuPreferences> {
     private final JCheckBox cbOrderCombatants = new OptionsCheckBox(localizer.getMessage("cbOrderCombatants"));
     private final JCheckBox cbManaLostPrompt = new OptionsCheckBox(localizer.getMessage("cbManaLostPrompt"));
     private final JCheckBox cbAutoCallCoinFlip = new OptionsCheckBox(localizer.getMessage("cbAutoCallCoinFlip"));
+    private final JCheckBox cbYieldExperimentalOptions = new OptionsCheckBox(localizer.getMessage("cbYieldExperimentalOptions"));
     private final JCheckBox cbDevMode = new OptionsCheckBox(localizer.getMessage("cbDevMode"));
     private final JCheckBox cbLoadCardsLazily = new OptionsCheckBox(localizer.getMessage("cbLoadCardsLazily"));
     private final JCheckBox cbLoadArchivedFormats = new OptionsCheckBox(localizer.getMessage("cbLoadArchivedFormats"));
@@ -314,6 +315,9 @@ public enum VSubmenuPreferences implements IVSubmenu<CSubmenuPreferences> {
         pnlPrefs.add(cbpAutoTriggerMode, comboBoxConstraints);
         pnlPrefs.add(new NoteLabel(localizer.getMessage("nlpAutoTriggerMode")), descriptionConstraints);
 
+        pnlPrefs.add(cbYieldExperimentalOptions, titleConstraints);
+        pnlPrefs.add(new NoteLabel(localizer.getMessage("nlYieldExperimentalOptions")), descriptionConstraints);
+
         //Server Preferences
         pnlPrefs.add(new SectionLabel(localizer.getMessage("ServerPreferences")), sectionConstraints);
 
@@ -509,8 +513,13 @@ public enum VSubmenuPreferences implements IVSubmenu<CSubmenuPreferences> {
         pnlPrefs.add(new SectionLabel(localizer.getMessage("KeyboardShortcuts")), sectionConstraints);
 
         final List<Shortcut> shortcuts = KeyboardShortcuts.getKeyboardShortcuts();
+        final boolean yieldExperimentalEnabled = FModel.getPreferences().getPrefBoolean(FPref.YIELD_EXPERIMENTAL_OPTIONS);
 
         for (final Shortcut s : shortcuts) {
+            // Skip yield shortcuts if experimental options not enabled
+            if (!yieldExperimentalEnabled && s.getPrefKey().name().startsWith("SHORTCUT_YIELD_")) {
+                continue;
+            }
             pnlPrefs.add(new FLabel.Builder().text(s.getDescription())
                     .fontAlign(SwingConstants.RIGHT).build(), "w 50%!, h 22px!, gap 0 2% 0 20px");
             KeyboardShortcutField field = new KeyboardShortcutField(s);
@@ -1055,6 +1064,10 @@ public enum VSubmenuPreferences implements IVSubmenu<CSubmenuPreferences> {
 
     public final JCheckBox getCbAutoCallCoinFlip() {
         return cbAutoCallCoinFlip;
+    }
+
+    public final JCheckBox getCbYieldExperimentalOptions() {
+        return cbYieldExperimentalOptions;
     }
 
     public final JCheckBox getCbDetailedPaymentDesc() {

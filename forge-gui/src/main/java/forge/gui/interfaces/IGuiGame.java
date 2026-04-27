@@ -10,6 +10,7 @@ import forge.game.event.GameEvent;
 import forge.game.event.GameEventSpellAbilityCast;
 import forge.game.event.GameEventSpellRemovedFromStack;
 import forge.game.phase.PhaseType;
+import forge.gamemodes.match.YieldMarker;
 import forge.game.player.DelayedReveal;
 import forge.game.player.IHasIcon;
 import forge.game.player.PlayerView;
@@ -46,6 +47,8 @@ public interface IGuiGame {
 
     void setOriginalGameController(PlayerView view, IGameController gameController);
     void setGameController(PlayerView player, IGameController gameController);
+
+    IGameController getGameController();
 
     void setSpectator(IGameController spectator);
 
@@ -263,8 +266,33 @@ public interface IGuiGame {
 
     void autoPassUntilEndOfTurn(PlayerView player);
     boolean mayAutoPass(PlayerView player);
+
+    boolean isAutoPassingNoActions(PlayerView player);
+
+    boolean shouldAutoYieldForPlayer(PlayerView player);
+
+    /** Returns true if this GUI is a server-side proxy for a remote player. */
+    default boolean isRemoteGuiProxy() { return false; }
+
     void autoPassCancel(PlayerView player);
     void updateAutoPassPrompt();
+
+    void activateYieldMarker(PlayerView player, YieldMarker marker);
+    void clearYieldMarker(PlayerView player);
+    void setStackYieldUiState(PlayerView player, boolean active);
+
+    /** Apply remote-client intent without re-broadcasting. */
+    void applyRemoteYieldMarker(PlayerView player, YieldMarker marker);
+    void applyRemoteStackYield(PlayerView player, boolean active);
+
+    void syncYieldMarkerCleared(PlayerView player);
+
+    YieldMarker getCurrentYieldMarker(PlayerView player);
+    boolean isCurrentStackYieldActive(PlayerView player);
+
+    void refreshYieldUi(PlayerView player);
+
+    void setHostYieldEnabled(boolean enabled);
 
     void setCurrentPlayer(PlayerView player);
 
