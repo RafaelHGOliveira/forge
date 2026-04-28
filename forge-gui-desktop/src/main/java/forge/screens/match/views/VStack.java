@@ -48,8 +48,6 @@ import forge.gui.framework.EDocID;
 import forge.gui.framework.IVDoc;
 import forge.interfaces.IGameController;
 import forge.localinstance.properties.ForgePreferences;
-import forge.localinstance.properties.ForgePreferences.FPref;
-import forge.model.FModel;
 import forge.screens.match.controllers.CDock.ArcState;
 import forge.screens.match.controllers.CStack;
 import forge.toolbox.FMouseAdapter;
