@@ -96,4 +96,5 @@ __pycache__
 *.pyc
 
 # Ignore Claude configuration
-.claudeFORK.md
+.claude
+FORK.md

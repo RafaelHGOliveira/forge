@@ -1,0 +1,18 @@
+# Card scripts — thousands of files, rarely need to read in bulk
+forge-gui/res/cardsfolder/
+
+# Build output
+target/
+*.log
+build.log
+
+# Generated/binary resources
+forge-gui/res/pics*
+forge-gui/res/pics_product
+forge-gui/res/skins/**/pics*
+forge-gui/res/skins/**/pics_product
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store
