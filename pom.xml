@@ -26,7 +26,7 @@
         <configSourceDirectory>src/main/config</configSourceDirectory>
         <maven.compiler.release>17</maven.compiler.release>
         <!-- version code - fork uses 2.13.x scheme (patch increments per release) -->
-        <versionCode>2.13.1</versionCode>
+        <versionCode>2.13.2</versionCode>
         <!-- set snapshotName to blank for release -->
         <snapshotName>-SNAPSHOT</snapshotName>
         <!-- revision will be the global version string -->
